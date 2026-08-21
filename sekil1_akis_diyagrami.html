@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şekil 1: CyberTech Neural Shield Sistem Akış Diyagramı</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #ffffff;
+            padding: 50px 60px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .diagram-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-align: center;
+            margin-bottom: 36px;
+            font-family: 'Times New Roman', 'Cambria', Georgia, serif;
+            letter-spacing: 0.2px;
+            line-height: 1.5;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            min-height: 400px;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .download-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .download-btn:active {
+            background-color: #1e40af;
+        }
+
+        .download-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media print {
+            .btn-container { display: none; }
+            .page-container { border: none; padding: 20px; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container" id="diagram-area">
+    <div class="diagram-title">Şekil 1: CyberTech Neural Shield Sistem Akış Diyagramı</div>
+
+    <div class="mermaid">
+flowchart TD
+    A["👤 Kullanıcı Mesajı"]:::inputNode --> B{"Güvenlik Katmanı\nAktif mi?"}:::decisionNode
+    B -- "Hayır" --> G["Gemini 2.5 Flash\nLLM Modeli"]:::processNode
+    B -- "Evet" --> C["Katman 1: Regex Kural Motoru\n• Bilinen Saldırı Kalıpları\n• Unicode Tag Tespiti\n• Zero-Width Karakter Kontrolü"]:::processNode
+    C --> D["Katman 2: ML Sınıflandırıcı\n• Helsinki-NLP TR→EN Çeviri\n• DeBERTa-v3-base Analizi\n• Benign / Malicious Sınıflandırma"]:::processNode
+    D --> E{"Risk Skoru\nHesaplama"}:::decisionNode
+    E -- "Risk ≥ 65 — BLOCKED" --> F["⛔ İşlem Engellendi\nSaldırı Loglandı"]:::blockedNode
+    E -- "Risk < 65 — ALLOWED" --> G
+    G --> H["Model Yanıtı Üretildi"]:::processNode
+    H --> I["Katman 3: DLP Filtresi\n• Kredi Kartı Maskeleme\n• TC No Maskeleme\n• API Key Sansürleme"]:::processNode
+    I --> J["✅ Güvenli Yanıt\nKullanıcıya İletildi"]:::safeNode
+
+    classDef inputNode fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b,font-size:14px
+    classDef processNode fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f,font-size:13px
+    classDef decisionNode fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#7c2d12,font-size:13px
+    classDef blockedNode fill:#fee2e2,stroke:#dc2626,stroke-width:2.5px,color:#7f1d1d,font-size:13px
+    classDef safeNode fill:#dcfce7,stroke:#16a34a,stroke-width:2.5px,color:#14532d,font-size:13px
+    </div>
+</div>
+
+<div class="btn-container">
+    <button class="download-btn" onclick="downloadAsPNG()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+        PNG Olarak İndir
+    </button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+            fontFamily: '"Segoe UI", "Helvetica Neue", Arial, sans-serif',
+            fontSize: '14px',
+            primaryColor: '#dbeafe',
+            primaryBorderColor: '#2563eb',
+            primaryTextColor: '#1e3a5f',
+            lineColor: '#6b7280',
+            secondaryColor: '#fff7ed',
+            tertiaryColor: '#f0fdf4'
+        },
+        flowchart: {
+            htmlLabels: true,
+            curve: 'basis',
+            padding: 20,
+            nodeSpacing: 40,
+            rankSpacing: 60,
+            useMaxWidth: false
+        }
+    });
+
+    function downloadAsPNG() {
+        const area = document.getElementById('diagram-area');
+        html2canvas(area, {
+            scale: 3,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            logging: false
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'sekil1_akis_diyagrami.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            console.error('PNG indirme hatası:', err);
+            alert('PNG indirilemedi. Lütfen tekrar deneyin.');
+        });
+    }
+</script>
+
+</body>
+</html>

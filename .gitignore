@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Sensitive Information & Credentials
+.env
+*.env
+*.pem
+*.key
+*key*.json
+*client*.json
+*credentials*.json
+backend/vertex-key.json
+backend/gen-lang-client-*.json
+frontend/gen-lang-client-*.json
+
+# SQLite Databases & Dynamic Storage
+*.db
+*.sqlite3
+backend/database.db
+
+# Large Model Binaries (GitHub 100MB limit)
+# Note: Model config & tokenizers are tracked; weights can be loaded from HF or trained
+*.safetensors
+*.bin
+*.pt
+*.onnx
+best_model/*.safetensors
+best_model/*.bin
+best_model/*.pt
+
+# Log files
+*.log
+logs/
+
+# Operating System & Editor Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

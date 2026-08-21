@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Pipeline | CyberTech Neural Shield</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #050505;
+            --bg-node: #111111;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.5);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.5);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.5);
+            --border: #222222;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+        }
+
+        header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title .dot { width: 12px; height: 12px; background: var(--success); border-radius: 50%; box-shadow: 0 0 15px var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .pipeline-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 1800px;
+        }
+
+        .node {
+            background: var(--bg-node);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            opacity: 0.2;
+            transform: scale(0.9);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .node.active { opacity: 1; transform: scale(1.05); border-color: var(--primary); box-shadow: 0 0 30px var(--primary-glow); z-index: 10; }
+        .node.success { border-color: var(--success); box-shadow: 0 0 30px var(--success-glow); }
+        .node.danger { border-color: var(--danger); box-shadow: 0 0 30px var(--danger-glow); }
+        .node.warning { border-color: var(--warning); box-shadow: 0 0 30px var(--warning-glow); }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+        .node.active .node-header { color: #fff; border-color: rgba(255,255,255,0.2); }
+
+        .node-icon { font-size: 1.2rem; }
+
+        .node-body {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #ccc;
+            overflow-y: auto;
+            flex: 1;
+            word-break: break-word;
+            padding-right: 5px;
+        }
+        
+        .node-body .label { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem; display: block; text-transform: uppercase; }
+        .node-body .value { color: #fff; font-weight: 600; margin-bottom: 0.5rem;}
+        .node-body .highlight { color: var(--danger); font-weight: bold; }
+        .node-body .highlight-success { color: var(--success); font-weight: bold; }
+
+        .node-body::-webkit-scrollbar { width: 4px; }
+        .node-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+        .connector {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            position: relative;
+            border-radius: 2px;
+            overflow: hidden;
+            min-width: 30px;
+        }
+
+        .connector::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            transition: left 0s;
+        }
+        .connector.active::after { left: 100%; transition: left 1s linear infinite; }
+
+        .waiting-text {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title"><div class="dot" id="status-dot"></div> Live Execution Pipeline</div>
+        <div class="logo" style="color: #666; font-weight: 700; font-size: 1.2rem;">CyberTech Neural Shield</div>
+    </header>
+
+    <div class="pipeline-container">
+        <div class="pipeline">
+            <!-- 1. Girdi -->
+            <div class="node" id="node-input">
+                <div class="node-header"><span class="node-icon">📥</span> Girdi</div>
+                <div class="node-body" id="content-input">Bekleniyor...</div>
+            </div>
+            <div class="connector" id="conn-1"></div>
+            
+            <!-- 2. Çeviri -->
+            <div class="node" id="node-translate">
+                <div class="node-header"><span class="node-icon">🌐</span> Çeviri</div>
+                <div class="node-body" id="content-translate">Bekleniyor...</div>
+            </div>
+            <div class="connector" id="conn-2"></div>
+            
+            <!-- 3. Regex -->
+            <div class="node" id="node-regex">
+                <div class="node-header"><span class="node-icon">🛡️</span> Kural Motoru</div>
+                <div class="node-body" id="content-regex">Bekleniyor...</div>
+            </div>
+            <div class="connector" id="conn-3"></div>
+            
+            <!-- 4. ML -->
+            <div class="node" id="node-ml">
+                <div class="node-header"><span class="node-icon">🧠</span> Yapay Zeka</div>
+                <div class="node-body" id="content-ml">Bekleniyor...</div>
+            </div>
+            <div class="connector" id="conn-4"></div>
+            
+            <!-- 5. Karar -->
+            <div class="node" id="node-decision">
+                <div class="node-header"><span class="node-icon">⚖️</span> Nihai Karar</div>
+                <div class="node-body" id="content-decision">Bekleniyor...</div>
+            </div>
+            <div class="connector" id="conn-5"></div>
+            
+            <!-- 6. LLM/DLP -->
+            <div class="node" id="node-llm">
+                <div class="node-header"><span class="node-icon">🤖</span> Çıktı & DLP</div>
+                <div class="node-body" id="content-llm">Bekleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="waiting-text" id="waiting-text">Ağ dinleniyor... İstek bekleniyor...</div>
+
+    <script>
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/logs`;
+        const ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => { document.getElementById('status-dot').style.background = 'var(--success)'; document.getElementById('status-dot').style.boxShadow = '0 0 15px var(--success)'; };
+        ws.onclose = () => { document.getElementById('status-dot').style.background = 'var(--danger)'; document.getElementById('status-dot').style.boxShadow = '0 0 15px var(--danger)'; document.getElementById('waiting-text').innerText = 'Bağlantı Koptu'; };
+
+        let isAnimating = false;
+        const queue = [];
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === "new_log") {
+                queue.push(data.log);
+                processQueue();
+            }
+        };
+
+        function processQueue() {
+            if(isAnimating || queue.length === 0) return;
+            isAnimating = true;
+            document.getElementById('waiting-text').style.opacity = '0';
+            animatePipeline(queue.shift());
+        }
+
+        function resetPipeline() {
+            const nodes = ['input', 'translate', 'regex', 'ml', 'decision', 'llm'];
+            nodes.forEach(n => {
+                const el = document.getElementById(`node-${n}`);
+                el.className = 'node';
+                document.getElementById(`content-${n}`).innerHTML = 'İşleniyor...';
+            });
+            [1,2,3,4,5].forEach(i => document.getElementById(`conn-${i}`).classList.remove('active'));
+        }
+
+        function animatePipeline(log) {
+            resetPipeline();
+
+            // 1. Input
+            setTimeout(() => {
+                const sender = log.username || 'Bilinmiyor';
+                document.getElementById('node-input').classList.add('active', 'success');
+                document.getElementById('content-input').innerHTML = `
+                    <span class="label">Gönderen:</span>
+                    <div class="value" style="color: var(--accent);">${sender}</div>
+                    <span class="label">Orijinal Metin (TR):</span>
+                    <div class="value">${log.request_preview}</div>
+                `;
+                document.getElementById('conn-1').classList.add('active');
+            }, 200);
+
+            // 2. Translate
+            setTimeout(() => {
+                if (!log.security_enabled) {
+                    document.getElementById('node-translate').classList.add('active', 'warning');
+                    document.getElementById('content-translate').innerHTML = `
+                        <div style="text-align:center; margin-top: 1.5rem; color: var(--warning); font-weight:bold; font-size:1.1rem;">
+                            BYPASS<br>(GÜVENLİK KAPALI)
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('node-translate').classList.add('active', 'success');
+                    document.getElementById('content-translate').innerHTML = `
+                        <span class="label">Çeviri Sonucu (EN):</span>
+                        <div class="value">${log.translated_text || log.request_preview}</div>
+                    `;
+                }
+                document.getElementById('conn-2').classList.add('active');
+            }, 1000);
+
+            // 3. Regex
+            setTimeout(() => {
+                if (!log.security_enabled) {
+                    document.getElementById('node-regex').classList.add('active', 'warning');
+                    document.getElementById('content-regex').innerHTML = `
+                        <div style="text-align:center; margin-top: 1.5rem; color: var(--warning); font-weight:bold; font-size:1.1rem;">
+                            BYPASS<br>(GÜVENLİK KAPALI)
+                        </div>
+                    `;
+                } else {
+                    const isThreat = log.regex_hit;
+                    document.getElementById('node-regex').classList.add('active', isThreat ? 'danger' : 'success');
+                    
+                    let ruleText = "Tetiklenen Kural Yok";
+                    if(isThreat && log.regex_patterns && log.regex_patterns.length > 0) {
+                        ruleText = log.regex_patterns.join(", ");
+                    }
+                    
+                    document.getElementById('content-regex').innerHTML = `
+                        <span class="label">Durum:</span>
+                        <div class="value ${isThreat ? 'highlight' : 'highlight-success'}">${isThreat ? 'TEHDİT BULUNDU' : 'TEMİZ'}</div>
+                        <span class="label">Tetiklenen Kurallar:</span>
+                        <div class="value">${ruleText}</div>
+                    `;
+                }
+                document.getElementById('conn-3').classList.add('active');
+            }, 1800);
+
+            // 4. ML Model
+            setTimeout(() => {
+                if (!log.security_enabled) {
+                    document.getElementById('node-ml').classList.add('active', 'warning');
+                    document.getElementById('content-ml').innerHTML = `
+                        <div style="text-align:center; margin-top: 1.5rem; color: var(--warning); font-weight:bold; font-size:1.1rem;">
+                            BYPASS<br>(GÜVENLİK KAPALI)
+                        </div>
+                    `;
+                } else {
+                    const isMalicious = log.risk_score >= 50;
+                    document.getElementById('node-ml').classList.add('active', isMalicious ? 'danger' : 'success');
+                    
+                    const benignProb = (log.ml_probabilities.Benign * 100).toFixed(1);
+                    const malProb = (log.ml_probabilities.Malicious * 100).toFixed(1);
+
+                    document.getElementById('content-ml').innerHTML = `
+                        <span class="label">Tahmin (Etiket):</span>
+                        <div class="value ${isMalicious ? 'highlight' : 'highlight-success'}">${log.ml_class}</div>
+                        <span class="label">Güven Oranları:</span>
+                        <div class="value">Benign: %${benignProb}<br>Malicious: %${malProb}</div>
+                        <span class="label">Üretilen Risk Skoru:</span>
+                        <div class="value">${log.risk_score} / 100</div>
+                    `;
+                }
+                document.getElementById('conn-4').classList.add('active');
+            }, 2600);
+
+            // 5. Decision
+            setTimeout(() => {
+                const decNode = document.getElementById('node-decision');
+                const isBlocked = log.decision === "BLOCKED";
+                decNode.classList.add('active', isBlocked ? 'danger' : 'success');
+                
+                document.getElementById('content-decision').innerHTML = `
+                    <div style="font-size: 2rem; font-weight: bold; text-align: center; margin-top: 1rem;" class="${isBlocked ? 'highlight' : 'highlight-success'}">
+                        ${isBlocked ? "ENGELLE" : "İZİN VER"}
+                    </div>
+                `;
+                document.getElementById('conn-5').classList.add('active');
+            }, 3400);
+
+            // 6. Gemini Output & DLP
+            setTimeout(() => {
+                const llmNode = document.getElementById('node-llm');
+                
+                if (log.decision === "BLOCKED") {
+                    llmNode.classList.add('active', 'warning');
+                    document.getElementById('content-llm').innerHTML = `
+                        <div style="text-align:center; margin-top: 2rem; color: var(--warning); font-weight:bold;">
+                            İSTEK LLM'E ULAŞAMADI<br>(Havada İmha Edildi)
+                        </div>
+                    `;
+                } else {
+                    const isDLP = log.dlp_triggered;
+                    llmNode.classList.add('active', isDLP ? 'warning' : 'success');
+                    
+                    let dlpInfo = "DLP İhlali Yok";
+                    if(isDLP && log.dlp_patterns && log.dlp_patterns.length > 0) {
+                        dlpInfo = `Şunlar maskelendi: ${log.dlp_patterns.join(", ")}`;
+                    }
+
+                    document.getElementById('content-llm').innerHTML = `
+                        <span class="label">Gemini Ham Cevabı:</span>
+                        <div class="value" style="font-size:0.7rem; max-height:40px; overflow-y:hidden;">${log.gemini_response || "Yok"}</div>
+                        <span class="label">DLP Kontrolü:</span>
+                        <div class="value ${isDLP ? 'highlight' : 'highlight-success'}">${isDLP ? 'VERİ SIZINTISI TESPİTİ' : 'TEMİZ'}</div>
+                        <span class="label">Maskelenmiş Çıktı:</span>
+                        <div class="value" style="font-size:0.7rem;">${log.dlp_masked_response || "Yok"}</div>
+                    `;
+                }
+
+                [1,2,3,4,5].forEach(i => document.getElementById(`conn-${i}`).classList.remove('active'));
+                
+                setTimeout(() => {
+                    isAnimating = false;
+                    if(queue.length === 0) {
+                        document.getElementById('waiting-text').style.opacity = '1';
+                    }
+                    processQueue();
+                }, 4000);
+            }, 4200);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLUE TEAM — SOC Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0a0f1e;
+  --bg2:      #0d1426;
+  --panel:    #111827;
+  --border:   #1e2d4a;
+  --blue:     #00aaff;
+  --cyan:     #00d4ff;
+  --green:    #00ff88;
+  --yellow:   #ffd700;
+  --orange:   #ff8c00;
+  --red:      #ff4444;
+  --text:     #c8d6e5;
+  --dim:      #5a7a9a;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Header */
+header {
+  background: linear-gradient(90deg, #0a0f1e 0%, #0d1a3a 50%, #0a0f1e 100%);
+  border-bottom: 1px solid var(--border);
+  padding: .9rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900;
+  color: var(--cyan); text-shadow: 0 0 16px #00d4ff88;
+  letter-spacing: 2px;
+}
+.logo span { color: var(--green); }
+.ws-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+  padding: .25rem .7rem; border-radius: 20px;
+  border: 1px solid; transition: all .3s;
+}
+.ws-badge.connected    { color: var(--green); border-color: var(--green); text-shadow:0 0 6px var(--green); }
+.ws-badge.disconnected { color: var(--red);   border-color: var(--red); }
+.ws-badge.connecting   { color: var(--yellow);border-color: var(--yellow); }
+
+/* Layout */
+.container { max-width: 1600px; margin: 0 auto; padding: 1.2rem 1.5rem 3rem; }
+
+/* Metric Cards */
+.metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.2rem; }
+@media(max-width:900px){ .metrics{grid-template-columns:repeat(2,1fr);} }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+  position: relative; overflow: hidden;
+  transition: border-color .3s, box-shadow .3s;
+}
+.card:hover { border-color: var(--cyan); box-shadow: 0 0 16px #00d4ff18; }
+.card::before {
+  content: ''; position: absolute; top:0; left:0; right:0; height:2px;
+  background: var(--card-accent, var(--cyan));
+}
+.card-title { font-size: .68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: .5rem; }
+.card-value {
+  font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 700;
+  color: var(--card-color, var(--cyan));
+  text-shadow: 0 0 12px var(--card-color, var(--cyan));
+}
+.card-sub { font-size: .72rem; color: var(--dim); margin-top: .3rem; }
+.card-icon { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: .12; }
+
+@keyframes countUp { from { opacity:0; transform:scale(.9); } to { opacity:1; transform:scale(1); } }
+.count-anim { animation: countUp .4s ease; }
+
+/* Middle grid */
+.mid-grid {
+  display: grid; grid-template-columns: 1fr 380px; gap: 1rem; margin-bottom: 1rem;
+}
+@media(max-width:1100px){ .mid-grid{grid-template-columns:1fr;} }
+
+/* Panel base */
+.panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
+}
+.panel-header {
+  padding: .7rem 1.1rem; border-bottom: 1px solid var(--border);
+  font-size: .72rem; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--cyan); font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; gap: .5rem;
+}
+.dot-live {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 1.5s ease infinite;
+}
+@keyframes pulse-dot {
+  0%,100%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.4); opacity:.7; }
+}
+
+/* Log table */
+.table-wrap { overflow-y: auto; max-height: 380px; }
+table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: .72rem; }
+thead th {
+  background: #0d1426; color: var(--dim); text-transform: uppercase;
+  letter-spacing: 1px; padding: .5rem .8rem; text-align: left;
+  position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border);
+}
+tbody tr { border-bottom: 1px solid #151e30; transition: background .15s; }
+tbody tr:hover { background: #ffffff06; }
+tbody td { padding: .45rem .8rem; vertical-align: middle; }
+
+.row-blocked { background: #ff444408 !important; border-left: 3px solid var(--red); }
+.row-allowed { background: #00ff8808 !important; border-left: 3px solid var(--green); }
+
+.badge {
+  display:inline-block; padding:.15rem .5rem; border-radius:3px;
+  font-size:.65rem; font-weight:600; letter-spacing:.5px; white-space:nowrap;
+}
+.badge-blocked { background:#ff44441a; color:var(--red); border:1px solid #ff444433; }
+.badge-allowed { background:#00ff881a; color:var(--green); border:1px solid #00ff8833; }
+.badge-ml { font-size:.62rem; padding:.12rem .4rem; border-radius:3px; }
+.badge-Benign    { background:#00ff881a; color:var(--green); }
+.badge-Injection { background:#ff44441a; color:var(--red); }
+.badge-Jailbreak { background:#ff8c001a; color:var(--orange); }
+.badge-Leakage   { background:#ff69b41a; color:#ff69b4; }
+
+.risk-pill {
+  display:inline-block; padding:.15rem .5rem; border-radius:12px;
+  font-weight:600; font-size:.7rem;
+}
+
+/* Right: probability chart */
+.prob-panel { display: flex; flex-direction: column; }
+.prob-panel .panel-header { justify-content: space-between; }
+.prob-content { padding: 1rem 1.2rem; flex:1; }
+
+.prob-bar-item { margin-bottom: 1rem; }
+.prob-bar-label { display: flex; justify-content: space-between; font-size: .72rem; margin-bottom: .3rem; }
+.prob-bar-label .class-name { color: var(--text); }
+.prob-bar-label .class-pct  { font-weight: 600; font-family:'JetBrains Mono',monospace; }
+.prob-track { background: #1a2540; border-radius:4px; height:10px; overflow:hidden; }
+.prob-fill {
+  height:100%; border-radius:4px; transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+.prob-fill.Benign    { background: linear-gradient(90deg, #00cc66, #00ff88); }
+.prob-fill.Injection { background: linear-gradient(90deg, #cc0000, #ff4444); }
+.prob-fill.Jailbreak { background: linear-gradient(90deg, #cc6600, #ff8c00); }
+.prob-fill.Leakage   { background: linear-gradient(90deg, #cc2277, #ff69b4); }
+
+.no-data-msg { color: var(--dim); font-size: .8rem; text-align: center; padding: 2rem; }
+
+/* Bottom chart */
+.chart-panel { margin-top: 0; }
+.chart-wrap  { padding: 1rem 1.2rem; height: 200px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Tooltip */
+.tip { font-size:.65rem; color:var(--dim); margin-left:auto; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">BLUE<span>TEAM</span> // SOC DASHBOARD</div>
+  <span class="ws-badge connecting" id="wsBadge">⟳ BAĞLANIYOR…</span>
+</header>
+
+<div class="container">
+
+  <!-- Metric cards -->
+  <div class="metrics">
+    <div class="card" style="--card-accent:var(--cyan);--card-color:var(--cyan)">
+      <div class="card-title">Toplam İstek</div>
+      <div class="card-value" id="mTotal">0</div>
+      <div class="card-sub">Tüm zamanlar</div>
+      <div class="card-icon">📥</div>
+    </div>
+    <div class="card" style="--card-accent:var(--red);--card-color:var(--red)">
+      <div class="card-title">Engellenen</div>
+      <div class="card-value" id="mBlocked">0</div>
+      <div class="card-sub" id="mBlockedPct">—</div>
+      <div class="card-icon">🚫</div>
+    </div>
+    <div class="card" style="--card-accent:var(--yellow);--card-color:var(--yellow)">
+      <div class="card-title">Ort. Risk Skoru</div>
+      <div class="card-value" id="mAvgRisk">0</div>
+      <div class="card-sub">/ 100</div>
+      <div class="card-icon">⚡</div>
+    </div>
+    <div class="card" style="--card-accent:var(--orange);--card-color:var(--orange)">
+      <div class="card-title">DLP Müdahale</div>
+      <div class="card-value" id="mDLP">0</div>
+      <div class="card-sub">Hassas veri maskelendi</div>
+      <div class="card-icon">🔒</div>
+    </div>
+  </div>
+
+  <!-- Middle grid -->
+  <div class="mid-grid">
+
+    <!-- Live log table -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="dot-live"></span>
+        Canlı Güvenlik Logları
+        <span class="tip">WebSocket feed</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Zaman</th>
+              <th>İstek Özeti</th>
+              <th>Regex Hit</th>
+              <th>ML Sınıfı</th>
+              <th>Risk</th>
+              <th>Karar</th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            <tr><td colspan="6" style="text-align:center;color:var(--dim);padding:2rem">
+              WebSocket bekleniyor…
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Probability panel -->
+    <div class="panel prob-panel">
+      <div class="panel-header">
+        Risk Skoru Dağılımı
+        <span class="tip">Son istek</span>
+      </div>
+      <div class="prob-content" id="probContent">
+        <div class="no-data-msg">İlk analiz bekleniyor…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom chart -->
+  <div class="panel chart-panel">
+    <div class="panel-header">
+      <span>Risk Skoru Trendi — Son 20 İstek</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const API_WS = 'ws://localhost:8000/ws/logs';
+const API    = 'http://localhost:8000';
+let trendData = [];
+let trendChart;
+
+// ── Chart.js trend ─────────────────────────────────────────────────────────
+function initChart() {
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Risk Skoru',
+        data: [],
+        borderColor: '#00aaff',
+        backgroundColor: 'rgba(0,170,255,0.08)',
+        borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: ctx => {
+          const v = ctx.raw;
+          if (v >= 70) return '#ff4444';
+          if (v >= 40) return '#ffd700';
+          return '#00ff88';
+        },
+        pointBorderColor: 'transparent',
+        tension: 0.4,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111827',
+          borderColor: '#1e2d4a',
+          borderWidth: 1,
+          titleColor: '#00d4ff',
+          bodyColor: '#c8d6e5',
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#1e2d4a55' },
+          ticks: { color: '#5a7a9a', font: { family: 'JetBrains Mono', size: 10 } }
+        },
+        y: {
+          min: 0, max: 100,
+          grid: { color: '#1e2d4a55' },
+          ticks: { color: '#5a7a9a', font: { family: 'JetBrains Mono', size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+function updateChart(ts, risk) {
+  const label = ts.split('T')[1]?.slice(0,8) || ts;
+  trendChart.data.labels.push(label);
+  trendChart.data.datasets[0].data.push(risk);
+  if (trendChart.data.labels.length > 20) {
+    trendChart.data.labels.shift();
+    trendChart.data.datasets[0].data.shift();
+  }
+  // Recolor points
+  trendChart.data.datasets[0].pointBackgroundColor =
+    trendChart.data.datasets[0].data.map(v =>
+      v >= 70 ? '#ff4444' : v >= 40 ? '#ffd700' : '#00ff88'
+    );
+  trendChart.update('none');
+}
+
+// ── Probability bars ───────────────────────────────────────────────────────
+function renderProbs(probs) {
+  const classes = ['Benign','Injection','Jailbreak','Leakage'];
+  const colors  = { Benign:'var(--green)', Injection:'var(--red)', Jailbreak:'var(--orange)', Leakage:'#ff69b4' };
+  const container = document.getElementById('probContent');
+  container.innerHTML = classes.map(cls => {
+    const pct = ((probs[cls] || 0) * 100).toFixed(1);
+    return `
+      <div class="prob-bar-item">
+        <div class="prob-bar-label">
+          <span class="class-name" style="color:${colors[cls]}">${cls}</span>
+          <span class="class-pct" style="color:${colors[cls]}">${pct}%</span>
+        </div>
+        <div class="prob-track">
+          <div class="prob-fill ${cls}" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+function updateStats(s) {
+  setVal('mTotal',   s.total_requests);
+  setVal('mBlocked', s.blocked_requests);
+  setVal('mAvgRisk', s.avg_risk_score ?? 0);
+  setVal('mDLP',     s.dlp_interventions);
+  const pct = s.total_requests > 0
+    ? ((s.blocked_requests / s.total_requests) * 100).toFixed(1) + '% engelleme oranı'
+    : '—';
+  document.getElementById('mBlockedPct').textContent = pct;
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  el.textContent = typeof val === 'number' ? (Number.isInteger(val) ? val : val.toFixed(1)) : val;
+  el.classList.remove('count-anim');
+  void el.offsetWidth;
+  el.classList.add('count-anim');
+}
+
+// ── Log table ──────────────────────────────────────────────────────────────
+function prependLog(log) {
+  const tbody = document.getElementById('logBody');
+
+  // Remove placeholder
+  if (tbody.querySelector('[colspan]')) tbody.innerHTML = '';
+
+  const ts      = log.timestamp?.split('T')?.[1]?.slice(0,8) || '—';
+  const preview = (log.request_preview || '').slice(0, 60);
+  const isBlock = log.decision === 'BLOCKED';
+  const risk    = log.risk_score ?? 0;
+  const riskColor = risk >= 70 ? 'var(--red)' : risk >= 40 ? 'var(--yellow)' : 'var(--green)';
+
+  const tr = document.createElement('tr');
+  tr.className = isBlock ? 'row-blocked' : 'row-allowed';
+  tr.innerHTML = `
+    <td style="white-space:nowrap;color:var(--dim)">${ts}</td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(log.request_preview || '')}">${escHtml(preview)}…</td>
+    <td>${log.regex_hit
+      ? `<span style="color:var(--red)">⚡ ${(log.regex_patterns||[]).length} desen</span>`
+      : `<span style="color:var(--green)">✓ Temiz</span>`}</td>
+    <td><span class="badge badge-ml badge-${log.ml_class}">${log.ml_class}</span></td>
+    <td><span class="risk-pill" style="background:${riskColor}22;color:${riskColor};border:1px solid ${riskColor}44">${risk}</span></td>
+    <td><span class="badge ${isBlock ? 'badge-blocked' : 'badge-allowed'}">${isBlock ? '🚫 ENGELLENDİ' : '✅ İZİN'}</span></td>
+  `;
+
+  tbody.insertBefore(tr, tbody.firstChild);
+  // Keep max 50 rows visible
+  while (tbody.rows.length > 50) tbody.deleteRow(tbody.rows.length - 1);
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+const badge = document.getElementById('wsBadge');
+let ws, reconnTimer;
+
+function connect() {
+  badge.textContent = '⟳ BAĞLANIYOR…'; badge.className = 'ws-badge connecting';
+  ws = new WebSocket(API_WS);
+
+  ws.onopen = () => {
+    badge.textContent = '● BAĞLANDI'; badge.className = 'ws-badge connected';
+    clearTimeout(reconnTimer);
+  };
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'init') {
+      updateStats(msg.stats);
+      (msg.recent_logs || []).slice().reverse().forEach(log => {
+        prependLog(log);
+        updateChart(log.timestamp, log.risk_score);
+        if (log.ml_probabilities) renderProbs(log.ml_probabilities);
+      });
+    } else if (msg.type === 'new_log') {
+      updateStats(msg.stats);
+      prependLog(msg.log);
+      updateChart(msg.log.timestamp, msg.log.risk_score);
+      if (msg.log.ml_probabilities) renderProbs(msg.log.ml_probabilities);
+    }
+  };
+
+  ws.onclose = () => {
+    badge.textContent = '✗ BAĞLANTI KESİLDİ'; badge.className = 'ws-badge disconnected';
+    reconnTimer = setTimeout(connect, 3000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+initChart();
+connect();
+</script>
+</body>
+</html>

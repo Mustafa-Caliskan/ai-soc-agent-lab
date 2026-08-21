@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Şekil 3: V22 Confusion Matrix</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; background: white; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+        h2 { font-size: 18px; margin-bottom: 30px; text-align: center; }
+        .matrix-container { display: flex; align-items: center; gap: 10px; }
+        .y-label { writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; text-align: center; padding: 10px; }
+        .grid { display: grid; grid-template-columns: auto 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 3px; }
+        .corner { width: 80px; height: 40px; }
+        .col-header { text-align: center; font-weight: bold; font-size: 13px; padding: 10px; background: #f0f0f0; border-radius: 4px; }
+        .row-header { display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; padding: 10px; background: #f0f0f0; border-radius: 4px; width: 80px; }
+        .cell { width: 220px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; color: white; font-size: 42px; font-weight: bold; }
+        .cell span { font-size: 13px; font-weight: normal; margin-top: 8px; opacity: 0.9; }
+        .tn { background: #1a237e; }
+        .fp { background: #e8eaf6; color: #1a237e; }
+        .fn { background: #fff3e0; color: #e65100; }
+        .tp { background: #00acc1; }
+        .x-label { text-align: center; font-weight: bold; font-size: 14px; margin-top: 15px; }
+        .legend { margin-top: 30px; display: flex; gap: 25px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 16px; height: 16px; border-radius: 3px; }
+        .stats { margin-top: 25px; border: 1px solid #ddd; border-radius: 8px; padding: 20px 30px; background: #fafafa; }
+        .stats table { border-collapse: collapse; }
+        .stats td { padding: 5px 15px; font-size: 13px; }
+        .stats td:first-child { font-weight: bold; }
+        button { margin-top: 30px; padding: 12px 30px; background: #1a237e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #283593; }
+        @media print { button { display: none; } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div id="capture">
+        <h2>Şekil 3: V22 Nihai Karışıklık Matrisi (Confusion Matrix)<br><span style="font-weight:normal;font-size:14px;">Test Seti: 16.020 Örnek</span></h2>
+        
+        <div class="matrix-container">
+            <div class="y-label">Gerçek Durum (Actual)</div>
+            <div class="grid">
+                <div class="corner"></div>
+                <div class="col-header">Benign<br>(Masum)</div>
+                <div class="col-header">Attack<br>(Saldırı)</div>
+                
+                <div class="row-header">Benign<br>(Masum)</div>
+                <div class="cell tn">10.096<span>True Negative</span></div>
+                <div class="cell fp">0<span>False Positive</span></div>
+                
+                <div class="row-header">Attack<br>(Saldırı)</div>
+                <div class="cell fn">110<span>False Negative</span></div>
+                <div class="cell tp">5.814<span>True Positive</span></div>
+            </div>
+        </div>
+        
+        <div class="x-label">Yapay Zeka Tahmini (Predicted)</div>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background:#1a237e;"></div> True Negative: Doğru tespit edilen masum mesajlar</div>
+            <div class="legend-item"><div class="legend-color" style="background:#00acc1;"></div> True Positive: Doğru tespit edilen saldırılar</div>
+            <div class="legend-item"><div class="legend-color" style="background:#e8eaf6;border:1px solid #ccc;"></div> False Positive: Yanlış alarm (SIFIR!)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#fff3e0;border:1px solid #ddd;"></div> False Negative: Kaçırılan saldırılar</div>
+        </div>
+
+        <div class="stats">
+            <table>
+                <tr><td>Doğruluk (Accuracy):</td><td>%99,31</td></tr>
+                <tr><td>Attack Precision:</td><td>1,00 (Saldırı dediği her şey gerçekten saldırı)</td></tr>
+                <tr><td>Benign Recall:</td><td>1,00 (Hiçbir masum mesaj engellenmedi)</td></tr>
+                <tr><td>F1 Macro:</td><td>0,99</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <button onclick="downloadPNG()">PNG Olarak İndir</button>
+    <script>
+        function downloadPNG() {
+            html2canvas(document.getElementById('capture'), { scale: 3, backgroundColor: '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'sekil3_confusion_matrix.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilet Ödemesi | SkyPort Havalimanı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a; --bg-card: rgba(30, 41, 59, 0.7);
+            --primary: #3b82f6; --accent: #0ea5e9;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --danger: #ef4444; --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        
+        .buy-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            width: 500px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        
+        h1 { font-family: 'Outfit', sans-serif; margin-bottom: 0.5rem; font-size: 2rem; }
+        .subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+        
+        .item-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        .input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted); }
+        .input-group input, .input-group select { 
+            width: 100%; padding: 1rem; 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; color: white; outline: none;
+            transition: border-color 0.3s;
+        }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; cursor: pointer; }
+        .checkbox-group label { font-size: 0.9rem; color: var(--text-muted); cursor: pointer; }
+        
+        .btn-buy {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white; border: none; padding: 1.2rem; border-radius: 12px;
+            width: 100%; font-weight: 700; cursor: pointer; font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(16,185,129,0.3); }
+        
+        .error { color: var(--danger); margin-top: 1rem; font-size: 0.9rem; display: none; }
+        .success { color: var(--success); margin-top: 1rem; font-size: 1.1rem; font-weight: 700; display: none; }
+        
+        .back-link { display: inline-block; margin-top: 2rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+        .back-link:hover { color: white; }
+    </style>
+</head>
+<body>
+    <div class="buy-container">
+        <h1>Uçak Bileti Ödemesi</h1>
+        <p class="subtitle">İşleminiz SkyPort Güvenlik Katmanı ile korunmaktadır.</p>
+        
+        <div class="item-info" id="display-item">Yükleniyor...</div>
+        
+        <div class="input-group">
+            <label>Koltuk Numarası</label>
+            <input type="text" id="seat" placeholder="Örn: 12A" value="12A">
+        </div>
+        
+        <div class="input-group">
+            <label>Kart Numarası</label>
+            <input type="text" id="card" placeholder="XXXX XXXX XXXX XXXX">
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+            <div class="input-group" style="flex: 2;">
+                <label>Son Kullanma</label>
+                <input type="text" id="exp" placeholder="AA/YY">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>CVC</label>
+                <input type="text" id="cvc" placeholder="***">
+            </div>
+        </div>
+        
+        <div class="checkbox-group">
+            <input type="checkbox" id="save-card">
+            <label for="save-card">Kartımı bir sonraki bilet alımı için kaydet</label>
+        </div>
+        
+        <button class="btn-buy" onclick="handlePurchase()">Bileti Onayla ve Öde</button>
+        <div id="error-msg" class="error"></div>
+        <div id="success-msg" class="success">Bilet rezervasyonu başarılı! PNR kodunuz oluşturuldu.</div>
+        
+        <a href="/" class="back-link">← Ana Sayfaya Dön</a>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const flightCode = params.get('flight') || 'SP101';
+        const item = params.get('item') || flightCode;
+        const price = params.get('price');
+        const travelClass = params.get('class') || 'Economy';
+        const user = localStorage.getItem('skyport_user') || localStorage.getItem('cybertech_user');
+
+        if(!user) {
+            window.location.href = '/?auth=login';
+        }
+
+        document.getElementById('display-item').innerText = `${flightCode} · ${item} - ₺${price}`;
+
+        async function handlePurchase() {
+            const seat = document.getElementById('seat').value;
+            const card = document.getElementById('card').value;
+            const exp = document.getElementById('exp').value;
+            const cvc = document.getElementById('cvc').value;
+            const save = document.getElementById('save-card').checked;
+            const err = document.getElementById('error-msg');
+            const succ = document.getElementById('success-msg');
+
+            err.style.display = 'none';
+            if(!seat || !card || !exp || !cvc) {
+                err.innerText = "Lütfen tüm alanları doldurun.";
+                err.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/buy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        username: user,
+                        flight_code: flightCode,
+                        item_name: item,
+                        seat_number: seat,
+                        travel_class: travelClass,
+                        price: parseFloat(price),
+                        save_card: save,
+                        card_number: card,
+                        expiry: exp,
+                        cvc: cvc
+                    })
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    succ.innerText = `Bilet rezervasyonu başarılı! PNR: ${data.pnr || '—'}`;
+                    succ.style.display = 'block';
+                    setTimeout(() => window.location.href = '/', 2500);
+                } else {
+                    err.innerText = data.message; err.style.display = 'block';
+                }
+            } catch(e) {
+                err.innerText = "Bağlantı hatası."; err.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

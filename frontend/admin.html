@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Admin Panel | CyberTech Neural Shield</title>
+    <!-- Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #09090b;
+            --bg-panel: #18181b;
+            --bg-card: #27272a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --border: #3f3f46;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar */
+        header {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo svg { color: var(--primary); }
+
+        /* Security Toggle */
+        .security-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-card);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #52525b;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 16px; width: 16px; left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Dashboard Layout */
+        .dashboard {
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .stat-card h3 {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .stat-card.danger .value { color: var(--danger); }
+        .stat-card.warning .value { color: var(--warning); }
+
+        /* Logs Table */
+        .logs-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 400px;
+        }
+
+        .logs-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .status-badge .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: rgba(0,0,0,0.2);
+        }
+        td {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .cell-preview { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+        }
+        .badge.blocked { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge.allowed { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            CyberTech Neural Shield | SOC Admin
+        </div>
+        <div class="security-control">
+            <span>Global Güvenlik Duvarı</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="security-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Toplam İstek</h3>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>Engellenen Saldırılar</h3>
+                <div class="value" id="stat-blocked">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>Ortalama Risk Skoru</h3>
+                <div class="value" id="stat-risk">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>DLP Müdahaleleri</h3>
+                <div class="value" id="stat-dlp">0</div>
+            </div>
+        </div>
+        
+        <!-- Database Explorer Section -->
+        <div class="logs-section" style="margin-bottom: 2rem;">
+            <div class="logs-header">
+                📂 Veritabanı İzleyicisi (SQLite Canlı)
+                <button onclick="refreshDb()" class="status-badge" style="cursor:pointer; background:rgba(59,130,246,0.1); color:var(--primary); border-color:rgba(59,130,246,0.2);">YENİLE</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem;">
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin-bottom: 0.5rem; color: var(--accent);">👤 Kayıtlı Kullanıcılar</h4>
+                    <div id="db-users" style="font-size: 0.75rem; color: var(--text-muted); max-height: 150px; overflow-y: auto;">Yükleniyor...</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin-bottom: 0.5rem; color: #f59e0b;">💳 Kayıtlı Kartlar (PII Hedefi)</h4>
+                    <div id="db-cards" style="font-size: 0.75rem; color: var(--text-muted); max-height: 150px; overflow-y: auto;">Yükleniyor...</div>
+                </div>
+            </div>
+            <div style="padding: 0 1rem 1rem;">
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                    <h4 style="margin-bottom: 0.5rem; color: var(--success);">🛒 Satın Alma Geçmişi</h4>
+                    <div id="db-purchases" style="font-size: 0.75rem; color: var(--text-muted); max-height: 150px; overflow-y: auto;">Yükleniyor...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-section">
+            <div class="logs-header">
+                Canlı Tehdit İzleme (WebSocket)
+                <div class="status-badge"><div class="dot"></div> CANLI BAĞLANTI</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ZAMAN</th>
+                        <th>KULLANICI</th>
+                        <th>KAYNAK</th>
+                        <th>İSTEK ÖZETİ</th>
+                        <th>ML SINIFI</th>
+                        <th>RİSK SKORU</th>
+                        <th>KARAR</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-body">
+                    <!-- Logs will appear here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/logs`;
+        const ws = new WebSocket(wsUrl);
+
+        const securityToggle = document.getElementById('security-toggle');
+        const logsBody = document.getElementById('logs-body');
+
+        // Fetch initial security status
+        fetch('/security-status')
+            .then(res => res.json())
+            .then(data => {
+                securityToggle.checked = data.security_enabled;
+            });
+
+        // Toggle Event
+        securityToggle.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            try {
+                await fetch('/toggle-security', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({enabled})
+                });
+            } catch (err) {
+                console.error("Failed to toggle security", err);
+                e.target.checked = !enabled; // revert on fail
+            }
+        });
+
+        function createLogRow(log) {
+            const tr = document.createElement('tr');
+            
+            const time = new Date(log.timestamp).toLocaleTimeString();
+            const sourceBadge = `<span class="badge" style="background:#3f3f46;color:#fff">${log.source.toUpperCase()}</span>`;
+            const user = log.username || 'Bilinmiyor';
+            
+            const riskClass = log.risk_score >= 50 ? 'risk-high' : (log.risk_score >= 20 ? 'risk-medium' : '');
+            
+            let mlClass = log.ml_class;
+            if(log.regex_hit) mlClass += " + Regex";
+            if(log.dlp_triggered) mlClass += " + DLP";
+
+            const decisionBadge = log.decision === "BLOCKED" 
+                ? `<span class="badge blocked">ENGELLENDİ</span>`
+                : `<span class="badge allowed">İZİN VERİLDİ</span>`;
+
+            tr.innerHTML = `
+                <td>${time}</td>
+                <td style="color: var(--accent); font-weight: bold;">${user}</td>
+                <td>${sourceBadge}</td>
+                <td class="cell-preview" title="${log.request_preview}">${log.request_preview}</td>
+                <td>${mlClass}</td>
+                <td class="${riskClass}">${log.risk_score} / 100</td>
+                <td>${decisionBadge}</td>
+            `;
+            return tr;
+        }
+
+        function updateStats(stats) {
+            document.getElementById('stat-total').innerText = stats.total_requests;
+            document.getElementById('stat-blocked').innerText = stats.blocked_requests;
+            document.getElementById('stat-risk').innerText = stats.avg_risk_score;
+            document.getElementById('stat-dlp').innerText = stats.dlp_interventions;
+        }
+
+        async function refreshDb() {
+            try {
+                const res = await fetch('/admin/db-dump');
+                const data = await res.json();
+                
+                // Users
+                let userHtml = '<table><tr><th>Kullanıcı</th><th>Rol</th><th>Saldırı Girişimi</th></tr>';
+                data.users.forEach(u => {
+                    const risk = data.risks[u.username] || 0;
+                    userHtml += `<tr><td>${u.username}</td><td>${u.role}</td><td style="color:${risk > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:bold;">${risk}</td></tr>`;
+                });
+                userHtml += '</table>';
+                document.getElementById('db-users').innerHTML = userHtml;
+                
+                // Cards
+                let cardHtml = '<table><tr><th>User</th><th>Card Number</th><th>CVC</th></tr>';
+                data.credit_cards.forEach(c => {
+                    cardHtml += `<tr><td>${c.username}</td><td>${c.card_number}</td><td>${c.cvc}</td></tr>`;
+                });
+                cardHtml += '</table>';
+                document.getElementById('db-cards').innerHTML = cardHtml;
+                
+                // Purchases
+                let purHtml = '<table><tr><th>User</th><th>Item</th><th>Price</th></tr>';
+                data.purchases.forEach(p => {
+                    purHtml += `<tr><td>${p.username}</td><td>${p.item_name}</td><td>₺${p.price}</td></tr>`;
+                });
+                purHtml += '</table>';
+                document.getElementById('db-purchases').innerHTML = purHtml;
+
+            } catch (err) { console.error("DB refresh failed", err); }
+        }
+
+        // Initial load
+        refreshDb();
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === "init") {
+                securityToggle.checked = data.security_enabled;
+                updateStats(data.stats);
+                logsBody.innerHTML = '';
+                data.recent_logs.forEach(log => {
+                    logsBody.appendChild(createLogRow(log));
+                });
+            } else if (data.type === "new_log") {
+                updateStats(data.stats);
+                logsBody.insertBefore(createLogRow(data.log), logsBody.firstChild);
+                if (logsBody.children.length > 50) {
+                    logsBody.removeChild(logsBody.lastChild);
+                }
+            } else if (data.type === "security_status") {
+                securityToggle.checked = data.enabled;
+            }
+        };
+
+        ws.onclose = () => {
+            console.log("WebSocket kapandı. Sayfayı yenileyin.");
+        };
+    </script>
+</body>
+</html>
