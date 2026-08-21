@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-FastAPI-005571.svg)](https://fastapi.tiangolo.com)
-[![Model](https://img.shields.io/badge/ML%20Engine-DeBERTa--v3--base-orange.svg)](https://huggingface.co/microsoft/deberta-v3-base)
+[![Hugging Face Model](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-cybertech--neural--shield--deberta-yellow.svg)](https://huggingface.co/Mustafa5645344/cybertech-neural-shield-deberta)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## Executive Summary
