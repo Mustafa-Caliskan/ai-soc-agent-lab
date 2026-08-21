@@ -32,6 +32,7 @@ backend/database.db
 *.bin
 *.pt
 *.onnx
+*.zip
 best_model/*.safetensors
 best_model/*.bin
 best_model/*.pt
