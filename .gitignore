@@ -40,9 +40,14 @@ best_model/*.pt
 *.log
 logs/
 
+# Temporary Testing Files & Payloads
+poisoned_*.txt
+*.tmp
+
 # Operating System & Editor Files
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
 *.swp
+

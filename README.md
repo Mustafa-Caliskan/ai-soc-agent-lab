@@ -97,19 +97,28 @@ The security gateway operates as a non-bypassable intermediary between external 
 │   ├── regex_rules.py              # Layer 1 deterministic pattern signatures
 │   ├── dlp.py                      # Layer 3 data loss prevention filter
 │   ├── database.py                 # SQLite database schema and seed data
-│   ├── create_poison_pdf.py        # PDF white-paper attack test generator
-│   └── create_invisible_attack.py  # Unicode payload generation utilities
+│   └── create_poison_pdf.py        # PDF white-paper attack test generator
 ├── frontend/
-│   └── index.html                  # Airport portal, interactive UI & AI assistant
+│   ├── index.html                  # Airport portal, interactive UI & AI assistant
+│   ├── red_team.html               # Red team attack simulation interface
+│   ├── blue_team.html              # Blue team SOC monitoring console
+│   ├── admin.html                  # Firewall policy control dashboard
+│   ├── buy.html                    # Ticket reservation and payment mock
+│   └── pipeline.html               # Multi-layer architecture interactive view
+├── tools/
+│   ├── zehirleyici.py              # CLI adversarial Unicode payload encoder
+│   ├── cozucu.py                   # CLI Unicode payload decoder utility
+│   └── decoder.html                # Web-based visual decoder utility
+├── samples/
+│   └── pdf_attacks/                # Pre-compiled white-paper attack PDF test cases
+├── docs/
+│   ├── CyberTech_IMRAD_Raporu.docx # Comprehensive academic research paper
+│   ├── CyberTech_IMRAD_Raporu.pdf  # Compiled PDF research report
+│   └── figures/                    # High-resolution architectural diagrams
 ├── best_model/                     # Transformer configuration, vocabulary & tokenizers
 │   ├── config.json
 │   ├── tokenizer.json
 │   └── tokenizer_config.json
-├── zehirleyici.py                  # CLI adversarial payload encoder (Red Team Tool)
-├── cozucu.py                       # CLI Unicode payload decoder utility
-├── decoder.html                    # Web-based visual decoder utility
-├── generate_diagrams.py            # High-resolution architectural diagram generator
-├── generate_imrad.py               # Academic IMRAD report compilation script
 ├── requirements.txt                # Production dependencies
 ├── .env.example                    # Environment variable configuration template
 └── README.md                       # Technical documentation
@@ -179,14 +188,14 @@ Once the server is running, access the following endpoints via a web browser:
 
 The framework includes dedicated testing utilities to validate detection capabilities:
 
-### 1. Steganographic Unicode Encoder (`zehirleyici.py`)
+### 1. Steganographic Unicode Encoder (`tools/zehirleyici.py`)
 Generates payload strings where arbitrary prompt injections are hidden within Unicode Tag characters appended to carrier emojis:
 ```bash
-python zehirleyici.py
+python tools/zehirleyici.py
 ```
 
 ### 2. Document Smuggling Test Suite (`backend/create_poison_pdf.py`)
-Compiles test documents embedding white-on-white text across multiple operational scenarios:
+Compiles test documents embedding white-on-white text across multiple operational scenarios into `samples/pdf_attacks/`:
 ```bash
 python backend/create_poison_pdf.py
 ```

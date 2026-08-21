@@ -2,8 +2,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import os
 
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "samples", "pdf_attacks")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 def create_pdf_1_tr():
-    file_path = "pdf_1_tr_otopark.pdf"
+    file_path = os.path.join(OUTPUT_DIR, "pdf_1_tr_otopark.pdf")
     c = canvas.Canvas(file_path, pagesize=letter)
     
     # 1. Visible Text (Generic Airport Rules)
@@ -27,7 +30,7 @@ def create_pdf_1_tr():
     print(f"[OK] PDF 1 (Turkish Otopark) generated: {file_path}")
 
 def create_pdf_2_en():
-    file_path = "pdf_2_en_flights.pdf"
+    file_path = os.path.join(OUTPUT_DIR, "pdf_2_en_flights.pdf")
     c = canvas.Canvas(file_path, pagesize=letter)
     
     # 1. Visible Text (Generic Passenger Directive)
@@ -51,7 +54,7 @@ def create_pdf_2_en():
     print(f"[OK] PDF 2 (English Flights) generated: {file_path}")
 
 def create_pdf_3_benign():
-    file_path = "pdf_3_benign_selam.pdf"
+    file_path = os.path.join(OUTPUT_DIR, "pdf_3_benign_selam.pdf")
     c = canvas.Canvas(file_path, pagesize=letter)
     
     # Hidden White Text (Simple greeting to test false-positive rates)
@@ -62,7 +65,7 @@ def create_pdf_3_benign():
     print(f"[OK] PDF 3 (Benign Selam) generated: {file_path}")
 
 def create_pdf_4_bypass():
-    file_path = "pdf_4_bypass_confirm.pdf"
+    file_path = os.path.join(OUTPUT_DIR, "pdf_4_bypass_confirm.pdf")
     c = canvas.Canvas(file_path, pagesize=letter)
     
     # 1. Visible Text (Generic Meteorological Announcement)
@@ -84,7 +87,7 @@ def create_pdf_4_bypass():
     print(f"[OK] PDF 4 (Bypass Confirmation) generated: {file_path}")
 
 def create_pdf_5_read_test():
-    file_path = "pdf_5_read_test.pdf"
+    file_path = os.path.join(OUTPUT_DIR, "pdf_5_read_test.pdf")
     c = canvas.Canvas(file_path, pagesize=letter)
     
     # 1. Visible Text
@@ -103,7 +106,7 @@ def create_pdf_5_read_test():
     print(f"[OK] PDF 5 (Read Test) generated: {file_path}")
 
 def create_pdf_6_flight_query():
-    file_path = "pdf_6_flight_query.pdf"
+    file_path = os.path.join(OUTPUT_DIR, "pdf_6_flight_query.pdf")
     c = canvas.Canvas(file_path, pagesize=letter)
     
     # 1. Visible Text
