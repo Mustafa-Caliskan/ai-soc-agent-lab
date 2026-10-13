@@ -20,7 +20,7 @@ flowchart TD
     subgraph NeuralShield["NeuralShield v5'e Eklenenler"]
         NS1["Layer 0: Kayan Pencere (Sliding Window Chunking)<br/>(512 Sınırını Kaldırma)"]
         NS2["Layer 0: JSON & Tool-Call Payload Unpacker<br/>(Ajan Güvenliği)"]
-        NS3["Layer 1: Masum Sistem Soruları Toleransı<br/>(%0 FP Garantisi)"]
+        NS3["Layer 2: Semantik Olasılık Kalibrasyonu<br/>(Sıcaklık/Platt Scaling)"]
         NS4["Kafa Kafaya (Head-to-Head) Kıyaslama Testi<br/>(Makale Tablo II)"]
     end
 
