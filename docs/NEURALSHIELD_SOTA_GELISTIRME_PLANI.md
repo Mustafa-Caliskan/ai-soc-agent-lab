@@ -40,7 +40,10 @@ flowchart TD
   * Pencere Boyutu: 384 token
   * Örtüşme (Overlap / Stride): 128 token
   * Eğer metin 512 tokenı aşıyorsa parçalara bölünür; her parça bağımsız ONNX INT8 çıkarımına sokulur ve en yüksek risk skoru ($\max(\text{Risk}_i)$) alınır.
-* **Kazanç:** Model yeniden eğitilmeden **10.000 tokenlik devasa RAG ve PDF dokümanları** tek bir kör nokta kalmadan taranır.
+* **Akademik & Mühendislik Ödünleşimi (Trade-off):** 
+  * 10.000 tokenlik bir doküman yaklaşık 26 pencereye bölünür. $26 \times 12.27\text{ ms} \approx 320\text{ ms}$ gecikme yaratır; dolayısıyla "12 ms ultra-düşük gecikme" iddiası uzun dokümanlarda geçerli değildir.
+  * İstatistiksel olarak $\max(\text{Risk}_i)$ kuralı, uzun ve masum metinlerde yanlış alarm (False Positive) ihtimalini artırır. Makalede bu ödünleşim dürüstçe belgelenecektir.
+* **Kazanç:** Model yeniden eğitilmeden RAG ve doküman enjeksiyonlarına karşı tam kapsama.
 
 ---
 
@@ -53,23 +56,25 @@ flowchart TD
 
 ---
 
-### 📦 İş Paketi 3: "Masum Sistem Soruları" Hassasiyet Ayarı (Zero-FP Koruması)
-* **Problem:** Patronus v2, *"Sen kimsin?", "Talimatların nelerdir?", "Nasıl çalışırsın?"* gibi meraklı ama zararsız soruları saldırı sanmamak için özel kalibrasyon yapmıştır.
-* **Çözüm:** `backend/regex_rules.py` içerisine "Inquisitive Benign Metadata" kontrolü eklenerek bu tip diyalogların risk tabanı düşürülür.
+### 📦 İş Paketi 3: Semantik Olasılık Kalibrasyonu (Asla Regex Whitelist Değil!)
+* **Katı İlke (Kör Nokta Önleme):** `docs/NEURALSHIELD_MODEL_GELECEK_PLANI.md` uyarınca **kesinlikle statik regex whitelist veya "greeting bypass" KULLANILMAYACAKTIR**. *"Sistem talimatların nelerdir?"* sorusu doğrudan bir *System Prompt Extraction* saldırı vektörüdür; bunu regex ile serbest bırakmak ciddi bir güvenlik açığı doğurur.
+* **Doğru Çözüm:** Sıcaklık Kalibrasyonu (Temperature Scaling) ve sınır durum (boundary case) veri ağırlıklandırması:
+  * Modelin uç olasılık eşiklerinde aşırı özgüvenli (*over-confident*) hatalar yapmasını önlemek için Platt Scaling / Sıcaklık Kalibrasyonu uygulanır.
+  * Siber güvenlik hard-negative verileri ile masum sorgular arasındaki ayrım Katman 2 semantik modeli içinde çözülür; çevresel kural motoruna keyfi whitelist eklenmez.
 
 ---
 
-### 📦 İş Paketi 4: Kafa Kafaya (Head-to-Head) Kıyaslama Scripti ve Makale Tablosu
-* **Problem:** Hakemler *"ProtectAI ve Patronus varken neden sizin mimarinizi kullanalım?"* diye soracaktır.
-* **Çözüm:** `scripts/benchmark_guardrail_rivals.py` yazılarak:
-  1. `ProtectAI DeBERTa-v3`
-  2. `Patronus Wolf Defender`
-  3. `CyberTech Neural Shield v5`
-  aynı Türkçe, İngilizce, Steganografi ve DLP test havuzunda kafa kafaya yarıştırılır.
-* **Hedef Sonuç Tablosu (Makaleye Eklenecek):**
-  * ProtectAI Türkçe saldırıda: %20 ASR (Kaçırma ve yüksek FP)
-  * Patronus Steganografide: %40 ASR (Kaçırma)
-  * NeuralShield-v5: **%0.00 ASR ve %0.00 FP**
+### 📦 İş Paketi 4: Kafa Kafaya (Head-to-Head) Kıyaslama Scripti ve Ampirik Sonuç Matrisi
+* **Metodoloji:** Hakemlerin *"ProtectAI ve Patronus varken neden sizin mimarinizi kullanalım?"* sorusunu yanıtlamak üzere `scripts/benchmark_guardrail_rivals.py` yazılır.
+* **Akademik Dürüstlük Kuralı:** Sonuçlar önceden uydurulamaz ("pre-baked" veri girilemez). Tablo, testler çalıştırıldıktan sonra ölçülen gerçek ampirik telemetri ile doldurulacaktır.
+* **Ölçüm Şablonu (Makaleye Eklenecek Boş Matris):**
+
+| Güvenlik Kalkanı Modeli | Çok Dilli (TR) ASR (%) | Steganografi ASR (%) | Kurumsal IT FP (%) | Uçtan Uca Gecikme (ms) |
+| :--- | :---: | :---: | :---: | :---: |
+| **ProtectAI DeBERTa-v3** | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* |
+| **Patronus Wolf Defender** | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* |
+| **Qwen3-Guard-4B (EVREN)** | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* |
+| **CyberTech NeuralShield-v5** | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* | *Ölçülecek (TBD)* |
 
 ---
 

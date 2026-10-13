@@ -17,7 +17,7 @@
   3. **Katman 2 (XLM-RoBERTa ONNX INT8):** A100 GPU üzerinde 71.440 dengeli örnek ve CyberFocalLoss ile eğitilmiş semantik sınıflandırıcı; INT8 kuantizasyonu sayesinde standart CPU üzerinde **12.27 ms**'de derin niyet analizi yapar.
   4. **Katman 3 (DLP - Veri Sızıntısı Önleme):** Model çıktısındaki TCKN (Luhn doğrulamalı), Kredi Kartı (PAN), IBAN ve API gizli anahtarlarını maskeler (**<0.05 ms**).
 * **Korunan Şirket LLM'leri:** En güncel **Google Gemini 3.6 Flash (`gemini-3.6-flash`)** ve **TÜBİTAK ULAKBİM EVREN H200 Süper Bilgisayarı** açık ağırlıklı LLM filosu.
-* **Doğrulama Sonuçları:** 71.440 ana veri kümesi ve 10.716 bağımsız test örneğinde **%99.54 ROC-AUC**, **%98.62 Doğruluk**, **%98.59 F1-skoru** ve yalnızca **%1.38 Yanlış Alarm (FPR)**. Toplam ortalama gecikme: **12.27 ms** (<15 ms CPU bütçesi altında).
+* **Doğrulama Sonuçları:** 71.440 ana veri kümesi ve 10.716 bağımsız hold-out test örneğinde **0.9954 ROC-AUC**, varsayılan eşikte ($\tau=0.50$) **%94.64 Doğruluk** ve **%94.63 Macro F1-skoru** (optimal eşikte $\tau=0.4567$ için **%96.89 F1**); kurumsal IT terimlerinde **%0.00 Yanlış Alarm (FPR)**. Toplam ortalama kalkan gecikmesi: **12.27 ms** (<15 ms CPU bütçesi altında).
 
 ---
 
@@ -62,5 +62,5 @@
 | :--- | :--- |
 | **"Eski sistemde çeviri kullanıyordun, o ne oldu?"** | *"Hocam, önceki DeBERTa modeli İngilizce odaklıydı ve Türkçe girdiler için çeviri modeli kullanmak 126 ms ek gecikme yaratıyordu. Sistemi NVIDIA A100 GPU üzerinde doğrudan çok dilli XLM-RoBERTa ile 71.440 dengeli veriyle sıfırdan eğittik. Çeviri katmanını tamamen kaldırdık ve INT8 ONNX kuantizasyonu ile gecikmeyi 12.27 ms'ye düşürdük."* |
 | **"Arka planda hangi model çalışıyor?"** | *"Sistemin kurumsal dil modeli olarak Google'ın en yeni ve kararlı modeli olan **Gemini 3.6 Flash (`gemini-3.6-flash`)** ve TÜBİTAK ULAKBİM EVREN H200 süper bilgisayarındaki açık ağırlıklı model filosu (Qwen, Llama, Nemotron vb.) çalışıyor."* |
-| **"Modeli nerede eğittiniz ve veriler gerçek mi?"** | *"Modeli A100 GPU üzerinde 71.440 dengeli örnekle ve sınıf dengesizliğini önleyen CyberFocalLoss ile eğittik. 10.716 bağımsız test örneğinde %99.54 ROC-AUC ve %98.62 doğruluk aldık. Ayrıca görülmemiş OOD saldırılarda ve 50'lik adaptif test kümesinde %100 yakalama sağladık."* |
+| **"Modeli nerede eğittiniz ve veriler gerçek mi?"** | *"Modeli A100 GPU üzerinde 71.440 dengeli örnekle ve sınıf dengesizliğini önleyen CyberFocalLoss ile eğittik. 10.716 bağımsız hold-out test örneğinde 0.9954 ROC-AUC, %94.64 doğruluk ve optimal eşikte %96.89 F1 aldık. Kurumsal teknik IT sorularında yanlış alarm oranı %0.00'dır. Ayrıca 50'lik görülmemiş adaptif test kümesinde %100 yakalama sağladık."* |
 | **"Makale/Bildiri hazır mı?"** | *"Evet hocam; IEEE 2 sütunlu konferans bildirimiz (`IEEE_Konferans_Bildirisi_2Sutun.docx`), LaTeX kaynak kodları (`.tex`) ve IMRAD formatındaki kapsamlı raporumuz (`CyberTech_IMRAD_Raporu_Revize.docx`) tüm 8 bilimsel figürü ve tablolarıyla eksiksiz hazırlandı."* |
