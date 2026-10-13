@@ -52,3 +52,17 @@ Thumbs.db
 .vscode/
 *.swp
 
+# Workspace & Scratch
+scratch/
+diger_projeler/
+
+# Local Tool Configs & Secret Protection
+opencode.json
+
+# Google Colab & Jupyter Notebooks (No Notebooks/Colabs in Git)
+*.ipynb
+notebooks/
+
+# Archive & Standalone Bundles
+archive/
+neuralshield_v5_academic_bundle/

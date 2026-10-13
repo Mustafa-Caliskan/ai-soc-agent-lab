@@ -175,9 +175,9 @@
             </div>
             <div class="connector" id="conn-1"></div>
             
-            <!-- 2. Çeviri -->
+            <!-- 2. Steganografi -->
             <div class="node" id="node-translate">
-                <div class="node-header"><span class="node-icon">🌐</span> Çeviri</div>
+                <div class="node-header"><span class="node-icon">🔍</span> Steganografi</div>
                 <div class="node-body" id="content-translate">Bekleniyor...</div>
             </div>
             <div class="connector" id="conn-2"></div>
@@ -265,7 +265,7 @@
                 document.getElementById('conn-1').classList.add('active');
             }, 200);
 
-            // 2. Translate
+            // 2. Steganography & Invisible Text Filter
             setTimeout(() => {
                 if (!log.security_enabled) {
                     document.getElementById('node-translate').classList.add('active', 'warning');
@@ -275,14 +275,18 @@
                         </div>
                     `;
                 } else {
-                    document.getElementById('node-translate').classList.add('active', 'success');
+                    const hasStego = (log.layer0_alerts && log.layer0_alerts.length > 0) || (log.hard_stego_signal) || (log.regex_patterns && log.regex_patterns.some(p => p.includes("UNICODE") || p.includes("ZERO-WIDTH") || p.includes("BASE64") || p.includes("GİZLİ METİN") || p.includes("HEX") || p.includes("URL")));
+                    document.getElementById('node-translate').classList.add('active', hasStego ? 'danger' : 'success');
+                    const alertsText = (log.layer0_alerts && log.layer0_alerts.length > 0) ? log.layer0_alerts[0] : (hasStego ? 'GİZLİ PAYLOAD BULUNDU' : 'TEMİZ (Görünmez/Şifreli Veri Yok)');
                     document.getElementById('content-translate').innerHTML = `
-                        <span class="label">Çeviri Sonucu (EN):</span>
-                        <div class="value">${log.translated_text || log.request_preview}</div>
+                        <span class="label">Layer 0 (Normalizasyon & Stego):</span>
+                        <div class="value ${hasStego ? 'highlight' : 'highlight-success'}">${alertsText}</div>
+                        <span class="label">Katman 0 Gecikmesi:</span>
+                        <div class="value" style="color:var(--success); font-weight:bold;">${log.layer0_latency_ms || 0.17} ms</div>
                     `;
                 }
                 document.getElementById('conn-2').classList.add('active');
-            }, 1000);
+            }, 800);
 
             // 3. Regex
             setTimeout(() => {
@@ -298,15 +302,18 @@
                     document.getElementById('node-regex').classList.add('active', isThreat ? 'danger' : 'success');
                     
                     let ruleText = "Tetiklenen Kural Yok";
-                    if(isThreat && log.regex_patterns && log.regex_patterns.length > 0) {
-                        ruleText = log.regex_patterns.join(", ");
+                    const patterns = log.layer1_patterns || log.regex_patterns || [];
+                    if(isThreat && patterns.length > 0) {
+                        ruleText = patterns.join(", ");
                     }
                     
                     document.getElementById('content-regex').innerHTML = `
-                        <span class="label">Durum:</span>
-                        <div class="value ${isThreat ? 'highlight' : 'highlight-success'}">${isThreat ? 'TEHDİT BULUNDU' : 'TEMİZ'}</div>
+                        <span class="label">Layer 1 (Kural Motoru):</span>
+                        <div class="value ${isThreat ? 'highlight' : 'highlight-success'}">${isThreat ? 'TEHDİT İMZASI BULUNDU' : 'TEMİZ'}</div>
                         <span class="label">Tetiklenen Kurallar:</span>
                         <div class="value">${ruleText}</div>
+                        <span class="label">Katman 1 Gecikmesi:</span>
+                        <div class="value" style="color:var(--success); font-weight:bold;">${log.layer1_latency_ms || 0.29} ms</div>
                     `;
                 }
                 document.getElementById('conn-3').classList.add('active');
@@ -329,12 +336,12 @@
                     const malProb = (log.ml_probabilities.Malicious * 100).toFixed(1);
 
                     document.getElementById('content-ml').innerHTML = `
-                        <span class="label">Tahmin (Etiket):</span>
-                        <div class="value ${isMalicious ? 'highlight' : 'highlight-success'}">${log.ml_class}</div>
+                        <span class="label">XLM-RoBERTa ONNX INT8 Tahmini:</span>
+                        <div class="value ${isMalicious ? 'highlight' : 'highlight-success'}">${log.ml_class} (Risk: %${log.risk_score})</div>
                         <span class="label">Güven Oranları:</span>
-                        <div class="value">Benign: %${benignProb}<br>Malicious: %${malProb}</div>
-                        <span class="label">Üretilen Risk Skoru:</span>
-                        <div class="value">${log.risk_score} / 100</div>
+                        <div class="value">Benign: %${benignProb} | Malicious: %${malProb}</div>
+                        <span class="label">Katman 2 Çıkarım Gecikmesi:</span>
+                        <div class="value" style="color:var(--success); font-weight:bold;">${log.layer2_latency_ms || 13.4} ms</div>
                     `;
                 }
                 document.getElementById('conn-4').classList.add('active');

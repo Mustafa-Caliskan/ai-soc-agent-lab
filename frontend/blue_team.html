@@ -272,9 +272,10 @@ tbody td { padding: .45rem .8rem; vertical-align: middle; }
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-const API_WS = 'ws://localhost:8000/ws/logs';
-const API    = 'http://localhost:8000';
+const loc = window.location;
+const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+const API_WS = loc.host ? `${wsProto}//${loc.host}/ws/logs` : 'ws://localhost:8000/ws/logs';
+const API    = loc.origin && loc.origin !== 'null' ? loc.origin : 'http://localhost:8000';
 let trendData = [];
 let trendChart;
 

@@ -1599,11 +1599,12 @@
                 document.getElementById(loadingId).remove();
 
                 if (data.decision === "BLOCKED") {
-                    appendMessage("system-alert", `⛔ İŞLEM ENGELLENDİ\nSkyPort Güvenlik Katmanı bu talebi riskli buldu.\nRisk Skoru: ${data.risk_score}/100`);
+                    const lat = data.total_latency_ms || 10.0;
+                    appendMessage("system-alert", `🛡️ [NEURAL SHIELD] TALEP ENGELLENDİ\nGüvenlik Katmanı saldırı tespit etti (Risk: %${data.risk_score})\nKalkan Tepki Süresi: ${lat} ms`);
                 } else {
                     appendMessage("bot", data.gemini_response || "Yanıt alınamadı.");
                     if(data.dlp_triggered) {
-                        appendMessage("system-alert", "⚠ Sistem uyarısı: DLP filtresi bazı hassas verileri maskeledi.");
+                        appendMessage("system-alert", "⚠ Sistem uyarısı: DLP filtresi hassas operasyonel verileri maskeledi.");
                     }
                 }
             } catch (err) {

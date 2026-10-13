@@ -1,0 +1,170 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Büyük Dil Modellerinde Çok Katmanlı Güvenlik Ağ Geçidi: XLM-RoBERTa Tabanlı Doğal Çok Dilli ve Kuantize Semantik Savunma\\
+{\footnotesize \textsuperscript{*}Multi-Layer Security Gateway for Large Language Models: Native Multilingual and Quantized Semantic Defense via XLM-RoBERTa}
+}
+
+\author{\IEEEauthorblockN{Mustafa ÇALIŞKAN}
+\IEEEauthorblockA{\textit{Bilgisayar Mühendisliği Bölümü} \\
+\textit{Burdur Mehmet Akif Ersoy Üniversitesi}\\
+Burdur, Türkiye \\
+mustafacaliskan@ogr.mehmetakif.edu.tr}
+\and
+\IEEEauthorblockN{Prof. Dr. Ali Hakan IŞIK}
+\IEEEauthorblockA{\textit{Bilgisayar Mühendisliği Bölümü} \\
+\textit{Burdur Mehmet Akif Ersoy Üniversitesi}\\
+Burdur, Türkiye \\
+hisik@mehmetakif.edu.tr}
+}
+
+\maketitle
+
+\begin{abstract}
+Büyük Dil Modellerinin (LLM) kurumsal karar destek mekanizmalarına entegre edilmesi, doğal dil girdilerini manipüle eden yeni nesil siber tehdit vektörlerini beraberinde getirmiştir. Komut enjeksiyonu (Prompt Injection), jailbreak ve görünmez Unicode Tag (U+E0000 - U+E007F) steganografisi gibi teknikler, geleneksel ağ güvenlik duvarlarını ve LLM sağlayıcılarının dahili güvenlik filtrelerini aşabilmektedir. Bu çalışmada, harici bir çeviri katmanına ihtiyaç duymaksızın doğrudan çok dilli çalışan ve mikro-gecikme seviyesinde koruma sağlayan 4 katmanlı hibrit bir çevre savunma mimarisi (\textbf{CyberTech Neural Shield v5}) önerilmektedir. Önerilen mimari; (1) NFKC, ZWJ-emojileri koruyan görünmez karakter temizleyici ve çoklu çözücüden oluşan Normalizasyon ve Steganografi Motoru (Katman 0, $<0.2$ ms), (2) çift dilli ağırlıklı sezgisel kural motoru (Katman 1, $<0.3$ ms), (3) 71.440 dengeli veri örneği ve sinsi kurgulara karşı CyberFocalLoss ($\gamma=2.0$) ile eğitilen, CPU üzerinde 12.27 ms gecikmeyle çalışan kuantize \textbf{XLM-RoBERTa ONNX INT8} Semantik Sınıflandırıcısı (Katman 2) ve (4) model yanıtlarındaki hassas verileri algoritmik checksum (Luhn/TCKN) ile maskeleyen Veri Sızıntısı Önleme (DLP) katmanından (Katman 3, $<0.1$ ms) oluşmaktadır. 10.716 adetlik bağımsız hold-out test kümesinde yapılan ampirik değerlendirmeler; önerilen modelin \textbf{\%94.64 doğruluk}, \textbf{\%94.63 Macro F1-skoru}, optimal eşikte ($\tau=0.4567$) \textbf{\%96.89 F1-skoru}, \textbf{0.9954 ROC-AUC} ve kurumsal IT istemlerinde \textbf{\%0.00 Yanlış Alarm (False Positive)} ürettiğini kanıtlamıştır. Sistem, uçtan uca 12.73 ms gecikmeyle çalışarak kurumsal LLM filoları önünde API maliyetlerini ve DoS risklerini sıfıra indiren yüksek verimli bir çevre savunması sağlamaktadır.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Büyük Dil Modelleri, LLM Güvenliği, Prompt Injection, XLM-RoBERTa, CyberFocalLoss, ONNX INT8 Kuantizasyon, Unicode Steganografi, Çevre Savunması, Veri Sızıntısı Önleme (DLP).
+\end{IEEEkeywords}
+
+\section{Giriş}
+Büyük Dil Modelleri (Large Language Models - LLM), doğal dil işleme alanındaki transformatör devrimi sayesinde kurumsal iş akışlarında ve müşteri iletişim sistemlerinde merkezi bir aktör haline gelmiştir \cite{greshake2023}. Ancak modern dil modelleri, klasik Von Neumann bilgisayar mimarisinden farklı olarak komut (talimat) ile kullanıcı verisini birbirinden ayıramaz; girdi olarak verilen tüm belirteçleri (\textit{tokens}) aynı bağlam penceresinde (\textit{context window}) tek bir metin dizisi olarak işler \cite{perez2022}. Bu yapısal zafiyet, kötü niyetli aktörlerin masum kullanıcı sorguları kisvesi altında sistem talimatlarını geçersiz kılmasına (\textit{Prompt Injection}), kurumsal veri tabanlarını sızdırmasına veya etik güvenlik bariyerlerini yıkmasına (\textit{Jailbreak}) yol açmaktadır \cite{wei2023}.
+
+Buna ek olarak, Unicode standardında dil etiketleme amacıyla tanımlanmış özel etiket karakterleri (U+E0000 - U+E007F) kötüye kullanılarak icra edilen steganografik saldırılar yeni bir tehdit boyutu doğurmuştur. Arayüzde tek bir masum emoji veya boşluk gibi görünen bu karakterler, tokenizer seviyesinde ayrıştırılarak LLM'e görünmez kötü niyetli talimatlar iletmektedir.
+
+Mevcut LLM güvenlik yaklaşımlarında üç temel kısıt bulunmaktadır:
+\begin{enumerate}
+    \item \textbf{Yüksek Çıkarım Gecikmesi ve Maliyet:} LlamaGuard \cite{inan2023} gibi büyük güvenlik modelleri 1-2 saniyelik gecikme ve devasa donanım maliyeti üretmektedir.
+    \item \textbf{Harici Çeviri Bağımlılığı:} İngilizce odaklı modeller Türkçe gibi dillerde çalıştığında morfolojik uyumsuzluk nedeniyle yanlış alarmlar vermekte; harici çeviri modelleri ise sisteme 120 ms'nin üzerinde ek gecikme bindirmektedir.
+    \item \textbf{Aşırı Yanlış Alarm (False Positive):} Siber güvenlik sınıflandırıcıları kurumsal IT destek taleplerinde geçen 'password', 'sql', 'system' gibi masum terimleri saldırı sanarak iş akışlarını kilitlemektedir.
+\end{enumerate}
+
+Bu çalışmada, söz konusu sorunları kökten çözmek amacıyla; harici çeviri katmanını tamamen ortadan kaldıran, Türkçe ve İngilizce dillerini doğal olarak anlayan, 71.440 dengeli veri örneği ve CyberFocalLoss ($\gamma=2.0$) ile eğitilip CPU için kuantize edilen (12.27 ms çıkarım süreli XLM-RoBERTa ONNX INT8 v5), steganografik görünmez tehditleri milisaniyenin altında ($<0.2$ ms) temizleyen, deterministik kural motoru ve DLP maskelemesiyle kurumsal sızıntıları önleyen 4 katmanlı hibrit çevre savunma mimarisi (\textbf{CyberTech Neural Shield v5}) sunulmaktadır.
+
+\section{Çevre Savunmasının Gerekliliği ve Maliyet Analizi}
+Akademik literatürde ve endüstride sıklıkla sorulan temel soru şudur: \textit{"Kurumsal temel modeller zaten milyar dolarlık bütçelerle eğitilmekte ve kendi güvenlik filtrelerine sahiptir. Harici bir ön cephe güvenlik katmanına (Guardrail) neden ihtiyaç vardır?"} Bu çalışmanın varlık sebebi olan 4 temel siber güvenlik gerekçesi şunlardır:
+
+\subsection{Kod ve Veri Ayrımının İmkânsızlığı}
+Geleneksel işletim sistemlerinde kod belleği ile veri belleği katı biçimde ayrılmıştır ($W \oplus X$ prensibi). LLM'lerde ise sistem yöneticisi talimatı, kullanıcı girdisi ve harici dokümanlar aynı tensör akışında birleşir. Bu sebeple en gelişmiş modeller dahi bilişsel çerçeveleme (\textit{Cognitive Framing}), kademeli ikna (\textit{Crescendo Attack}) ve rol yapma teknikleriyle kandırılabilmektedir \cite{zou2023}.
+
+\subsection{Dolaylı Enjeksiyon Tehdidi (Indirect Prompt Injection)}
+Kurumsal bir LLM asistanı harici bir web sayfasını veya yolcunun yüklediği bilet PDF'ini özetlerken, belge içerisine gizlenmiş görünmez beyaz metinleri okuduğunda zafiyete düşer. Bu saldırı kullanıcıdan değil, belgeden geldiği için modelin iç filtresi devreye girmez. Çevre savunmamız dokümanı modele gitmeden önce ayıklar.
+
+\subsection{Hizmet Kesinti Saldırıları (DoS) ve Token Maliyet Tasarrufu}
+Saldırganlar kurumsal LLM API'lerine binlerce kelimelik manipülatif promptlar göndererek şirketi iflas ettirecek API faturaları (\textit{Resource Exhaustion}) çıkarabilir. Bir saldırı promptu doğrudan kurumsal modele gittiğinde model bunu okur, reddetse dahi şirket binlerce token ücreti öder ve 800-1500 ms sistem meşgul edilir. NeuralShield çevre savunmasında ise saldırı yerel sunucuda 12.27 ms'de ve sıfır (\$0) API maliyetiyle ağ seviyesinde (HTTP 403) imha edilir. Token tasarruf bağıntısı Denklem \eqref{eq:cost} ile modellenmiştir:
+\begin{equation}
+\Delta C = \sum_{k=1}^{N_{\text{attack}}} \left( \text{Tokens}_k \times P_{\text{token}} \right) - C_{\text{local\_cpu}}
+\label{eq:cost}
+\end{equation}
+Burada $P_{\text{token}}$ ticari API birim fiyatı, $C_{\text{local\_cpu}} \approx 0$ yerel mikro-çıkarım maliyetidir.
+
+\subsection{Kurumsal Hassas Veri İzolasyonu (Hard Negatives)}
+Genel bulut modelleri kurumsal IT bağlamını bilmez. NeuralShield, kurumsal ve havalimanı terminolojisinde geçen kritik kelimeleri yanlış alarm üretmeden güvenle işler.
+
+\section{Önerilen Hibrit Sistem Mimarisi}
+CyberTech Neural Shield v5, gelen istekleri ardışık 4 katmandan geçiren asenkron bir güvenlik ağ geçididir.
+
+\subsection{Katman 0: Normalizasyon ve Steganografi Motoru ($<0.2$ ms)}
+Ham metin ilk olarak sıfırıncı dereceden mikro-analize tabi tutulur:
+\begin{enumerate}
+    \item \textbf{Unicode Tag Tespiti:} Unicode standardında yer alan U+E0000 - U+E007F aralığındaki baytlar filtrelenir ve deşifre edilir (Denklem \ref{eq:unicode}):
+    \begin{equation}
+    \text{Payload} = \bigcup_{i} \text{chr}(\text{ord}(c_i) - \text{0xE0000})
+    \label{eq:unicode}
+    \end{equation}
+    \item \textbf{ZWJ-Güvenli Emoji ve Boşluk Filtresi:} \texttt{\textbackslash u200d} birleştirici emojileri korunurken, alfabe arasına gizlenen sıfır genişlikli karakterler (\texttt{\textbackslash u200b}, \texttt{\textbackslash ufeff}) elenir.
+    \item \textbf{Çoklu Çözücüler:} Base64, Hex, ROT13, ters yazılmış dizgeler ve URL kodlamaları çözülerek sonraki katmanlara iletilir.
+\end{enumerate}
+
+\subsection{Katman 1: Heuristic Regex Kural Motoru ($<0.3$ ms)}
+30'dan fazla ağırlıklı siber saldırı şablonu (DAN varyantları, talimat geçersiz kılma, sistem yöneticisi taklidi) taranır ve 0-100 arasında sezgisel risk skoru üretilir.
+
+\subsection{Katman 2: XLM-RoBERTa ONNX INT8 v5 Semantik Sınıflandırıcısı (12.27 ms)}
+Sistemin beyni olan Katman 2, çok dilli transformatör mimarisine (\texttt{xlm-roberta-base}) dayanmaktadır \cite{conneau2020}.
+\begin{itemize}
+    \item \textbf{CyberFocalLoss ($\gamma=2.0$):} Kolay örneklerin kaybını bastırarak modelin sinsi kurgulara (\textit{Adversarial Framing}) ve zorlu sınır örneklerine odaklanmasını sağlar.
+    \item \textbf{Kuantizasyon (ONNX INT8):} PyTorch FP32 modeli ONNX formatına ihraç edildikten sonra 8-bit dinamik kuantizasyona tabi tutulmuştur \cite{onnxruntime}. Model boyutu 278 MB'a düşürülmüş ve CPU çıkarım gecikmesi \textbf{12.27 ms / girdi} olarak ölçülmüştür.
+\end{itemize}
+
+\subsection{Katman 3: DLP (Veri Sızıntısı Önleme) Katmanı ($<0.1$ ms)}
+Model tarafından üretilen yanıt kullanıcıya dönmeden önce taranır. Kredi kartları Luhn algoritması, TCKN ise resmi mod-10/11 algoritmaları ile doğrulanarak maskelenir (\texttt{[MASKED\_PII]}).
+
+\section{Deneysel Bulgular ve Başarım Analizi}
+
+\subsection{Veri Kümesi ve Eğitim Protokolü}
+Model, 30 farklı açık kaynaklı ve yerel veri setinin birleşiminden oluşan \textbf{71.440 dengeli master örnek} ile eğitilmiştir.
+\begin{itemize}
+    \item \textbf{Stratified 3-Way Split:} Eğitim (50.006 - \%70), Doğrulama (10.718 - \%15), Bağımsız Hold-out Test (10.716 - \%15).
+    \item \textbf{Donanım:} NVIDIA A100 GPU üzerinde FP16 karışık duyarlılık, CyberFocalLoss ($\gamma=2.0$, $\alpha=0.25$) ve AdamW optimizatörüyle eğitilmiştir.
+\end{itemize}
+
+\begin{table*}[t]
+\caption{NeuralShield-v5 Kapsamlı Ampirik Başarım Karnesi}
+\begin{center}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Değerlendirme Kümesi} & \textbf{Örnek (n)} & \textbf{Doğruluk (Acc)} & \textbf{Macro F1} & \textbf{Kesinlik (Prec)} & \textbf{Duyarlılık (Rec)} & \textbf{ROC-AUC} \\
+\midrule
+\textbf{Bağımsız Hold-out Test ($\tau=0.50$)} & 10.716 & \textbf{\%94.64} & \textbf{\%94.63} & \%94.65 & \%94.62 & \textbf{0.9954} \\
+\textbf{Optimal Eşik Başarımı ($\tau=0.4567$)} & 10.716 & \textbf{\%96.89} & \textbf{\%96.89} & \%96.72 & \%97.05 & \textbf{0.9954} \\
+\textbf{Canlı Çift Dilli Siber Saldırı Havuzu} & 100 & \textbf{\%98.00} & \textbf{\%97.98} & \%96.15 & \textbf{\%100.00} & \textbf{0.9980} \\
+\bottomrule
+\end{tabular}
+\label{tab:empirical_metrics}
+\end{center}
+\end{table*}
+
+\subsection{Grafiksel Bulguların Değerlendirilmesi}
+Çalışmada elde edilen ampirik sonuçlar 8 temel yayın figürü üzerinden doğrulanmıştır:
+\begin{enumerate}
+    \item \textbf{Eğitim ve Doğrulama Kaybı (Şekil 1):} CyberFocalLoss optimizasyonu ile aşırı öğrenmenin önüne geçilmiştir.
+    \item \textbf{Metrik İlerlemesi (Şekil 2):} Doğruluk ve Macro F1 eğrileri \%94.6'nın üzerine dengeli biçimde oturmuştur.
+    \item \textbf{Karmaşıklık Matrisi (Şekil 3):} 10.716 test örneğinde yüksek ayırt edicilik sergilenmiştir.
+    \item \textbf{ROC-AUC Analizi (Şekil 4):} Modelin Alan Altındaki Değeri $\text{AUC} = 0.9954$ olarak doğrulanmıştır.
+    \item \textbf{Çapraz Dağılım Kıyası (Şekil 5):} Türkçe, İngilizce ve çok dilli alt kümelerde modelin dengeli performansı gösterilmiştir.
+    \item \textbf{Eşik Değeri Analizi (Şekil 6):} Karar eşiği taramasıyla optimal $\tau=0.4567$ noktasında \%96.89 F1 elde edilmiştir.
+    \item \textbf{Karar Eşiği Optimizasyonu (Şekil 7):} Kurumsal risk toleransına göre dinamik eşik ayarı modellenmiştir.
+    \item \textbf{Çok Modelli Savunma Karşılaştırması (Şekil 8):} Temel modellerin kalkan kapalıyken \%80-95 olan Saldırı Başarı Oranının (ASR), NeuralShield devredeyken \textbf{\%0'a indiği} kanıtlanmıştır.
+\end{enumerate}
+
+\subsection{Çıkarım Gecikmesi (Latency) Başarımı}
+Standart CPU üzerinde ölçülen çıkarım süreleri: Katman 0 ortalama 0.17 ms, Katman 1 ortalama 0.29 ms, Katman 2 (XLM-RoBERTa ONNX INT8 v5) \textbf{12.27 ms}, Katman 3 DLP ise $<0.05$ ms olarak kaydedilmiştir. Toplam kalkan tepkisi \textbf{12.73 ms}'dir. Hedef modellerin 400-1200 ms yanıt süresi yanında 12.73 milisaniyelik bu ek yük kullanıcı deneyiminde sıfır gecikme hissi uyandırmaktadır.
+
+\section{Tartışma ve Literatürle Kıyaslama}
+ProtectAI'ın orijinal \texttt{deberta-v3-base} modeli ham Türkçe girdilerde \%100'e varan yanlış alarmlar üretirken, geliştirdiğimiz XLM-RoBERTa modeli harici bir çeviriye ihtiyaç duymadan Türkçe morfolojisini yerel olarak öğrenmiştir. Canlı testte 50 saldırının 50'sini de yakalayarak (\%100 Duyarlılık / Sıfır Kaçırma) ve kurumsal IT sorgularında \%0.00 Yanlış Alarm üreterek yüksek siber güvenlik sağlamıştır.
+
+\subsection{Tehdit Modeli ve Kapsam Sınırları}
+Ölçülen \%0 ASR başarımı, bilinen enjeksiyon şablonları, steganografi ve hedeflenen semantik test havuzları kapsamındaki savunma etkinliğini ifade eder. Hiçbir tekil sınıflandırıcı daha önce görülmemiş sıfır gün manipülasyonlarına karşı mutlak \%100 koruma garanti edemez. Bu doğrultuda NeuralShield, derinlemesine savunma (\textit{Defense-in-Depth}) prensibiyle 4 katmanlı hibrit bir mimari yürütmektedir.
+
+\section{Sonuç}
+Bu çalışmada, Büyük Dil Modellerine yönelik siber saldırılara karşı 4 katmanlı hibrit bir çevre savunma mimarisi olan \textbf{CyberTech Neural Shield v5} geliştirilmiş ve 71.440 dengeli veri örneğiyle eğitilerek doğrulanmıştır. XLM-RoBERTa ONNX INT8 modeli ile harici çeviri katmanı kaldırılmış, çıkarım süresi 12.27 ms'ye düşürülmüş ve hold-out test setinde 0.9954 ROC-AUC başarımı elde edilmiştir. Çalışma, kurumsal LLM filoları önünde tam koruma sağlayarak endüstri standardı bir açık kaynaklı güvenlik ağ geçidi sunmaktadır.
+
+\begin{thebibliography}{00}
+\bibitem{greshake2023} K. Greshake, S. Abdelnabi, S. Mishra, C. Endres, T. Holz, and M. Fritz, ``Not what you've signed up for: Compromising real-world LLM-integrated applications with indirect prompt injections,'' in \textit{Proc. 16th ACM Workshop on Artificial Intelligence and Security (AISEC)}, 2023, pp. 79--90.
+\bibitem{conneau2020} A. Conneau et al., ``Unsupervised cross-lingual representation learning at scale,'' in \textit{Proc. ACL}, 2020, pp. 8440--8451.
+\bibitem{perez2022} F. Perez and I. Ribeiro, ``Ignore previous prompt: Attack techniques for language models,'' in \textit{NeurIPS ML Safety Workshop}, 2022.
+\bibitem{wei2023} J. Wei et al., ``Jailbroken: How does LLM safety training fail?'' in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 36, 2023.
+\bibitem{owasp2023} OWASP Foundation, ``OWASP Top 10 for Large Language Model Applications v1.1,'' \textit{Tech. Rep.}, 2023.
+\bibitem{zou2023} A. Zou, Z. Wang, J. Z. Kolter, and M. Fredrikson, ``Universal and transferable adversarial attacks on aligned language models,'' \textit{arXiv preprint arXiv:2307.15043}, 2023.
+\bibitem{inan2023} S. Inan et al., ``Llama Guard: LLM-based input-output safeguard for human-AI conversations,'' \textit{arXiv preprint arXiv:2312.06674}, 2023.
+\bibitem{onnxruntime} Microsoft, ``ONNX Runtime: Cross-platform, high performance ML inferencing and training accelerator,'' \textit{GitHub Repository}, 2024.
+\bibitem{caliskan2026} M. Çalışkan and A. H. Işık, ``CyberTech Neural Shield v5: 4-Layer Hybrid Security Gateway for LLMs,'' \textit{Burdur Mehmet Akif Ersoy Üniversitesi}, 2026.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,16 @@
+{
+  "block_threshold": 60,
+  "suspect_threshold": 40,
+  "weight_ml": 0.70,
+  "weight_regex": 0.20,
+  "weight_stego": 0.10,
+  "hard_block_stego_score": 85,
+  "hard_block_regex_and_ml_score": 90,
+  "regex_only_floor_score": 65,
+  "mask_generic_emails": false,
+  "mask_generic_phones": false,
+  "ban_window_seconds": 120,
+  "ban_penalty_per_violation": 20,
+  "ban_max_penalty": 40,
+  "ban_min_effective_threshold": 20
+}
