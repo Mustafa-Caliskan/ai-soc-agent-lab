@@ -34,6 +34,10 @@ _DEFAULTS: Dict[str, Any] = {
     "ban_penalty_per_violation": 20,
     "ban_max_penalty": 40,
     "ban_min_effective_threshold": 20,
+    "ml_window_size": 256,
+    "ml_stride": 128,
+    "ml_temperature": 1.0,
+    "ml_sliding_window_enabled": True,
 }
 
 # Ortam değişkeni ön eki: SHIELD_BLOCK_THRESHOLD=55 gibi.

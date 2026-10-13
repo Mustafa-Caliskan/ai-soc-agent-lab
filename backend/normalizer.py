@@ -31,10 +31,11 @@ from __future__ import annotations
 import base64
 import codecs
 import html
+import json
 import re
 import unicodedata
 import urllib.parse
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 # ── Zero-Width / Görünmez ve Format Kontrol Karakterleri ──────────────────
 ZERO_WIDTH_CHARS = {
@@ -296,6 +297,85 @@ def deinterleave_spaced_words(text: str) -> List[str]:
     return out
 
 
+_JSON_BLOCK_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)\s*```", re.IGNORECASE)
+_TOOL_CALL_TAG_RE = re.compile(
+    r"<(?:tool_call|function_call|call)>(.*?)</(?:tool_call|function_call|call)>",
+    re.DOTALL | re.IGNORECASE
+)
+
+
+def _flatten_json_value(val: Any, prefix: str = "") -> List[str]:
+    """İç içe JSON/Sözlük nesnelerini düzleştirir."""
+    lines: List[str] = []
+    if isinstance(val, dict):
+        for k, v in val.items():
+            sub = f"{prefix}.{k}" if prefix else str(k)
+            lines.extend(_flatten_json_value(v, sub))
+    elif isinstance(val, list):
+        for i, item in enumerate(val):
+            sub = f"{prefix}[{i}]" if prefix else f"[{i}]"
+            lines.extend(_flatten_json_value(item, sub))
+    elif isinstance(val, str):
+        if prefix:
+            lines.append(f"{prefix}: {val}")
+        else:
+            lines.append(val)
+    elif val is not None:
+        if prefix:
+            lines.append(f"{prefix}: {val}")
+    return lines
+
+
+def unpack_structured_payload(text: str) -> List[str]:
+    """
+    Patronus AI ve Qualifire seviyesinde: JSON, kod blokları (```json ... ```) ve
+    yapay zeka ajanlarının araç çağrılarına (tool_calls, function_call) gizlenen
+    dolaylı komut enjeksiyonlarını tespit edip düz metin olarak açar.
+    """
+    out: List[str] = []
+    if not text:
+        return out
+
+    candidates: List[str] = []
+
+    # 1) XML stili tool/function call etiketleri
+    for tag_match in _TOOL_CALL_TAG_RE.findall(text):
+        clean_tag = tag_match.strip()
+        if clean_tag:
+            candidates.append(clean_tag)
+
+    # 2) Markdown kod blokları (```json ... ```)
+    for block_match in _JSON_BLOCK_RE.findall(text):
+        clean_block = block_match.strip()
+        if clean_block:
+            candidates.append(clean_block)
+
+    # 3) Doğrudan JSON nesnesi veya parantez bloğu { ... }
+    stripped = text.strip()
+    if (stripped.startswith("{") and stripped.endswith("}")) or \
+       (stripped.startswith("[") and stripped.endswith("]")):
+        candidates.append(stripped)
+    else:
+        # Metin içine gömülmüş nesneler
+        brace_matches = re.findall(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text)
+        for b in brace_matches:
+            if len(b) >= 8 and ":" in b:
+                candidates.append(b.strip())
+
+    for cand in candidates:
+        try:
+            parsed = json.loads(cand)
+            flattened = _flatten_json_value(parsed)
+            if flattened:
+                flat_text = " ".join(flattened)
+                if len(flat_text) >= 6 and flat_text != text:
+                    out.append(flat_text)
+        except Exception:
+            pass
+
+    return list(dict.fromkeys(out))
+
+
 def decode_leetspeak(text: str) -> str:
     """Temel leetspeak ikamelerini Latin harflerine çevirir."""
     leet_map = str.maketrans({
@@ -402,9 +482,15 @@ def normalize_for_analysis(text: str) -> Dict[str, object]:
         preview = "; ".join(interleaved_payloads)[:60]
         alerts.append(f"NOKTALI/TİRELİ AYRILMIŞ GİZLİ KELİME BİRLEŞTİRİLDİ: '{preview}'")
 
+    structured_payloads = unpack_structured_payload(folded_text)
+    if structured_payloads:
+        preview = "; ".join(structured_payloads)[:60]
+        alerts.append(f"YAPILANDIRILMIŞ (JSON/TOOL-CALL) GİZLİ PAYLOAD AYRIŞTIRILDI: '{preview}'")
+
     decoded_extra = (
         hidden_tag_payloads + b64_payloads + hex_payloads +
-        url_payloads + html_payloads + interleaved_payloads
+        url_payloads + html_payloads + interleaved_payloads +
+        structured_payloads
     )
     extended_text = folded_text
     if decoded_extra:

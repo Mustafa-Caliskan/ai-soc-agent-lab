@@ -6,8 +6,16 @@ Native multilingual (Turkish & English) semantic classifier with ~12ms CPU infer
 import os
 import time
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import numpy as np
+
+try:
+    from backend.shield_config import CONFIG
+except ImportError:
+    try:
+        from shield_config import CONFIG
+    except ImportError:
+        CONFIG = {}
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +23,14 @@ CLASS_NAMES = ["Benign", "Malicious"]
 
 
 class MLSecurityModel:
-    def __init__(self, model_path: str = None):
+    def __init__(
+        self,
+        model_path: str = None,
+        window_size: Optional[int] = None,
+        stride: Optional[int] = None,
+        temperature: Optional[float] = None,
+        sliding_window_enabled: Optional[bool] = None,
+    ):
         if model_path is None:
             # Priority: v5 (if available) -> v4 -> v3 -> fallback v2
             v5_local = os.path.join(os.path.dirname(__file__), "models", "neuralshield_v5")
@@ -31,6 +46,14 @@ class MLSecurityModel:
                 self.model_path = os.path.join(os.path.dirname(__file__), "models", "neuralshield_v2")
         else:
             self.model_path = model_path
+
+        self.window_size = window_size or CONFIG.get("ml_window_size", 256)
+        self.stride = stride or CONFIG.get("ml_stride", 128)
+        self.temperature = temperature if temperature is not None else CONFIG.get("ml_temperature", 1.0)
+        self.sliding_window_enabled = (
+            sliding_window_enabled if sliding_window_enabled is not None
+            else CONFIG.get("ml_sliding_window_enabled", True)
+        )
 
         self.session = None
         self.tokenizer = None
@@ -106,43 +129,117 @@ class MLSecurityModel:
             logger.error(f"❌ Failed to initialize ONNX model: {e}")
             self.is_loaded = False
 
-    def predict(self, text: str) -> Dict[str, Any]:
+    def predict(
+        self,
+        text: str,
+        temperature: Optional[float] = None,
+        sliding_window: Optional[bool] = None
+    ) -> Dict[str, Any]:
         if not self.is_loaded or self.session is None or self.tokenizer is None:
             return self._fallback_predict(text)
 
+        temp = temperature if temperature is not None else self.temperature
+        sw_enabled = sliding_window if sliding_window is not None else self.sliding_window_enabled
+
         t_start = time.perf_counter()
         try:
-            tokens = self.tokenizer(
+            # 1. Uzun dokümanları kontrol etmek için 4096 tokene kadar tara
+            tokens_full = self.tokenizer(
                 text,
                 truncation=True,
-                max_length=256,
+                max_length=4096,
                 return_tensors="np"
             )
-            inputs = {
-                "input_ids": tokens["input_ids"].astype(np.int64),
-                "attention_mask": tokens["attention_mask"].astype(np.int64)
-            }
-            outputs = self.session.run(None, inputs)
-            logits = outputs[0][0]
+            input_ids = tokens_full["input_ids"][0]
+            attention_mask = tokens_full["attention_mask"][0]
+            total_tokens = int(len(input_ids))
 
-            # Softmax calculation
-            exp_logits = np.exp(logits - np.max(logits))
-            probs = exp_logits / np.sum(exp_logits)
-            pred_idx = int(np.argmax(probs))
+            # 2. Standart metin boyutu (<= window_size) veya kayan pencere kapalıysa tek geçiş
+            if total_tokens <= self.window_size or not sw_enabled:
+                if total_tokens > self.window_size:
+                    input_ids = input_ids[:self.window_size]
+                    attention_mask = attention_mask[:self.window_size]
 
-            probs_dict = {
-                "Benign": float(probs[0]),
-                "Malicious": float(probs[1])
-            }
+                inputs = {
+                    "input_ids": np.expand_dims(input_ids, axis=0).astype(np.int64),
+                    "attention_mask": np.expand_dims(attention_mask, axis=0).astype(np.int64)
+                }
+                outputs = self.session.run(None, inputs)
+                logits = outputs[0][0]
+
+                # Sıcaklık kalibrasyonu (Platt scaling)
+                if temp > 0 and temp != 1.0:
+                    logits = logits / temp
+
+                exp_logits = np.exp(logits - np.max(logits))
+                probs = exp_logits / np.sum(exp_logits)
+                pred_idx = int(np.argmax(probs))
+                latency_ms = (time.perf_counter() - t_start) * 1000.0
+
+                return {
+                    "ml_class": CLASS_NAMES[pred_idx],
+                    "ml_class_idx": pred_idx,
+                    "ml_probabilities": {
+                        "Benign": float(probs[0]),
+                        "Malicious": float(probs[1])
+                    },
+                    "ml_risk_score": int(round(probs[1] * 100)),
+                    "inference_latency_ms": round(latency_ms, 2),
+                    "translated_text": text,
+                    "chunks_analyzed": 1,
+                    "total_tokens": total_tokens,
+                }
+
+            # 3. Kayan Pencere (Sliding Window Chunking) — 512+ RAG/PDF Doküman Analizi
+            bos_id = int(self.tokenizer.bos_token_id if self.tokenizer.bos_token_id is not None else 0)
+            eos_id = int(self.tokenizer.eos_token_id if self.tokenizer.eos_token_id is not None else 2)
+            content_ids = [int(t) for t in input_ids if t not in (bos_id, eos_id)]
+            content_window = max(self.window_size - 2, 64)
+
+            chunks = []
+            start = 0
+            while start < len(content_ids):
+                end = min(start + content_window, len(content_ids))
+                sub = content_ids[start:end]
+                # RoBERTa sınıflandırma kafası için <s> ve </s> ile çerçeveleme şarttır
+                chunk = [bos_id] + sub + [eos_id]
+                chunks.append(np.array(chunk, dtype=np.int64))
+                if end == len(content_ids):
+                    break
+                start += self.stride
+
+            max_mal_prob = 0.0
+            for chunk_ids in chunks:
+                chunk_inputs = {
+                    "input_ids": np.expand_dims(chunk_ids, axis=0),
+                    "attention_mask": np.ones((1, len(chunk_ids)), dtype=np.int64)
+                }
+                outputs = self.session.run(None, chunk_inputs)
+                logits = outputs[0][0]
+                if temp > 0 and temp != 1.0:
+                    logits = logits / temp
+                exp_logits = np.exp(logits - np.max(logits))
+                probs = exp_logits / np.sum(exp_logits)
+                mal_prob = float(probs[1])
+                if mal_prob > max_mal_prob:
+                    max_mal_prob = mal_prob
+
+            benign_prob = float(1.0 - max_mal_prob)
+            pred_idx = 1 if max_mal_prob >= 0.50 else 0
             latency_ms = (time.perf_counter() - t_start) * 1000.0
 
             return {
                 "ml_class": CLASS_NAMES[pred_idx],
                 "ml_class_idx": pred_idx,
-                "ml_probabilities": probs_dict,
-                "ml_risk_score": int(round(probs[1] * 100)),
+                "ml_probabilities": {
+                    "Benign": benign_prob,
+                    "Malicious": max_mal_prob
+                },
+                "ml_risk_score": int(round(max_mal_prob * 100)),
                 "inference_latency_ms": round(latency_ms, 2),
-                "translated_text": text,  # Native multilingual: no translation required
+                "translated_text": text,
+                "chunks_analyzed": len(chunks),
+                "total_tokens": total_tokens,
             }
         except Exception as e:
             logger.error(f"Inference execution error: {e}")
