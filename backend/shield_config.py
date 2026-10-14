@@ -22,6 +22,13 @@ _CONFIG_PATH = Path(__file__).parent / "shield_config.json"
 _DEFAULTS: Dict[str, Any] = {
     "block_threshold": 60,
     "suspect_threshold": 40,
+    # ── OR-Gate karar politikası (Seçenek B) ──────────────────────────────
+    # Karar = hard_stego OR regex_score>=regex_block_score_threshold
+    #          OR ml_risk_score>=ml_block_threshold
+    # (Composite formül yalnızca RAPORLAMA/severity skoru için korunur.)
+    "decision_mode": "or_gate",
+    "ml_block_threshold": 70,
+    "regex_block_score_threshold": 60,
     "weight_ml": 0.70,
     "weight_regex": 0.20,
     "weight_stego": 0.10,

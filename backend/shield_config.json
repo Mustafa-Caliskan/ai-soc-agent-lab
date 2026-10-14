@@ -1,6 +1,9 @@
 {
   "block_threshold": 60,
   "suspect_threshold": 40,
+  "decision_mode": "or_gate",
+  "ml_block_threshold": 70,
+  "regex_block_score_threshold": 60,
   "weight_ml": 0.7,
   "weight_regex": 0.2,
   "weight_stego": 0.1,

@@ -241,10 +241,13 @@ for name, decision in encoding_results.items():
 # ── 6) Config-Driven Eşik Değeri (P1.8) ────────────────────────────────────
 print("\n[6/8] Eşik değeri artık kod içine gömülü değil, config'ten okunuyor...")
 original_threshold = shield_config.CONFIG["block_threshold"]
+original_ml_thresh = shield_config.CONFIG.get("ml_block_threshold", 70)
 original_min_thresh = shield_config.CONFIG["ban_min_effective_threshold"]
 shield_config.CONFIG["block_threshold"] = 5  # Son derece agresif mod
+shield_config.CONFIG["ml_block_threshold"] = 5
 shield_config.CONFIG["ban_min_effective_threshold"] = 5
 sl.CONFIG["block_threshold"] = 5
+sl.CONFIG["ml_block_threshold"] = 5
 sl.CONFIG["ban_min_effective_threshold"] = 5
 
 BORDERLINE_TEXT = "Hesabıma erişemiyorum, şifre sıfırlama bağlantısını nasıl talep edebilirim?"  # ML skoru ~13 üreten sınırda örnek
@@ -256,8 +259,10 @@ async def run_threshold_case():
 
 r_aggressive = asyncio.run(run_threshold_case())
 shield_config.CONFIG["block_threshold"] = original_threshold
+shield_config.CONFIG["ml_block_threshold"] = original_ml_thresh
 shield_config.CONFIG["ban_min_effective_threshold"] = original_min_thresh
 sl.CONFIG["block_threshold"] = original_threshold
+sl.CONFIG["ml_block_threshold"] = original_ml_thresh
 sl.CONFIG["ban_min_effective_threshold"] = original_min_thresh
 r_normal = asyncio.run(run_threshold_case())
 

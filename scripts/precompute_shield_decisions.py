@@ -34,7 +34,12 @@ for i, x in enumerate(d):
     elif trig: risk = max(comp, CONFIG["regex_only_floor_score"])
     else: risk = comp
     risk = min(100, round(risk))
-    blocked = risk >= BLOCK or (trig and ml_class == "Malicious")
+    # OR-Gate karar (Seçenek B)
+    blocked = bool(
+        hard or r_score >= CONFIG.get("regex_block_score_threshold", 60)
+        or ml_risk >= CONFIG.get("ml_block_threshold", 70)
+        or (trig and ml_class == "Malicious")
+    )
     x["shield_blocked"] = bool(blocked)
     x["shield_risk"] = int(risk)
     x["shield_clean_text"] = nr["clean_text"]

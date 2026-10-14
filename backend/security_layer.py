@@ -183,37 +183,49 @@ async def analyze(
 
         stego_score = 100 if hard_stego_signal else 0
 
+        # Composite yalnızca RAPORLAMA/severity skoru içindir (karar aşağıda OR-Gate).
         composite_score = (
             CONFIG["weight_ml"] * ml_risk_score
             + CONFIG["weight_regex"] * regex_score
             + CONFIG["weight_stego"] * stego_score
         )
 
-        # Kesin/deterministik sinyaller, ağırlıklı formülü ezebilen bir "taban" oluşturur
-        # (tek bir katmana güvenmeme ilkesi — bkz. proje yol haritası §3.1).
+        # Kesin/deterministik sinyaller raporlama skoruna taban oluşturur.
         if hard_stego_signal:
             risk_score = max(composite_score, CONFIG["hard_block_stego_score"])
         elif regex_triggered and ml_class == "Malicious":
             risk_score = max(composite_score, CONFIG["hard_block_regex_and_ml_score"])
         elif regex_triggered:
             risk_score = max(composite_score, CONFIG["regex_only_floor_score"])
-        elif ml_class == "Malicious" and ml_risk_score >= effective_threshold:
-            risk_score = max(composite_score, ml_risk_score)
         else:
             risk_score = composite_score
 
         risk_score = min(100, round(risk_score))
 
-        # ── Dinamik Ban Politikası: tekrarlanan ihlaller eşik değerini düşürür ──
-        effective_threshold = max(
+        # ── Dinamik Ban Politikası: tekrarlanan ihlaller ML eşiğini düşürür ──
+        ml_effective = max(
             CONFIG["ban_min_effective_threshold"],
-            CONFIG["block_threshold"] - int(user_behavior_score or 0)
+            CONFIG["ml_block_threshold"] - int(user_behavior_score or 0)
         )
+        effective_threshold = ml_effective
 
-        if risk_score >= effective_threshold or (regex_triggered and ml_class == "Malicious"):
-            decision = "BLOCKED"
-        else:
-            decision = "ALLOWED"
+        # ── KARAR (Seçenek B — "OR-Gate") ────────────────────────────────────
+        # Karar = hard_stego OR güçlü-regex OR yüksek-ML. Böylece stego/regex
+        # gücü korunur ve ML sinyali 0.70 ağırlığıyla EZİLMEZ.
+        if CONFIG.get("decision_mode", "or_gate") == "or_gate":
+            blocked = bool(
+                hard_stego_signal
+                or regex_score >= CONFIG["regex_block_score_threshold"]
+                or ml_risk_score >= ml_effective
+                or (regex_triggered and ml_class == "Malicious")
+            )
+        else:  # legacy: composite eşiği
+            blocked = bool(
+                risk_score >= CONFIG["block_threshold"]
+                or (regex_triggered and ml_class == "Malicious")
+            )
+
+        decision = "BLOCKED" if blocked else "ALLOWED"
 
     # ── Layer 3: Gemini Execution & DLP Outbound Filtering ──────────────────
     gemini_response = None
