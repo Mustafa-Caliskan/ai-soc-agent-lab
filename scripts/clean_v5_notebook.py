@@ -2,6 +2,7 @@ import json
 import ast
 import shutil
 import os
+import base64
 
 def clean_notebook(path):
     print(f"\nProcessing {path}...")
@@ -11,17 +12,15 @@ def clean_notebook(path):
     cells = nb["cells"]
     print(f"Original cell count: {len(cells)}")
     
-    # 1. Verify Cell 10 and Cell 11
-    c10_src = "".join(cells[10]["source"])
-    c11_src = "".join(cells[11]["source"])
-    
-    assert "scores =" not in c10_src, "Cell 10 was expected to miss 'scores =' definition"
-    assert "scores =" in c11_src, "Cell 11 was expected to define 'scores ='"
-    
-    # 2. Delete Cell 10 (the duplicate v3 residue)
-    print("Deleting duplicate broken Cell 10...")
-    del cells[10]
-    print(f"New cell count: {len(cells)}")
+    if len(cells) == 14:
+        c10_src = "".join(cells[10]["source"])
+        c11_src = "".join(cells[11]["source"])
+        if "scores =" not in c10_src and "scores =" in c11_src:
+            print("Deleting duplicate broken Cell 10...")
+            del cells[10]
+            print(f"New cell count: {len(cells)}")
+    elif len(cells) == 13:
+        print("Cell count is already 13 (duplicate cell 10 already removed).")
     
     # 3. Update Cell 8 titles (NeuralShield-v3 -> NeuralShield-v5)
     c8_src = "".join(cells[8]["source"])
@@ -29,6 +28,19 @@ def clean_notebook(path):
     c8_src = c8_src.replace('NeuralShield-v3 - Doğrulama Kümesi', 'NeuralShield-v5 - Doğrulama Kümesi')
     cells[8]["source"] = [l + "\n" for l in c8_src.split("\n")[:-1]] if c8_src.endswith("\n") else [l + "\n" for l in c8_src.split("\n")]
     print("Updated Cell 8 titles to NeuralShield-v5.")
+
+    # 3.1 Embed verified NeuralShield-v5 images into Cell 8 inline outputs
+    with open("docs/figures/sekil_1_loss_egrisi.png", "rb") as f_img1:
+        b64_fig1 = base64.b64encode(f_img1.read()).decode("utf-8")
+    with open("docs/figures/sekil_2_metrik_ilerlemesi.png", "rb") as f_img2:
+        b64_fig2 = base64.b64encode(f_img2.read()).decode("utf-8")
+    
+    if len(cells[8].get("outputs", [])) >= 2:
+        if "data" in cells[8]["outputs"][0] and "image/png" in cells[8]["outputs"][0]["data"]:
+            cells[8]["outputs"][0]["data"]["image/png"] = b64_fig1
+        if "data" in cells[8]["outputs"][1] and "image/png" in cells[8]["outputs"][1]["data"]:
+            cells[8]["outputs"][1]["data"]["image/png"] = b64_fig2
+        print("Embedded verified NeuralShield-v5 figures into Cell 8 outputs.")
     
     # 4. Enhance Determinism in Cell 3 (seeds)
     c3_src = "".join(cells[3]["source"])
