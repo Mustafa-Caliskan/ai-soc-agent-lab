@@ -93,3 +93,34 @@ Gelen Kullanıcı İstemi (Prompt)
 │ KATMAN 3 / 4: Çıktı DLP Denetimi & Evren Güvenlik Doğrulaması│ (LLM Fallback & Veri Sızıntısı Engelleme)
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 6. Mevcut Faz ve Acil Eylem Planı (Immediate Next Steps)
+
+1. **Benchmark Veri Seti (Tamamlandı):**
+   - `data/appsec_benchmark_2000.json` (ve `data/benchmark_master_2000.json`) 12 dilde, tam 2.000 örnek, 0 sızıntı, 0 kopya, 0 log/print çöpüyle kilitlendi.
+2. **Çoklu Model Karşılaştırma Testi (Sıradaki Adım):**
+   - Açık ağırlıklı hafif modellerin (Qwen2.5-3B, Llama-3.2-3B, Phi-3.5-mini, Gemma-2-2B) Colab T4 GPU üzerinde batch inferans ile kalkanlı/kalkansız ASR ve sızıntı ölçümünün yapılması.
+
+---
+
+## 7. Ertelenen Maddeler ve İleride Yapılacaklar Yol Haritası (Backlog / Future Milestones)
+
+Bu maddeler mevcut test akışını engellemeyecek olup, makale yazım aşamasında ve açık yayın (open-source) safhasında sırasıyla hayata geçirilecektir:
+
+### A. HuggingFace Yayını ve Lisanslama (HF Release Track)
+1. **xTRam1 Lisanssız Kaynağı Yönetimi:**
+   - Veri kümesinde yer alan xTRam1 kökenli örneklerin lisans durumu netleştirilecek; gerekirse çıkarılacak, izin alınacak veya HuggingFace dataset kartında *"Yalnızca Akademik Araştırma Amaçlı (Research-Only / Non-Commercial)"* olarak açıkça sınırlandırılacaktır.
+2. **Horizon-Labs ("other") Lisans Koşullarının İncelenmesi:**
+   - Horizon-Labs veri setinin kullanım kısıtları ve telif şartları resmi reposundan okunup dokümante edilecektir.
+3. **HF Model Card + Dataset Card Hazırlığı:**
+   - Hugging Face'e yüklenecek model ve veri seti için; etiket şemasını, eğitim hiperparametrelerini, veri kaynaklarını ve lisans atıf tablosunu içeren profesyonel Model Card ve Dataset Card hazırlanacaktır.
+4. **Yükleme Zamanlaması (Release Timing):**
+   - Hugging Face depoları ve GitHub repoları ilk aşamada **Private (Gizli)** olarak tutulacak; makale kabulü veya preprint (arXiv) yayını gerçekleştiği anda resmi olarak **Public (Açık)** erişime açılacaktır.
+5. **Akademik Kaynak Atıfları:**
+   - Hem makalenin *References (Kaynakça)* bölümüne hem de HF dataset kartına, kullanılan tüm açık kaynak korpuslarının (Lakera Gandalf, SPML, HarmBench, NotInject vb.) resmi akademik makale atıfları eksiksiz eklenecektir.
+
+### B. Veri Kalitesi ve Kaynak Çeşitliliği (Dataset Diversity Polish)
+6. **Lakera/mosscap Bağımlılığını Düşürme (Kaynak Çeşitliliği Cilası):**
+   - Mevcut saldırı setindeki Lakera/mosscap payı (%49.9) makale tesliminden önceki son düzenlemede ~250 seviyesine düşürülecek; aradaki pay diğer onaylı açık akademik kaynaklardan (reshabhs/SPML, simsonsun_jailbreaks, orbench_hard, neuralchemy) çekilerek kaynak çeşitliliği en üst düzeye çıkarılacaktır.
