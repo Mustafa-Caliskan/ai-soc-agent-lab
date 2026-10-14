@@ -28,28 +28,29 @@
 
 | Alt grup | BEFORE (composite thr60) | AFTER (OR-Gate ML≥70) | Değişim |
 |---|---:|---:|---:|
-| Tüm set (saldırı) [Saldırı blok (recall)] | %29.4 | %73.1 | +43.7 |
-| Tüm set (meşru) [Meşru FP] | %4.2 | %15.0 | +10.8 |
-| Kapsam-içi (saldırı) [Saldırı blok (recall)] | %31.1 | %77.2 | +46.0 |
-| Kapsam-içi (meşru) [Meşru FP] | %4.2 | %15.0 | +10.8 |
+| Tüm set (saldırı) [Saldırı blok (recall)] | %27.3 | %72.5 | +45.2 |
+| Tüm set (meşru) [Meşru FP] | %1.3 | %12.4 | +11.1 |
+| Kapsam-içi (saldırı) [Saldırı blok (recall)] | %28.9 | %76.5 | +47.6 |
+| Kapsam-içi (meşru) [Meşru FP] | %1.3 | %12.4 | +11.1 |
 | native TR/EN (saldırı) [Saldırı blok (recall)] | %44.9 | %86.2 | +41.3 |
-| MT diller (saldırı) [Saldırı blok (recall)] | %22.4 | %67.2 | +44.8 |
-| explicit (saldırı) [Saldırı blok (recall)] | %52.1 | %87.0 | +34.9 |
-| subtle (saldırı) [Saldırı blok (recall)] | %20.4 | %67.6 | +47.2 |
-| normal benign [Meşru FP] | %4.4 | %10.7 | +6.3 |
-| hard-negative benign [Meşru FP] | %4.0 | %18.2 | +14.2 |
+| MT diller (saldırı) [Saldırı blok (recall)] | %19.3 | %66.3 | +46.9 |
+| explicit (saldırı) [Saldırı blok (recall)] | %50.7 | %87.0 | +36.3 |
+| subtle (saldırı) [Saldırı blok (recall)] | %18.0 | %66.8 | +48.7 |
+| normal benign [Meşru FP] | %0.0 | %6.8 | +6.8 |
+| hard-negative benign [Meşru FP] | %2.3 | %16.6 | +14.4 |
 
 ## 4. Özet tablo (kapsam-içi)
 
 | Metrik | A (eski) | B (yeni) |
 |---|---:|---:|
-| Saldırı blok (recall) | %31.1 | **%77.2** |
-| Meşru FP | %4.2 | %15.0 |
+| Saldırı blok (recall) | %28.9 | **%76.5** |
+| Meşru FP | %1.3 | %12.4 |
 
 ## 5. Yorum
 
-- Recall **~%31 → ~%77** (kapsam-içi) yükseldi; yani saldırıların çoğu artık yakalanıyor.
-- Bedel: meşru FP **~%4 → ~%15**'e çıktı — **çoğu NotInject hard-negative'lerden**; normal benign'te daha düşük.
+- Recall **~%29 → ~%77** (kapsam-içi) yükseldi; yani saldırıların çoğu artık yakalanıyor.
+- Bedel: meşru FP **~%1.3 → ~%12.4**'e çıktı — **çoğu NotInject hard-negative'lerden**; normal benign'te daha düşük.
+- Layer-0 Kiril (homoglyph) hatası düzeltildi: Rusça meşru FP ~%58 → düştü; genel FP bir miktar azaldı.
 - Bu, modelin ayrım gücünün (bu sette ~AUC 0.86) kaçınılmaz ödünleşimidir. **Kapasite/model sorunu değildir.**
 - Operasyonel öneri: banka/SOC gibi FP-toleranslı ortamlar için B uygun; müşteri-hizmetleri gibi 0-FP istenen ortamlar için `ml_block_threshold` 75-80'e çekilebilir veya 'şüpheli' tier ile kademelendirilebilir.
 

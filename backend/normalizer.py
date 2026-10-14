@@ -177,33 +177,40 @@ def detect_variation_selectors(text: str) -> bool:
     return False
 
 
+def _word_is_mixed_script(word: str) -> bool:
+    """
+    Bir KELİME içinde hem Latin hem de konfüze (Kiril/Yunan benzeri) harf
+    bulunuyorsa True. Homoglyph saldırısının ayırt edici imzası budur:
+    Latin bir kelimenin bazı harfleri Kiril/Yunan benzerleriyle değiştirilir
+    (ör. 'pаypal' → 'a' Kiril). Saf Kiril/Yunan metin (ör. gerçek Rusça)
+    MEŞRUDUR ve tetiklenMEMELİDİR — aksi halde tüm Kiril dilli kullanıcılar
+    yanlışlıkla bloklanır (bkz. bağımsız inceleme raporu §2.2).
+    """
+    has_latin = any("a" <= c.lower() <= "z" for c in word)
+    has_confusable = any(c in _CONFUSABLE_SET for c in word)
+    return has_latin and has_confusable
+
+
 def detect_homoglyphs(text: str) -> bool:
     """
-    Kiril/Yunan ve Latin karakterlerin karıştığını tespit eder.
-    Ayrıca tamamı konfüze karakterlerden oluşan yapay kelimeleri de yakalar.
+    Kiril/Yunan ve Latin karakterlerin AYNI kelime içinde karıştığını tespit eder.
+    Saf Kiril/Yunan metin (gerçek Rusça, Ukraynaca, Yunanca, Arapça vb.) meşrudur
+    ve tetiklenmez.
     """
-    has_any_latin = any("a" <= c.lower() <= "z" for c in text) or any(c in "çğıöşüÇĞİÖŞÜ" for c in text)
     for word in text.split():
-        confusable_count = sum(1 for c in word if c in _CONFUSABLE_SET)
-        has_latin_word = any("a" <= c.lower() <= "z" for c in word)
-        if confusable_count > 0 and (has_latin_word or has_any_latin):
-            return True
-        if len(word) >= 2 and confusable_count == len(word):
+        if _word_is_mixed_script(word):
             return True
     return False
 
 
 def fold_homoglyphs(text: str) -> str:
     """
-    Konfüze (Kiril/Yunan benzeri) karakterleri Latin karşılıklarına katlar.
+    Yalnızca KARIŞIK-alfabe (Latin+Kiril/Yunan) kelimelerde konfüze karakterleri
+    Latin karşılıklarına katlar. Saf Kiril/Yunan kelimelere dokunmaz.
     """
-    has_any_latin = any("a" <= c.lower() <= "z" for c in text) or any(c in "çğıöşüÇĞİÖŞÜ" for c in text)
-    words = text.split(" ")
     out_words = []
-    for word in words:
-        confusable_count = sum(1 for c in word if c in _CONFUSABLE_SET)
-        has_latin_word = any("a" <= c.lower() <= "z" for c in word)
-        if (confusable_count > 0 and (has_latin_word or has_any_latin)) or (len(word) >= 2 and confusable_count == len(word)):
+    for word in text.split(" "):
+        if _word_is_mixed_script(word):
             word = "".join(HOMOGLYPH_TO_LATIN.get(c, c) for c in word)
         out_words.append(word)
     return " ".join(out_words)
