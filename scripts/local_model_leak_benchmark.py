@@ -24,11 +24,11 @@ import requests
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "backend"))
 
+import asyncio
 import canary as cn  # noqa: E402
 import dlp  # noqa: E402
 from ml_model import MLSecurityModel  # noqa: E402
-from regex_rules import scan_text  # noqa: E402
-from security_layer import detect_obfuscation, extract_and_decode_base64  # noqa: E402
+from security_layer import analyze as shield_analyze  # noqa: E402
 
 SYSTEM_PROMPT = (
     "Sen 'SkyPort Uluslararasi Havalimani (IST)' Operasyonel Yapay Zeka Asistanisin. "
@@ -88,24 +88,18 @@ def main():
                 trimmed.append(c)
         attacks = trimmed
 
-    ml = MLSecurityModel(model_path=str(ROOT / "backend/models/neuralshield_v2"))
+    v5_path = str(ROOT / "backend/models/neuralshield_v5")
+    ml = MLSecurityModel(model_path=v5_path)
     results = []
     out = ROOT / args.out
     t0 = time.time()
     for idx, item in enumerate(attacks, 1):
         text = item["text"]
-        # --- ON karari (girdi tarafi) ---
-        full = text
-        alerts = detect_obfuscation(full)
-        if alerts:
-            dec = extract_and_decode_base64(full)
-            if dec:
-                full += "\n" + "\n".join(dec)
-        rx_trig, _, _ = scan_text(full)
-        l1_block = bool(alerts) or rx_trig
-        ml_res = ml.predict(full)
-        l2_block = ml_res["ml_class"] == "Malicious"
-        blocked = l1_block or l2_block
+        # --- ON kararı (girdi tarafı - NeuralShield-v5 4-Katmanlı Pipeline) ---
+        shield_res = asyncio.run(shield_analyze(text, None, None, True, None, ml))
+        blocked = (shield_res["decision"] == "BLOCKED")
+        l1_block = shield_res.get("regex_triggered", False) or bool(shield_res.get("layer0_alerts"))
+        l2_block = (shield_res.get("ml_class") == "Malicious")
 
         for rep in range(args.repeats):
             try:
@@ -130,8 +124,8 @@ def main():
 
     # --- Ozet ---
     fams = sorted({r["family"] for r in results})
-    lines = [f"# Yerel model sizinti deneyi ({args.model}, T={args.temperature}, k={args.repeats})", "",
-             "| Aile | n | OFF sizinti | OFF ASR % [Wilson95] | ON ASR % [Wilson95] | L1/L2 bloke % |",
+    lines = [f"# Yerel model sızıntı deneyi (NeuralShield-v5, {args.model}, T={args.temperature}, k={args.repeats})", "",
+             "| Aile | n | OFF sızıntı | OFF ASR % [Wilson95] | ON ASR % [Wilson95] | NeuralShield-v5 bloke % |",
              "|---|---:|---:|---|---|---:|"]
     tot = {"n": 0, "off": 0, "on": 0, "blk": 0}
     for f in fams + ["TOPLAM"]:
