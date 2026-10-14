@@ -5,8 +5,9 @@ import sys
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-nb = json.load(open("Train_XLM_RoBERTa_v5.ipynb", encoding="utf-8"))
-print(f"Total cells: {len(nb['cells'])}")
+nb_path = "notebooks/Train_XLM_RoBERTa_v5.ipynb"
+nb = json.load(open(nb_path, encoding="utf-8"))
+print(f"Loaded {nb_path} - Total cells: {len(nb['cells'])}")
 
 for i, cell in enumerate(nb["cells"]):
     c_type = cell["cell_type"]
