@@ -181,6 +181,16 @@ Modelin CyberFocalLoss ($\gamma=2.0$) ile eğitilmesi, karmaşık rol yapma ve s
 ### A. Tehdit Modeli ve Değerlendirme Kapsamı Sınırları (Threat Model & Scope Limitations)
 Deneysel kıyaslamalarda gözlemlenen %0 Saldırı Başarı Oranı (ASR); bilinen prompt injection kalıpları, Unicode Tag steganografisi, çoklu kodlama teknikleri ve hedeflenen semantik saldırı korpusları (JailbreakBench, Do-Not-Answer, adaptive_adversarial_50) sınırları dahilindeki performansı yansıtmaktadır. Siber güvenlikte hiçbir tekil sınıflandırıcı daha önce hiç karşılaşılmamış sıfır gün (zero-day) mantıksal manipülasyonlara karşı mutlak %100 bağışıklık sağlayamaz. Bu yapısal gerçeğin bilinciyle NeuralShield; yalnızca yapay zeka sınıflandırıcısına bel bağlamak yerine, Katman 0 normalizasyonu, Katman 1 sezgisel kural filtreleri, dinamik ban politikası ve Katman 3 DLP çıktı denetimini bir araya getirerek çok katmanlı derinlemesine savunma (*Defense-in-Depth*) mekanizması kurgulamıştır.
 
+### B. Kapsam Tanımı ve Delege Edilen Alanlar (In-Scope vs. Out-of-Scope)
+NeuralShield bir **Uygulama Güvenliği (AppSec / LLM SOC Gateway)** kalkanıdır; bir içerik moderasyonu veya "ahlak polisi" modeli **değildir**. Sistem, **saldırı mekanizmasını** hedefler, **konuyu** değil:
+
+- **Kapsam İçi (In-Scope):** OWASP **LLM01 (Prompt Injection)** ve **LLM06 (Hassas Bilgi İfşası)**, dolaylı enjeksiyon (IPI/RAG), sistem-promptu sızıntısı (canary/API anahtarı), jailbreak & rol gaspı (DAN), **zorlama (coercion)** yoluyla kural ezme, kaçınma/kodlama (Base64/Hex/ROT13/ters-yazma), steganografi (Unicode Tag, sıfır-genişlik, homoglyph), teknik istismar dizgeleri (SQLi/XSS/ters-shell) ve çıkış-taraflı DLP.
+- **Kapsam Dışı (Out-of-Scope, delege edilmiştir):** CBRN (kimyasal/biyolojik/silah sentezi, bomba), kendine zarar/intihar, uyuşturucu tedariki ve konu-tabanlı nefret/ayrımcılık gibi genel içerik-politikası denetimleri. Bu alanlar, arka plandaki üretici modelin **Alignment/RLHF** mekanizmasına veya **Llama-Guard-3** benzeri ayrı bir Trust & Safety katmanına devredilmiştir.
+
+> *"NeuralShield-v5, OWASP LLM01 (Prompt Injection) ve LLM06 (Hassas Veri Sızıntısı) tehditlerine odaklanan bir altyapı güvenlik duvarıdır. CBRN, intihar ve içerik sansürleme gibi sosyal politika filtrelemeleri, arkadaki modelin Alignment (RLHF) mekanizmasına veya Llama-Guard benzeri Trust & Safety katmanlarına devredilmiştir."*
+
+**Dürüst Sınırlılık Notu:** Eğitim korpusundaki jailbreak setlerinin bir yan etkisi olarak model, coercion içermeyen bazı açık küfür/hakaret kalıplarına sınırlı hassasiyet (%59–76) gösterebilmektedir. Bu, asıl AppSec hedefinin bir yan ürünüdür; öfkeli meşru müşteri sitemleri ise doğru şekilde Benign sınıflandırılmaktadır. İçerik/kategori moderasyonu bu mimarinin kapsamı dışındadır ve gelecek çalışmada (v6) kapsam-hizalı eğitim ile ayrıştırılacaktır.
+
 ---
 
 ## VI. SONUÇ

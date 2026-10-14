@@ -138,6 +138,18 @@ Elde edilen deneysel bulgular; LLM güvenliğinin model içsel kurallarıyla de�
 
 XLM-RoBERTa v5 mimarisinin sağladığı yerel çok dillilik ve CyberFocalLoss optimizasyonu, sinsi kurguların yakalanmasında kritik bir sıçrama yaratmıştır. ONNX INT8 kuantizasyonu sayesinde model, pahalı veri merkezi GPU'larına bağımlı kalmaksızın standart CPU altyapılarında 12.27 ms gecikmeyle üretim ortamında hizmet verebilmektedir.
 
+### 4.1. Tehdit Modeli ve Kapsam Sınırları (Threat Model & Scope)
+
+NeuralShield bir **Uygulama Güvenliği (AppSec / LLM SOC Gateway)** kalkanıdır; bir içerik moderasyonu veya "ahlak polisi" modeli **değildir**. Sistem **saldırı mekanizmasını** hedefler, **konuyu** değil. Bu ayrım, hem modelin eğitim felsefesini hem de deneysel değerlendirmenin sınırlarını tanımlar.
+
+**Kapsam İçi (In-Scope):** OWASP **LLM01 (Prompt Injection)** ve **LLM06 (Hassas Bilgi İfşası)**; dolaylı enjeksiyon (IPI/RAG), sistem-promptu sızıntısı (canary/API anahtarı), jailbreak & rol gaspı (DAN), **zorlama (coercion)** yoluyla kural ezme, kaçınma/kodlama (Base64/Hex/ROT13/ters-yazma), steganografi (Unicode Tag, sıfır-genişlik, homoglyph), teknik istismar dizgeleri (SQLi/XSS/ters-shell) ve çıkış-taraflı DLP.
+
+**Kapsam Dışı (Out-of-Scope, delege edilmiştir):** CBRN (kimyasal/biyolojik/silah sentezi, bomba), kendine zarar/intihar, uyuşturucu tedariki ve konu-tabanlı nefret/ayrımcılık gibi genel içerik-politikası denetimleri. Bu alanlar, arka plandaki üretici modelin **Alignment/RLHF** mekanizmasına veya **Llama-Guard-3** benzeri ayrı bir Trust & Safety katmanına devredilmiştir.
+
+> *"NeuralShield-v5, OWASP LLM01 (Prompt Injection) ve LLM06 (Hassas Veri Sızıntısı) tehditlerine odaklanan bir altyapı güvenlik duvarıdır. CBRN, intihar ve içerik sansürleme gibi sosyal politika filtrelemeleri, arkadaki modelin Alignment (RLHF) mekanizmasına veya Llama-Guard benzeri Trust & Safety katmanlarına devredilmiştir."*
+
+**Sınırlılıklar (Dürüst Değerlendirme):** Eğitim korpusundaki jailbreak setlerinin bir yan etkisi olarak model, coercion içermeyen bazı açık küfür/hakaret kalıplarına sınırlı hassasiyet (%59–76) gösterebilmektedir; öfkeli meşru müşteri sitemleri ise doğru şekilde Benign sınıflandırılmaktadır. Bu, asıl AppSec hedefinin bir yan ürünüdür ve içerik/kategori moderasyonu bu mimarinin kapsamı dışındadır. Gelecek çalışmada (v6) kapsam-hizalı eğitim ve katman-1 opsiyonel nezaket modülü ile ayrıştırılması hedeflenmektedir.
+
 ---
 
 ## Kaynaklar
