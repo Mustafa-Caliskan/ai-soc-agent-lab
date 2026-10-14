@@ -1,9 +1,9 @@
 {
   "block_threshold": 60,
   "suspect_threshold": 40,
-  "weight_ml": 0.70,
-  "weight_regex": 0.20,
-  "weight_stego": 0.10,
+  "weight_ml": 0.7,
+  "weight_regex": 0.2,
+  "weight_stego": 0.1,
   "hard_block_stego_score": 85,
   "hard_block_regex_and_ml_score": 90,
   "regex_only_floor_score": 65,
@@ -15,6 +15,6 @@
   "ban_min_effective_threshold": 20,
   "ml_window_size": 256,
   "ml_stride": 128,
-  "ml_temperature": 1.0,
+  "ml_temperature": 1.3904,
   "ml_sliding_window_enabled": true
 }

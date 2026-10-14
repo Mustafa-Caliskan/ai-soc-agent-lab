@@ -373,6 +373,26 @@ def unpack_structured_payload(text: str) -> List[str]:
         except Exception:
             pass
 
+    # 4) URL Query String veya URL Parametreleri (?q=...&cmd=... veya tam URL)
+    try:
+        if "?" in text or ("=" in text and ("&" in text or text.strip().startswith("?"))):
+            parsed_url = urllib.parse.urlparse(text)
+            query_str = parsed_url.query if parsed_url.query else (text.lstrip("?") if "=" in text else "")
+            if query_str and "=" in query_str:
+                params = urllib.parse.parse_qs(query_str, keep_blank_values=False)
+                url_flattened: List[str] = []
+                for k, v_list in params.items():
+                    for v in v_list:
+                        clean_v = urllib.parse.unquote_plus(v).strip()
+                        if len(clean_v) >= 3:
+                            url_flattened.append(f"{k}: {clean_v}")
+                if url_flattened:
+                    flat_url = " ".join(url_flattened)
+                    if flat_url != text and len(flat_url) >= 6:
+                        out.append(flat_url)
+    except Exception:
+        pass
+
     return list(dict.fromkeys(out))
 
 
