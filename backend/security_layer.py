@@ -197,6 +197,8 @@ async def analyze(
             risk_score = max(composite_score, CONFIG["hard_block_regex_and_ml_score"])
         elif regex_triggered:
             risk_score = max(composite_score, CONFIG["regex_only_floor_score"])
+        elif ml_class == "Malicious" and ml_risk_score >= effective_threshold:
+            risk_score = max(composite_score, ml_risk_score)
         else:
             risk_score = composite_score
 

@@ -105,7 +105,9 @@ def extract_raw_logits(ml_model: MLSecurityModel, texts: list) -> np.ndarray:
 def main():
     logger.info("=== NeuralShield v5 Sıcaklık Kalibrasyonu (Temperature Scaling) Başlatılıyor ===")
     
-    val_csv_path = os.path.join(ROOT_DIR, "data", "test_multilingual.csv")
+    val_csv_path = os.path.join(ROOT_DIR, "data", "val_multilingual.csv")
+    if not os.path.exists(val_csv_path):
+        val_csv_path = os.path.join(ROOT_DIR, "data", "test_multilingual.csv")
     if not os.path.exists(val_csv_path):
         logger.error(f"Doğrulama veri seti bulunamadı: {val_csv_path}")
         sys.exit(1)
@@ -113,7 +115,7 @@ def main():
     df = pd.read_csv(val_csv_path)
     texts = df["text"].tolist()
     labels = np.array(df["label"].tolist(), dtype=np.float64)
-    logger.info(f"Doğrulama veri seti yüklendi: {len(texts)} örnek (Malicious: {int(np.sum(labels))}, Benign: {int(len(labels) - np.sum(labels))})")
+    logger.info(f"Doğrulama veri seti yüklendi: {len(texts)} örnek ({os.path.basename(val_csv_path)}) (Malicious: {int(np.sum(labels))}, Benign: {int(len(labels) - np.sum(labels))})")
 
     ml_model = MLSecurityModel()
     if not ml_model.is_loaded:
@@ -146,8 +148,11 @@ def main():
     calibrated_probs = 1.0 / (1.0 + np.exp(-logits_diff / optimal_t))
     calibrated_ece = compute_ece(calibrated_probs, labels)
 
+    abs_ece_diff = (uncalibrated_ece - calibrated_ece) * 100.0
+    rel_ece_diff = (abs_ece_diff / (uncalibrated_ece * 100.0)) * 100.0 if uncalibrated_ece > 0 else 0.0
+
     logger.info(f"🎯 Kalibrasyon Sonrası (T* = {optimal_t:.4f}): NLL = {calibrated_nll:.5f}, ECE = %{calibrated_ece * 100:.2f}")
-    logger.info(f"📈 ECE İyileşmesi: %{uncalibrated_ece * 100:.2f} ➔ %{calibrated_ece * 100:.2f} (Delta: %{(uncalibrated_ece - calibrated_ece) * 100:.2f})")
+    logger.info(f"📈 ECE İyileşmesi: %{uncalibrated_ece * 100:.2f} ➔ %{calibrated_ece * 100:.2f} (Mutlak: {abs_ece_diff:.2f} puan, Bağıl: %{rel_ece_diff:.1f})")
 
     # 5. shield_config.json'a fitted T*'ı yaz
     config_path = os.path.join(ROOT_DIR, "backend", "shield_config.json")
@@ -162,7 +167,7 @@ def main():
     # 6. Sonuç Raporunu Kaydet
     report = {
         "calibration_timestamp": str(pd.Timestamp.now()),
-        "validation_dataset": "data/test_multilingual.csv",
+        "validation_dataset": f"data/{os.path.basename(val_csv_path)}",
         "validation_samples": len(texts),
         "uncalibrated_temperature": 1.0,
         "uncalibrated_nll": round(uncalibrated_nll, 5),
@@ -170,7 +175,8 @@ def main():
         "fitted_optimal_temperature": round(optimal_t, 4),
         "calibrated_nll": round(calibrated_nll, 5),
         "calibrated_ece_pct": round(calibrated_ece * 100.0, 3),
-        "ece_reduction_pct": round((uncalibrated_ece - calibrated_ece) * 100.0, 3)
+        "ece_absolute_reduction_points": round(abs_ece_diff, 3),
+        "ece_relative_reduction_pct": round(rel_ece_diff, 1)
     }
     report_path = os.path.join(ROOT_DIR, "data", "temperature_calibration_report.json")
     with open(report_path, "w", encoding="utf-8") as f:

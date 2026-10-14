@@ -114,6 +114,8 @@ class NeuralShieldV5FullPipelineEvaluator(BaseGuardrailEvaluator):
             final_risk = max(composite_score, CONFIG["hard_block_regex_and_ml_score"])
         elif r_trig:
             final_risk = max(composite_score, CONFIG["regex_only_floor_score"])
+        elif ml_class == "Malicious" and ml_risk >= CONFIG["block_threshold"]:
+            final_risk = max(composite_score, ml_risk)
         else:
             final_risk = composite_score
 
@@ -497,11 +499,11 @@ def print_academic_tables(results: Dict[str, Any]):
     print(f"{BOLD}{CYAN}========================================================================================{RESET}\n")
 
     md_b = (
-        "| Model Adı | Temel Mimari | Bildirilen Başarı / F1 | Bağlam Uzunluğu | Notlar & Sınırlamalar |\n"
+        "| Model Adı | Temel Mimari | Bildirilen Başarı / F1 | Bağlam Penceresi | Resmi Model Kartı Belirtimleri & Sınırlar |\n"
         "| :--- | :--- | :---: | :---: | :--- |\n"
-        "| **Patronus Wolf Defender** | ModernBERT (base) | %98.44 F1 (Resmi Kart) | 8.192 token | Çok dilli ve Base64 sentetik veri ile eğitilmiştir. Tekil metin sınıflandırıcısıdır. |\n"
-        "| **ProtectAI DeBERTa-v3 v2** | DeBERTa-v3 (base) | >%99.0 Doğruluk (Resmi Kart) | 512 token | Saf İngilizce prompt injection için optimize edilmiştir. Jailbreak ve Türkçe desteklemez. |\n"
-        "| **Qualifire Prompt Sentinel** | ModernBERT (large) | SOTA Gatekeeper | 8.192 token | Kurumsal LLM kapı bekçisi olarak eğitilmiştir. |\n"
+        "| **Patronus Wolf Defender** | ModernBERT (base) | %98.44 F1 | 8.192 token | Resmi HF Kartı: Çok dilli (multilingual), sentetik Base64/homoglyph veriyle desteklenmiş tekil metin sınıflandırıcısıdır. |\n"
+        "| **ProtectAI DeBERTa-v3 v2** | DeBERTa-v3 (base) | %99.1 Doğruluk | 512 token | Resmi HF Kartı: 'Eğitimi yalnızca İngilizce veri kümelerine dayanmaktadır; doğrudan jailbreak veya çok dilli saldırıları tespit etmek üzere tasarlanmamıştır.' |\n"
+        "| **Qualifire Prompt Sentinel** | ModernBERT (large) | SOTA Gatekeeper | 8.192 token | LLM giriş/çıkışlarını denetleyen kurumsal güvenlik kapı bekçisi mimarisidir. |\n"
     )
     print(md_b)
 

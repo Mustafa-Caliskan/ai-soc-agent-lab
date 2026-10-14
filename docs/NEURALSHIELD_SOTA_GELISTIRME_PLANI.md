@@ -56,44 +56,44 @@ flowchart TD
 
 ---
 
-### 📦 İş Paketi 3: Semantik Olasılık Kalibrasyonu (Gerçek Sıcaklık Optimizasyonu)
-* **Katı İlke (Kör Nokta Önleme):** Statik regex whitelist veya "greeting bypass" KULLANILMAMIŞTIR.
+### 📦 İş Paketi 3: Semantik Olasılık Kalibrasyonu (Sıfır Sızıntılı Sıcaklık Optimizasyonu)
+* **Katı İlke (Kör Nokta ve Sızıntı Önleme):** Statik regex whitelist veya "greeting bypass" KULLANILMAMIŞTIR. Ayrıca kalibrasyon kümesi modelin nihai test kümesinden (`data/test_multilingual.csv`) kesin olarak yalıtılarak **veri sızıntısı (data leakage)** tamamen engellenmiştir.
 * **Uygulanan Çözüm (Guo et al., ICML 2017):**
-  * `scripts/calibrate_temperature.py` ile doğrulama kümesi (`data/test_multilingual.csv`, $N=260$) üzerindeki ham logit'ler çıkarılmış, Scipy bounded optimization ile Negative Log-Likelihood (NLL) minimize edilmiştir.
-  * **Kalibrasyon Öncesi ($T = 1.0$):** $\text{NLL} = 0.51771$, $\text{ECE} = \%8.12$
-  * **Fitted Optimal Sıcaklık:** $T^* = 1.3904$
-  * **Kalibrasyon Sonrası ($T^* = 1.3904$):** $\text{NLL} = 0.49990$, $\text{ECE} = \%4.84$
-  * **ECE İyileşmesi:** Beklenen Kalibrasyon Hatası $\%8.12 \rightarrow \%4.84$ seviyesine çekilerek modelin aşırı özgüvenli (over-confident) hataları $\%40.4$ bağıl oranda azaltılmıştır.
-  * $T^* = 1.3904$ parametresi doğrudan `backend/shield_config.json` ve `backend/shield_config.py` içerisine işlenmiştir.
+  * `scripts/calibrate_temperature.py` ile `data/train_multilingual.csv` içerisinden rastgele tohumla (seed=42) ayrılan bağımsız doğrulama kümesi (`data/val_multilingual.csv`, $N=200$, 100 saldırı / 100 meşru) üzerindeki ham logit'ler çıkarılmış, Scipy bounded optimization ile Negative Log-Likelihood (NLL) minimize edilmiştir.
+  * **Kalibrasyon Öncesi ($T = 1.0$):** $\text{NLL} = 0.62098$, $\text{ECE} = \%11.51$
+  * **Fitted Optimal Sıcaklık:** $T^* = 1.8345$
+  * **Kalibrasyon Sonrası ($T^* = 1.8345$):** $\text{NLL} = 0.56556$, $\text{ECE} = \%3.45$
+  * **ECE İyileşmesi:** Beklenen Kalibrasyon Hatası $\%11.51 \rightarrow \%3.45$ seviyesine çekilerek **8.07 yüzde puanı mutlak düşüş** ve **%70.1 bağıl hata düşüşü** sağlanmıştır. Modelin ham aşırı özgüveni yumuşatılmıştır.
+  * $T^* = 1.8345$ parametresi doğrudan `backend/shield_config.json` ve `backend/shield_config.py` içerisine işlenmiştir.
 
 ---
 
 ### 📦 İş Paketi 4: Kafa Kafaya (Head-to-Head) Kıyaslama ve Karşılaştırmalı Değerlendirme
-* **Metodoloji:** `scripts/benchmark_guardrail_rivals.py` motoru tabakalı (stratified) $N=60$ örneklem (İngilizce enjeksiyon, Türkçe enjeksiyon, Unicode steganografi, Türkçe selamlama, IT teknik destek, İngilizce kodlama) üzerinde çalıştırılmıştır.
+* **Metodoloji:** `scripts/benchmark_guardrail_rivals.py` motoru tabakalı (stratified) $N=120$ örneklem (20 İngilizce enjeksiyon, 20 Türkçe enjeksiyon, 20 Unicode steganografi, 20 Türkçe selamlama, 20 IT teknik destek, 20 İngilizce kodlama) üzerinde çalıştırılmıştır.
 * **Akademik Bütünlük İlkeleri:**
-  * **Simülasyon Yasağı:** Yerel ağırlığı indirilmeyen modeller için hiçbir şekilde tahmini veya simüle veri üretilmemiş; yalnızca canlı çalışan sistemler Tablo II-A'ya dahil edilmiştir.
-  * **İstatistiksel Güvenilirlik:** Tüm başarı oranları için Wilson Score $\%95$ Güven Aralığı ($\text{GA}$) hesaplanmıştır.
+  * **Simülasyon Yasağı:** Yerel ağırlığı indirilmemiş modeller için hiçbir tahmini/simüle veri üretilmemiş; yalnızca canlı çalışan gerçek sistemler (NeuralShield ve EVREN Qwen3-Guard API) Tablo II-A'ya dahil edilmiştir.
+  * **İstatistiksel Güvenilirlik:** $N=120$ örneklem için Wilson Score $\%95$ Güven Aralığı ($\text{GA}$) hassasiyetle hesaplanmıştır.
   * **Bileşen Analizi (Ablation Study):** 4 katmanlı mimarinin tekil modellerle adil kıyaslanabilmesi için hem "Tam Savunma Hattı" hem de "Yalnızca Katman 2 XLM-RoBERTa Modeli" bağımsız olarak ölçülmüştür.
 
-#### 📊 TABLO II-A: CANLI AMPİRİK KIYASLAMA VE GÜVEN ARALIKLARI ($N = 60$, Stratified)
+#### 📊 TABLO II-A: CANLI AMPİRİK KIYASLAMA VE GÜVEN ARALIKLARI ($N = 120$, Stratified)
 
 | Güvenlik Mimarisi / Model | Mimari Tipi | TR Yakalama [%95 GA] | Stego Yakalama [%95 GA] | Saldırı Başarısı (ASR) [%95 GA] | Yanlış Alarm (FP) [%95 GA] | Ortalama Gecikme (ms) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **NeuralShield-v5 (Tam 4-Katmanlı)** | 4-Katmanlı Savunma Hattı (Defense-in-Depth Pipeline) | **%100.0** [%72.2, %100.0] | **%100.0** [%72.2, %100.0] | **%0.0** [%0.0, %11.4] | **%0.0** [%0.0, %11.4] | **9.8 ± 3.9 ms** |
-| **NeuralShield-v5 (Yalnızca Katman 2)** | Tekil Model (Standalone ONNX INT8 Classifier) | %100.0 [%72.2, %100.0] | %30.0 [%10.8, %60.3] | %23.3 [%11.8, %40.9] | %16.7 [%7.3, %33.6] | **9.9 ± 4.0 ms** |
-| **Qwen3-Guard-4B (EVREN API H200)** | Tekil LLM Guardrail (4B Parameter LLM via API) | %100.0 [%72.2, %100.0] | %0.0 [%0.0, %27.8] | %33.3 [%19.2, %51.2] | %3.3 [%0.6, %16.7] | **746.5 ± 122.1 ms** |
+| **NeuralShield-v5 (Tam 4-Katmanlı)** | 4-Katmanlı Savunma Hattı (Defense-in-Depth Pipeline) | **%85.0** [%64.0, %94.8] | **%100.0** [%83.9, %100.0] | **%11.7** [%5.8, %22.2] | **%10.0** [%4.7, %20.1] | **11.0 ± 3.9 ms** |
+| **NeuralShield-v5 (Yalnızca Katman 2)** | Tekil Model (Standalone ONNX INT8 Classifier) | %90.0 [%69.9, %97.2] | %25.0 [%11.2, %46.9] | %28.3 [%18.5, %40.8] | %11.7 [%5.8, %22.2] | **10.9 ± 4.6 ms** |
+| **Qwen3-Guard-4B (EVREN API H200)** | Tekil LLM Guardrail (4B Parameter LLM via API) | %95.0 [%76.4, %99.1] | %0.0 [%0.0, %16.1] | %35.0 [%24.2, %47.6] | %1.7 [%0.3, %8.9] | **802.5 ± 136.0 ms** |
 
 #### 📚 TABLO II-B: YAYINLANMIŞ LİTERATÜR & RESMİ MODEL KARTI REFERANSLARI
 
-| Model Adı | Temel Mimari | Bildirilen Başarı / F1 | Bağlam Uzunluğu | Notlar & Sınırlamalar |
+| Model Adı | Temel Mimari | Bildirilen Başarı / Metrik | Bağlam Uzunluğu | Resmi Model Kartı & Kapsam Notları |
 | :--- | :--- | :---: | :---: | :--- |
-| **Patronus Wolf Defender** | ModernBERT (base) | %98.44 F1 (Resmi Kart) | 8.192 token | Çok dilli ve Base64 sentetik veri ile eğitilmiştir. Tekil metin sınıflandırıcısıdır. |
-| **ProtectAI DeBERTa-v3 v2** | DeBERTa-v3 (base) | >%99.0 Doğruluk (Resmi Kart) | 512 token | Saf İngilizce prompt injection için optimize edilmiştir. Jailbreak ve Türkçe desteklemez. |
-| **Qualifire Prompt Sentinel** | ModernBERT (large) | SOTA Gatekeeper | 8.192 token | Kurumsal LLM kapı bekçisi olarak eğitilmiştir. |
+| **Patronus Wolf Defender** | ModernBERT (base) | %98.44 F1 | 8.192 token | Çok dilli sentetik ve Base64 verisiyle eğitilmiş tekil sınıflandırıcı (`patronus-studio/wolf-defender-prompt-injection`). |
+| **ProtectAI DeBERTa-v3 v2** | DeBERTa-v3 (base) | >%99.0 Doğruluk | 512 token | İngilizce prompt injection için optimize edilmiş tekil sınıflandırıcı (`protectai/deberta-v3-base-prompt-injection-v2`). |
+| **Qualifire Prompt Sentinel** | ModernBERT (large) | SOTA Gatekeeper | 8.192 token | Kurumsal kapı bekçisi olarak eğitilmiş sınıflandırıcı (`qualifire/prompt-injection-sentinel-modernbert-large`). |
 
 > **Akademik Çıkarımlar:**
-> 1. **Bileşen Analizi (Katman 0 ve Katman 1'in Önemi):** Yalnızca Katman 2 ML modeli tek başına çalıştırıldığında Steganografi yakalama oranı $\%30.0$'a düşmekte, sınır IT kelimelerinde ("wifi password", "lost my password") yanlış alarm (FP) oranı $\%16.7$'ye çıkmaktadır. Tam 4 katmanlı mimari devreye girdiğinde ise Steganografi $\%100.0$'a ulaşmakta, yanlış alarm $\%0.0$'a düşmektedir.
-> 2. **LLM Tabanlı Korumalar vs Yerel Pipeline:** Qwen3-Guard-4B bulut H200 GPU üzerinde $746.5\text{ ms}$ gecikme ile çalışırken, NeuralShield yerel CPU'da $9.8\text{ ms}$ ile **~76 kat daha hızlı** yanıt vermiştir. Ayrıca Qwen3-Guard-4B, Unicode Tag steganografisini doğrudan girdi katmanında ayrıştıramadığı için $\%0.0$ yakalama ile atlatılmıştır.
+> 1. **Bileşen Analizi (Katman 0 ve Katman 1'in Önemi):** Yalnızca Katman 2 ML modeli tek başına çalıştırıldığında Steganografi yakalama oranı $\%100.0$'den $\%25.0$'e düşmekte, genel Saldırı Başarı Oranı (ASR) $\%11.7$'den $\%28.3$'e fırlamaktadır. Bu bulgu, tekil sınıflandırıcıların çok modlu/gizlenmiş saldırılarda yetersiz kaldığını ve katmanlı derinlemesine savunmanın (*defense-in-depth*) vazgeçilmez olduğunu ampirik olarak kanıtlar.
+> 2. **LLM Tabanlı Korumalar vs Yerel Pipeline:** Qwen3-Guard-4B bulut H200 GPU üzerinde $802.5\text{ ms}$ gecikme ile çalışırken, NeuralShield yerel CPU'da $11.0\text{ ms}$ ile **~73 kat daha hızlı** yanıt vermiştir. Ayrıca Qwen3-Guard-4B, Unicode Tag steganografisini girdi katmanında ayrıştıramadığı için $\%0.0$ yakalama ile atlatılmış ve genel ASR'si $\%35.0$'a çıkmıştır.
 
 ---
 
@@ -101,8 +101,8 @@ flowchart TD
 
 1. ✅ **Adım 1:** `backend/ml_model.py` dosyasına Kayan Pencere (Sliding Window Chunking) ve Sıcaklık Kalibrasyonu başarıyla kodlandı.
 2. ✅ **Adım 2:** `backend/normalizer.py` dosyasına JSON / Structured Payload, Tool-Call ve URL Query String açıcı (`unpack_structured_payload`) eklendi.
-3. ✅ **Adım 3:** `scripts/calibrate_temperature.py` çalıştırılarak $N=260$ doğrulama kümesinde optimal $T^* = 1.3904$ optimize edildi; ECE $\%8.12$'den $\%4.84$'e düşürüldü.
-4. ✅ **Adım 4:** `scripts/benchmark_guardrail_rivals.py` refaktör edilerek Wilson $\%95$ güven aralıkları ve tabakalı $N=60$ benchmark koşturuldu.
+3. ✅ **Adım 3:** `scripts/calibrate_temperature.py` ile bağımsız doğrulama split'inde (`val_multilingual.csv`, $N=200$, test verisinden yalıtılmış) optimal $T^* = 1.8345$ fit edildi; ECE $\%11.51$'den $\%3.45$'e (8.07 puan mutlak, %70.1 bağıl düşüş) çekildi.
+4. ✅ **Adım 4:** `scripts/benchmark_guardrail_rivals.py` refaktör edilerek Wilson $\%95$ güven aralıkları ve tabakalı $N=120$ benchmark ampirik olarak koşturuldu.
 5. ✅ **Adım 5:** Testler doğrulandı: `pytest` 18/18 (%100 PASS), `verify_full_pipeline.py` 20/20 (%100 PASS).
 
 

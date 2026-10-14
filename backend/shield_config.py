@@ -36,7 +36,7 @@ _DEFAULTS: Dict[str, Any] = {
     "ban_min_effective_threshold": 20,
     "ml_window_size": 256,
     "ml_stride": 128,
-    "ml_temperature": 1.3904,
+    "ml_temperature": 1.8345,
     "ml_sliding_window_enabled": True,
 }
 
