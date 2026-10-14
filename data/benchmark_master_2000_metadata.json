@@ -1,0 +1,61 @@
+{
+  "dataset_name": "NeuralShield-v5 Master Parallel Multilingual Benchmark Suite",
+  "version": "2.0.0",
+  "total_samples": 2000,
+  "classes": {
+    "Attack (1)": 1000,
+    "Benign (0)": 1000
+  },
+  "language_breakdown": {
+    "en": 500,
+    "tr": 500,
+    "zh": 100,
+    "it": 100,
+    "fr": 100,
+    "ko": 100,
+    "de": 100,
+    "ja": 100,
+    "pt": 100,
+    "ar": 100,
+    "ru": 100,
+    "es": 100
+  },
+  "difficulty_breakdown": {
+    "level_2_framing_persona": 1201,
+    "level_1_direct": 731,
+    "level_3_obfuscation": 29,
+    "level_4_steganography": 33,
+    "level_5_indirect_canary": 6
+  },
+  "attack_family_breakdown": {
+    "paired_hard_negative": 325,
+    "direct_injection": 514,
+    "persona_jailbreak": 191,
+    "technical_it_support": 645,
+    "obfuscation_reverse": 11,
+    "information_hazard": 175,
+    "multilingual_jailbreak": 36,
+    "obfuscation_base64": 11,
+    "daily_conversation": 30,
+    "stego_emoji_vs": 11,
+    "indirect_doc": 4,
+    "stego_zerowidth": 11,
+    "semantic": 12,
+    "stego_unicode_tags": 11,
+    "homoglyph": 4,
+    "pdf_hidden": 2,
+    "persona": 4,
+    "obfuscation": 3
+  },
+  "quality_standards": [
+    "Peer-reviewed sources: JailbreakBench (Stanford/Berkeley), HarmBench (CAIS), LibrAI",
+    "Zero-noise policy: OnerAYTAS scraping 100% excluded",
+    "Parallel cross-lingual evaluation (10 major global cohorts of exactly 100 each)",
+    "Zero data leakage verified against all training corpora",
+    "Exact 50/50 balanced classes across every single language stratum"
+  ],
+  "export_paths": {
+    "json": "data/benchmark_master_2000.json",
+    "csv": "data/benchmark_master_2000.csv"
+  }
+}

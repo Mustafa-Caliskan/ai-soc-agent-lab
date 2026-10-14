@@ -45,6 +45,9 @@ logs/
 poisoned_*.txt
 *.tmp
 
+# Intermediate benchmark build artifacts (large; regenerate via scripts/)
+data/_appsec_pool_*.json
+
 # Operating System & Editor Files
 .DS_Store
 Thumbs.db

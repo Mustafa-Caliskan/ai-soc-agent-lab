@@ -1,0 +1,24 @@
+{
+ "dataset_name": "NeuralShield-v5 AppSec Independent Benchmark",
+ "version": "3.2.0-appsec",
+ "total_samples": 2000,
+ "classes": {
+  "Attack": 1000,
+  "Benign": 1000
+ },
+ "language_breakdown": {
+  "en": 500,
+  "tr": 500,
+  "zh": 100,
+  "ja": 100,
+  "fr": 100,
+  "ar": 100,
+  "ru": 100,
+  "de": 100,
+  "es": 100,
+  "pt": 100,
+  "ko": 100,
+  "it": 100
+ },
+ "note": "AppSec/prompt-injection kapsamı. Ethics kapsam dışı. legacy çöp temiz. v5 eğitimle sıfır örtüşme. MT [MT->xx]."
+}

@@ -5,6 +5,8 @@
 **Kurum:** Burdur Mehmet Akif Ersoy Üniversitesi, Fen Bilimleri Enstitüsü  
 **Tarih / Sürüm:** 13 Ekim 2026 / Sürüm 5.0 (CyberFocalLoss $\gamma=2.0$, INT8 ONNX Engine)  
 **Detaylı Master Rapor:** `docs/MASTER_PROJE_OZETI_VE_YAYIN_YOL_HARITASI.md`  
+**📌 Kapsam Anayasası (Bağlayıcı):** `docs/NEURALSHIELD_TEHDIT_MODELI_VE_ANAYASA.md` *(Tehdit modeli, in/out-of-scope, retrain kararı, ürünleşme ve makale çizgisi. Makale yazımında bu belge esastır.)*  
+**📊 AppSec Benchmark (v3.2):** `data/appsec_benchmark_2000.json` *(12 dil, N=2000, 1000/1000, decontamine, kapsam-içi)*  
 **Donanım Kümesi:** EVREN 8x NVIDIA H200 GPU Süper Bilgisayarı (Perşembe 15 Ekim, 16:00 – 20:00)
 
 ---
