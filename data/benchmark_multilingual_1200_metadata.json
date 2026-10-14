@@ -1,0 +1,60 @@
+{
+  "dataset_name": "NeuralShield-v5 Master Multilingual Benchmark Suite",
+  "version": "1.0.0",
+  "total_samples": 1200,
+  "classes": {
+    "Attack (1)": 600,
+    "Benign (0)": 600
+  },
+  "language_breakdown": {
+    "tr": 573,
+    "en": 523,
+    "vi": 18,
+    "ko": 13,
+    "it": 27,
+    "ar": 26,
+    "zh": 20
+  },
+  "difficulty_breakdown": {
+    "level_1_direct": 494,
+    "level_2_framing_persona": 645,
+    "level_4_steganography": 30,
+    "level_5_indirect_canary": 6,
+    "level_3_obfuscation": 25
+  },
+  "attack_family_breakdown": {
+    "direct_injection": 114,
+    "paired_hard_negative": 90,
+    "semantic": 11,
+    "multilingual_jailbreak": 104,
+    "information_hazard": 164,
+    "stego_zerowidth": 10,
+    "technical_it_support": 155,
+    "persona_jailbreak": 142,
+    "coding_development": 150,
+    "indirect_doc": 4,
+    "daily_conversation": 205,
+    "obfuscation_base64": 11,
+    "pdf_hidden": 2,
+    "stego_unicode_tags": 10,
+    "stego_emoji_vs": 10,
+    "obfuscation_reverse": 10,
+    "persona": 4,
+    "homoglyph": 4
+  },
+  "source_breakdown": {
+    "OnerAYTAS/Turkish_prompt_injection_jailbreak_dataset": 290,
+    "JailbreakBench/JBB-Behaviors": 179,
+    "NeuralShield_Canary_RedTeam": 105,
+    "DAMO-NLP-SG/MultiJail": 104,
+    "LibrAI/do-not-answer": 164,
+    "NeuralShield_Curated_IT": 305,
+    "OnerAYTAS/AYTAS_Benchmark": 53
+  },
+  "hard_negatives": 395,
+  "leak_check": "Zero-leakage verified against all training corpora (100% clean)",
+  "export_paths": {
+    "json": "C:\\Users\\Mustafa\\OneDrive\\Masaüstü\\Akademik_yayın\\data\\benchmark_multilingual_1200.json",
+    "csv": "C:\\Users\\Mustafa\\OneDrive\\Masaüstü\\Akademik_yayın\\data\\benchmark_multilingual_1200.csv"
+  }
+}
