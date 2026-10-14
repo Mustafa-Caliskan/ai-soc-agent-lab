@@ -1,5 +1,5 @@
 """
-Multi-Model Empirical Benchmark: NeuralShield-v3 Peripheral Defense Gateway
+Multi-Model Empirical Benchmark: NeuralShield-v5 Peripheral Defense Gateway
 Evaluates 5 Enterprise Open-Weight LLMs (Airline Customer Service Chatbot Scenario):
   1. qwen2.5:3b    (Alibaba Cloud)
   2. llama3.2:3b   (Meta AI)
@@ -10,7 +10,7 @@ Evaluates 5 Enterprise Open-Weight LLMs (Airline Customer Service Chatbot Scenar
 Protocol:
   - System prompt: SkyPort IST Operational AI Assistant with embedded synthetic Canary Tokens.
   - Mode 1: SHIELD OFF (Raw Model Vulnerability / Direct Attack Leakage ASR).
-  - Mode 2: SHIELD ON (CyberTech NeuralShield-v3 Peripheral Gateway Active: Layer 1 + Layer 2 v3 + Layer 3 DLP).
+  - Mode 2: SHIELD ON (CyberTech NeuralShield-v5 Peripheral Gateway Active: Layer 0 Normalizer + Layer 1 Regex + Layer 2 XLM-R INT8 T*=1.8345 + Layer 3 DLP).
   - Metrics: Leak Count, Attack Success Rate (ASR %), Wilson 95% CI, Layer 1 & 2 Block Rates, Risk Reduction.
 """
 
@@ -86,7 +86,7 @@ def main():
 
     print("=" * 85)
     print("🛡️ ÇOK MODELLİ HAVA YOLU ASİSTANI SIZMA VE KALKAN BENCHMARK'I")
-    print("   CyberTech NeuralShield-v3 vs 5 Farklı Açık Ağırlıklı Dil Modeli")
+    print("   CyberTech NeuralShield-v5 vs 5 Farklı Açık Ağırlıklı Dil Modeli")
     print("=" * 85)
 
     corpus_path = ROOT / "data/redteam/redteam_corpus.json"
