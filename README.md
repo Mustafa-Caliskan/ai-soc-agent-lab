@@ -50,12 +50,12 @@ Large Language Model (LLM) agents deployed within corporate backends and critica
                                       │
                                       ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│ 🧠 COMPOSITE RISK & DECISION ENGINE (Config-Driven)                              │
-│ Risk = max(ML_Risk, Stego_Floor) + Regex_Contribution                           │
-│ Dynamic Ban Policy: Consecutive violations lower effective threshold             │
+│ 🧠 OR-GATE DECISION ENGINE (Config-Driven)                                       │
+│ Block = hard_stego OR regex_score>=60 OR ml_risk>=70 OR (regex & ML=Malicious)   │
+│ Dynamic Ban Policy: Consecutive violations lower the effective ML threshold       │
 │                                                                                  │
-│ • Risk >= Effective Threshold (Default: 60) ──> 🛑 BLOCKED (Dropped immediately)│
-│ • Risk < Effective Threshold                ──> ✅ ALLOWED (Dispatched to LLM)  │
+│ • Any signal fires ──> 🛑 BLOCKED (Dropped immediately)                          │
+│ • No signal        ──> ✅ ALLOWED (Dispatched to LLM)                            │
 └─────────────────────────────────────┬────────────────────────────────────────────┘
                                       │ (If ALLOWED)
                                       ▼
@@ -122,6 +122,20 @@ Empirical evaluation on held-out test split ($n=10,716$) and latency benchmark (
 | **Layer 3 Latency (Outbound DLP)** | **< 0.05 ms** | < 0.5 ms |
 | **Total Guardrail CPU Latency** | **12.73 ms** | **< 15.0 ms** |
 
+### Independent (Out-of-Distribution) Evaluation — AppSec-2000 v4
+
+Balanced, 12-language, independently-sourced benchmark (`data/appsec_benchmark_v2_diverse.json`): **N=2,000** (1,000 attacks / 1,000 benign), **zero training leakage**, adversarial hard sources capped (Mosscap ≤7.5%, NotInject ≤12.2%). Decision: **OR-Gate** (`hard_stego ∨ regex≥60 ∨ ml_risk≥70`).
+
+| Subset | Recall [Wilson 95%] | False Positive [Wilson 95%] | Accuracy |
+| :--- | :---: | :---: | :---: |
+| **Balanced OOD (all, N=2,000)** | **83.2%** [80.8–85.4] | **4.5%** [3.4–6.0] | **89.3%** |
+| Frozen test split (N=1,000) | 82.6% [79.0–85.7] | 3.8% [2.4–5.9] | 89.4% |
+| Turkish (tr, N=500) | 80.8% | **1.6%** | 89.6% |
+| English (en, N=500) | 91.2% | 5.2% | 93.0% |
+| Boundary stress test (Gandalf/NotInject, N=1,070) | 67.7% | 16.3% | 76.0% |
+
+> The in-distribution metrics above are on a same-distribution held-out split; these independent OOD numbers are the honest real-world estimate. The boundary stress test (deliberately adversarial benign + context-dependent puzzles) is reported separately for transparency.
+
 ---
 
 ## Repository Structure
@@ -130,7 +144,7 @@ Empirical evaluation on held-out test split ($n=10,716$) and latency benchmark (
 .
 ├── backend/
 │   ├── main.py                     # FastAPI server, WebSocket log broadcaster & API endpoints
-│   ├── security_layer.py           # Core 4-tier pipeline coordinator & composite risk engine
+│   ├── security_layer.py           # Core 4-tier pipeline coordinator & OR-Gate decision engine
 │   ├── normalizer.py               # Layer 0: Unicode NFKC, ZWJ-aware stego & multi-codec engine
 │   ├── regex_rules.py              # Layer 1: Bilingual weighted regex attack signatures
 │   ├── ml_model.py                 # Layer 2: XLM-RoBERTa ONNX INT8 inference runner

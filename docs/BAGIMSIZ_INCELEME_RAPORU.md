@@ -1,5 +1,8 @@
 # NeuralShield-v5 — Bağımsız İnceleme Raporu
 
+> [!NOTE]
+> **Tarihsel İnceleme Belgesi:** Bu belge, Benchmark v4 (Diverse Rebuild) ve OR-Gate senkronizasyonu öncesi döneme ait tarihsel hakem denetim notlarını içermektedir. Belgede adı geçen "Mosscap 499" ve "76 sızıntı" bulguları v4 ile çözülmüş ve güncel durum `docs/BENCHMARK_V4_DIVERSE_REBUILD.md` içinde belgelenmiştir.
+
 Kod/veri/model değiştirilmedi. Sadece okuma ve yeniden hesaplama yapıldı. Yardımcı betikler artifact `scratch/` klasöründe (`leakage_probe.py`, `verify_numbers.py`, `verify_langs.py`). Proje içinde oluşturduğum geçici `scripts/review_audit_probe.py` silindi.
 
 **Kısa hüküm:** v5 ile devam, kapasite artırımı yok, yayın öncesi retrain yok. **Ama proje şu haliyle yayına hazır değil.** Üç sorun makaleyi doğrudan zayıflatıyor: (1) Layer 0'da Kiril alfabesi hatası, (2) "decontamine" iddiasının gerçek eğitim verisine karşı hiç sınanmamış olması, (3) belgelerin birbiriyle ve verilerle çelişen sayıları.

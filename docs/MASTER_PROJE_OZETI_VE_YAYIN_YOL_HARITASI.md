@@ -31,10 +31,10 @@ flowchart TD
     L0 --> L1["Layer 1: Heuristic & Regex Kural Motoru<br/>(DAN, Talimat İptali, Sistem İfşası, Yetki Rolü - 30+ İki Dilli Kural)"]
     L0 --> L2["Layer 2: NeuralShield-v5 INT8 ONNX Motoru<br/>(XLM-RoBERTa + CyberFocalLoss, 12 ms Latency, ~278 MB)"]
     
-    L1 --> CompScore["Bileşik Risk Skoru Hesaplama (Composite Risk Engine)<br/>0.70*ML + 0.20*Regex + 0.10*Stego + Sert Taban Sinyalleri"]
+    L1 --> CompScore["OR-Gate Karar Motoru<br/>Block = hard_stego OR regex_score>=60 OR ml_risk>=70 OR (regex & ML=Malicious)"]
     L2 --> CompScore
     
-    CompScore --> Gate{"Risk >= Etkin Eşik?<br/>(Varsayılan: 60 | Dinamik Ban Politikası)"}
+    CompScore --> Gate{"OR-Gate Sinyali Tetiklendi mi?<br/>(hard_stego | regex≥60 | ml_risk≥70)"}
     
     Gate -- "EVET" --> Block["🚫 403 BLOCKED<br/>(İstek LLM'e Asla Ulaşmaz, Maliyet & Risk Sıfırlanır)"]
     Gate -- "HAYIR" --> L3["Layer 3: Gemini / Hedef LLM Çalıştırma & DLP Filtreleme<br/>(Kredi Kartı Luhn, TC No Checksum, JWT/PEM/IBAN Sansürleme)"]
