@@ -125,21 +125,31 @@ def call_llm(base_url, api_key, model_name, user_text, timeout=45):
     except Exception as e:
         return "", (time.perf_counter() - t0) * 1000.0, str(e)
 
-# ── NeuralShield-v4 Çevresel Kalkan İncelemesi ────────────────────────────────
+# ── NeuralShield-v5 Çevresel Kalkan İncelemesi ────────────────────────────────
 def run_neuralshield(text, ml_model):
     t0 = time.perf_counter()
 
-    # Katman 0: Normalizasyon
-    clean_text, stego_detected, stego_details = norm.normalize_and_clean(text)
-    hard_stego = norm.has_hard_stego_signal(text, stego_details)
+    # Katman 0: Normalizasyon ve Steganografi Çözücü
+    norm_res = norm.normalize_for_analysis(text)
+    clean_text = norm_res["clean_text"]
+    analysis_text = norm_res["extended_text"]
+    alerts = list(norm_res["alerts"])
+    hard_stego = bool(norm_res["hard_stego_signal"])
 
-    # Katman 1: Regex & Sezgisel Kurallar
-    regex_hit, patterns, regex_score = scan_text(clean_text)
+    # Katman 1: Regex & Sezgisel Kurallar (ana metin + çözülmüş varyantlar)
+    regex_hit, patterns, regex_score = scan_text(analysis_text)
+    rot13_hit, r13_pats, r13_score = scan_text(norm_res.get("rot13_variant", ""))
+    rev_hit, rev_pats, rev_score = scan_text(norm_res.get("reversed_variant", ""))
+    leet_hit, leet_pats, leet_score = scan_text(norm_res.get("leetspeak_variant", ""))
+
+    regex_hit = regex_hit or rot13_hit or rev_hit or leet_hit
+    patterns = list(set(patterns + r13_pats + rev_pats + leet_pats))
+    regex_score = max(regex_score, r13_score, rev_score, leet_score)
 
     # Katman 2: XLM-RoBERTa ONNX INT8 Sınıflandırıcı
-    ml_res = ml_model.predict(clean_text)
-    ml_class = ml_res["ml_class"]
-    ml_risk = ml_res["ml_risk_score"]
+    ml_res = ml_model.predict(analysis_text)
+    ml_class = ml_res.get("ml_class", "Benign")
+    ml_risk = ml_res.get("ml_risk_score", 0)
 
     # Bileşik Risk Skoru
     stego_score = 100 if hard_stego else 0
@@ -159,7 +169,22 @@ def run_neuralshield(text, ml_model):
         risk_score = composite_score
 
     risk_score = min(100, round(risk_score))
-    decision = "BLOCKED" if risk_score >= CONFIG["block_threshold"] or (regex_hit and ml_class == "Malicious") else "ALLOWED"
+
+    # Karar: OR-Gate (Seçenek B)
+    if CONFIG.get("decision_mode", "or_gate") == "or_gate":
+        blocked = bool(
+            hard_stego
+            or regex_score >= CONFIG.get("regex_block_score_threshold", 60)
+            or ml_risk >= CONFIG.get("ml_block_threshold", 70)
+            or (regex_hit and ml_class == "Malicious")
+        )
+    else:
+        blocked = bool(
+            risk_score >= CONFIG["block_threshold"]
+            or (regex_hit and ml_class == "Malicious")
+        )
+
+    decision = "BLOCKED" if blocked else "ALLOWED"
     overhead_ms = (time.perf_counter() - t0) * 1000.0
 
     return {
@@ -167,7 +192,7 @@ def run_neuralshield(text, ml_model):
         "risk_score": risk_score,
         "clean_text": clean_text,
         "overhead_ms": round(overhead_ms, 2),
-        "patterns": patterns + ([d["detail"] for d in stego_details] if stego_detected else [])
+        "patterns": patterns + alerts
     }
 
 # ── Ana Benchmark Koşucusu ───────────────────────────────────────────────────
