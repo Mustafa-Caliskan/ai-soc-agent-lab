@@ -201,6 +201,8 @@ def main():
     parser.add_argument("--base-url", default="http://localhost:8000/v1", help="vLLM veya EVREN API Base URL")
     parser.add_argument("--api-key", default="", help="EVREN API Anahtarı (Gerekirse)")
     parser.add_argument("--model-name", default="meta-llama/Llama-3.3-70B-Instruct", help="Hedef Model Adı")
+    parser.add_argument("--dataset", default="", help="JSON veri seti yolu (örn: data/appsec_benchmark_2000.json veya data/curated_benchmark.json). Boşsa dahili TEST_SUITE kullanılır.")
+    parser.add_argument("--limit", type=int, default=0, help="Test edilecek maksimum örnek sayısı (0 = tümü)")
     parser.add_argument("--output-dir", default="./h200_results", help="Sonuç Çıktı Klasörü")
     args = parser.parse_args()
 
@@ -209,32 +211,56 @@ def main():
     print("🛡️  CYBERTECH NEURALSHIELD — 8x H200 CANLI SÜPER BİLGİSAYAR BENCHMARK TESTİ")
     print(f"  - Hedef Model   : {args.model_name}")
     print(f"  - Uç Nokta      : {args.base_url}")
+    print(f"  - Veri Seti     : {args.dataset if args.dataset else 'Dahili H200 TEST_SUITE'}")
     print(f"  - Çıktı Dizini  : {args.output_dir}")
     print("=" * 80)
 
-    # 1. Kalkan Modelini Yükle (v4 Öncelikli)
+    # 1. Kalkan Modelini Yükle
     print("\n📦 NeuralShield ONNX INT8 Motoru Yükleniyor...")
     ml_model = MLSecurityModel()
     print(f"✅ Kalkan Hazır: {ml_model.model_path}")
 
-    # 2. Testleri Koştur
+    # 2. Veri Setini Hazırla
+    if args.dataset and os.path.exists(args.dataset):
+        print(f"📂 Veri seti yükleniyor: {args.dataset}")
+        with open(args.dataset, "r", encoding="utf-8") as f:
+            raw_data = json.load(f)
+        active_suite = []
+        for i, x in enumerate(raw_data):
+            p = x.get("text") or x.get("prompt", "")
+            lbl = x.get("label", 1)
+            is_atk = bool(lbl == 1 or x.get("type") == "Attack" or x.get("tier", 0) > 0)
+            cat = x.get("attack_family") or x.get("category") or f"Lang:{x.get('language', 'unknown')}"
+            active_suite.append({
+                "id": x.get("id", f"SAMPLE_{i+1:04d}"),
+                "category": cat,
+                "type": "Attack" if is_atk else "Benign",
+                "prompt": p
+            })
+        if args.limit and args.limit > 0:
+            active_suite = active_suite[:args.limit]
+            print(f"ℹ️  Limit uygulandı: İlk {args.limit} örnek test edilecek.")
+    else:
+        active_suite = TEST_SUITE
+
+    # 3. Testleri Koştur
     results = []
-    attacks_total = sum(1 for item in TEST_SUITE if item["type"] == "Attack")
-    benign_total = sum(1 for item in TEST_SUITE if item["type"] == "Benign")
+    attacks_total = sum(1 for item in active_suite if item["type"] == "Attack")
+    benign_total = sum(1 for item in active_suite if item["type"] == "Benign")
 
     raw_leaks = 0
     shield_blocks = 0
     shield_leaks = 0
     fp_count = 0
 
-    print(f"\n🚀 {len(TEST_SUITE)} Canlı Test Senaryosu Yürütülüyor ({attacks_total} Saldırı, {benign_total} Meşru)...\n")
+    print(f"\n🚀 {len(active_suite)} Canlı Test Senaryosu Yürütülüyor ({attacks_total} Saldırı, {benign_total} Meşru)...\n")
 
-    for idx, item in enumerate(TEST_SUITE, 1):
+    for idx, item in enumerate(active_suite, 1):
         prompt = item["prompt"]
         category = item["category"]
         is_attack = item["type"] == "Attack"
 
-        print(f"[{idx:02d}/{len(TEST_SUITE)}] [{category}] {prompt[:60]}...")
+        print(f"[{idx:02d}/{len(active_suite)}] [{category}] {prompt[:60]}...")
 
         # ── MOD 1: SHIELD OFF (Model Doğrudan / Çıplak) ──
         raw_resp, raw_lat, raw_err = call_llm(args.base_url, args.api_key, args.model_name, prompt)
