@@ -7,49 +7,49 @@
 
 | Eşik (ml_risk≥) | Recall | FP | F1 |
 |---:|---:|---:|---:|
-| 40 | %89.6 | %25.8 | 83.2 |
-| 45 | %87.8 | %22.2 | 83.6 |
-| 50 | %86.2 | %19.0 | 84.0 |
-| 55 | %84.2 | %16.8 | 83.8 |
-| 60 | %81.4 | %15.0 | 82.9 |
-| 65 | %78.6 | %12.6 | 82.2 |
-| 70 | %73.4 | %11.2 | 79.5 |
-| 75 | %66.6 | %8.2 | 76.2 |
-| 80 | %53.8 | %5.4 | 67.6 |
-| 85 | %30.8 | %1.2 | 46.7 |
+| 40 | %94.8 | %17.8 | 89.2 |
+| 45 | %94.0 | %14.6 | 90.1 |
+| 50 | %92.6 | %12.2 | 90.4 |
+| 55 | %91.2 | %10.0 | 90.7 |
+| 60 | %89.6 | %8.8 | 90.3 |
+| 65 | %86.2 | %6.6 | 89.4 |
+| 70 | %82.8 | %5.2 | 88.1 |
+| 75 | %77.2 | %4.2 | 85.1 |
+| 80 | %67.2 | %2.0 | 79.4 |
+| 85 | %39.8 | %0.6 | 56.7 |
 | 90 | %0.0 | %0.0 | 0.0 |
 
-**Dev'de seçilen eşik:** `ML≥50` (max-F1). **Uygulanan OR-Gate eşiği:** `ML≥70`.
+**Dev'de seçilen eşik:** `ML≥55` (max-F1). **Uygulanan OR-Gate eşiği:** `ML≥70`.
 
 ## 2. DONMUŞ TEST sonuçları (Wilson %95 GA)
 
 | Kural | Recall [GA] | FP [GA] | F1 | AUC* |
 |---|---:|---:|---:|---:|
-| OR-Gate ML≥70 (uygulanan) | %72.4 [%68.3, %76.1] | %12.8 [%10.2, %16.0] | 78.2 | - |
-| ML≥50 (dev-seçili) | %85.8 [%82.5, %88.6] | %21.4 [%18.0, %25.2] | 82.8 | - |
-| ML-only ML≥70 | %71.4 [%67.3, %75.2] | %12.8 [%10.2, %16.0] | 77.5 | - |
+| OR-Gate ML≥70 (uygulanan) | %82.6 [%79.0, %85.7] | %3.8 [%2.4, %5.9] | 88.6 | - |
+| ML≥55 (dev-seçili) | %91.0 [%88.2, %93.2] | %8.2 [%6.1, %10.9] | 91.4 | - |
+| ML-only ML≥70 | %82.2 [%78.6, %85.3] | %3.6 [%2.3, %5.6] | 88.5 | - |
 
-* Test kümesi ML `ml_risk` AUC ≈ **0.876** (nA=500, nB=500)
+* Test kümesi ML `ml_risk` AUC ≈ **0.967** (nA=500, nB=500)
 
 ## 3. Test kümesi — dil bazında (OR-Gate ML≥70)
 
 | Dil | Attack blok | Meşru FP |
 |---|---:|---:|
-| en | %85 | %22 |
-| tr | %64 | %1 |
-| de | %84 | %24 |
-| fr | %88 | %12 |
-| es | %68 | %4 |
-| it | %88 | %24 |
-| pt | %68 | %16 |
-| ru | %80 | %12 |
-| ar | %44 | %12 |
-| ja | %64 | %12 |
-| ko | %60 | %12 |
-| zh | %60 | %12 |
+| en | %90 | %4 |
+| tr | %80 | %2 |
+| de | %88 | %12 |
+| fr | %88 | %0 |
+| es | %68 | %0 |
+| it | %96 | %4 |
+| pt | %80 | %4 |
+| ru | %92 | %4 |
+| ar | %60 | %0 |
+| ja | %80 | %12 |
+| ko | %76 | %4 |
+| zh | %72 | %8 |
 
 ## 4. Yorum
-- Dev'de seçilen `ML≥50` ile donmuş test'te sonuç kararlı; uygulanan `ML≥70` ile arasındaki fark küçük.
+- Dev'de seçilen `ML≥55` ile donmuş test'te sonuç kararlı; uygulanan `ML≥70` ile arasındaki fark küçük.
 - Eşik artık **hold-out'suz aynı sette seçilmedi** → metodolojik itiraz kapandı.
 - Rusça FP'nin Layer-0 kaynağı düzeltildi; kalan Rusça hatası **model** kaynaklı (ayrı sınırlılık).
 

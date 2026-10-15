@@ -19,9 +19,9 @@
 
 | Bileşen | Ölçüm | Yorum |
 |---|---|---|
-| **Model (L2)** | Saldırıların **%86**'ini Malicious diyor | Recall iyi; ana dedektör model |
-| **Regex (L1)** | Saldırıların yalnızca **%14**'unda tetikleniyor | Rolü küçük; darboğaz DEĞİL |
-| **Karar katmanı** | Mevcut blok **%30.3** | `0.70·ML` eşiği 60 → **ML≥86** istiyor; tespitlerin çoğu kesiliyor |
+| **Model (L2)** | Saldırıların **%93**'ini Malicious diyor | Recall iyi; ana dedektör model |
+| **Regex (L1)** | Saldırıların yalnızca **%16**'unda tetikleniyor | Rolü küçük; darboğaz DEĞİL |
+| **Karar katmanı** | Mevcut blok **%36.5** | `0.70·ML` eşiği 60 → **ML≥86** istiyor; tespitlerin çoğu kesiliyor |
 
 **KANIT:** *"Ignore everything above this line"* → ML **%84 Malicious** ama `0.70×84 = 59 < 60` → bloklanmadı.
 **Sonuç: Model doğru tespit ediyor; darboğaz karar eşiğidir.** (Kapasite/model büyütme sorunu değildir.)
@@ -31,23 +31,23 @@
 | Kırılım | Saldırı (n) | Meşru (n) |
 |---|---:|---:|
 | Tüm set | 1000 | 1000 |
-| Kapsam-içi (OR-Bench hariç) | 941 | 1000 |
-| native (TR/EN) | 312 | 255 |
-| MT (diğer 10 dil) | 688 | 745 |
-| explicit injection | 284 | - |
-| subtle | 716 | - |
-| hard-negative benign (NotInject) | - | 571 |
+| Kapsam-içi (OR-Bench hariç) | 1000 | 1000 |
+| native (TR/EN) | 508 | 395 |
+| MT (diğer 10 dil) | 492 | 605 |
+| explicit injection | 363 | - |
+| subtle | 637 | - |
+| hard-negative benign (NotInject) | - | 122 |
 
 ### Recall / FP (ML≥50, dil ve zorluk bazında)
 
 | Grup | Metrik | Değer |
 |---|---|---|
-| native TR/EN saldırı | Recall (ML≥50) | %91 |
-| MT diller saldırı | Recall (ML≥50) | %84 |
-| explicit saldırı | Recall (ML≥50) | %93 |
-| subtle saldırı | Recall (ML≥50) | %83 |
-| normal benign | FP (ML≥50) | %13 |
-| hard-negative benign | FP (ML≥50) | %26 |
+| native TR/EN saldırı | Recall (ML≥50) | %95 |
+| MT diller saldırı | Recall (ML≥50) | %91 |
+| explicit saldırı | Recall (ML≥50) | %96 |
+| subtle saldırı | Recall (ML≥50) | %91 |
+| normal benign | FP (ML≥50) | %10 |
+| hard-negative benign | FP (ML≥50) | %22 |
 
 > **Not:** MT diller recall'u native'den **daha düşüktür** (ML≥50'de native %91 vs MT %82; dağıtılan OR-Gate eşiğinde native %86 vs MT %67).
 > Yani model dili tamamen bağımsız DEĞİLDİR; FP'nin büyük kısmı ise **NotInject hard-negative**'lerden gelir.
@@ -56,16 +56,16 @@
 
 | Karar Kuralı | Saldırı Blok [in-scope] | Meşru FP [in-scope] | Saldırı Blok [tüm] | Meşru FP [tüm] |
 |---|---:|---:|---:|---:|
-| Mevcut composite (thr=60) | **%32.1** | %0.5 | %30.3 | %0.5 |
-| composite thr=50 | **%75.8** | %11.1 | %71.8 | %11.1 |
-| composite thr=40 | **%86.0** | %16.9 | %81.6 | %16.9 |
-| ML>=70 (önerilen) | **%77.3** | %12.0 | %73.2 | %12.0 |
-| ML>=60 | **%85.3** | %16.2 | %80.9 | %16.2 |
-| ML>=50 | **%90.5** | %20.2 | %86.1 | %20.2 |
-| ML sınıf=Malicious | **%90.2** | %20.0 | %85.7 | %20.0 |
-| OR-Gate (ML>=70) | **%77.3** | %12.0 | %73.2 | %12.0 |
-| OR-Gate (ML>=60) | **%85.3** | %16.2 | %80.9 | %16.2 |
-| OR-Gate (ML>=50) | **%90.5** | %20.2 | %86.1 | %20.2 |
+| Mevcut composite (thr=60) | **%36.5** | %0.3 | %36.5 | %0.3 |
+| composite thr=50 | **%81.5** | %4.0 | %81.5 | %4.0 |
+| composite thr=40 | **%89.7** | %8.2 | %89.7 | %8.2 |
+| ML>=70 (önerilen) | **%83.2** | %4.5 | %83.2 | %4.5 |
+| ML>=60 | **%89.2** | %7.8 | %89.2 | %7.8 |
+| ML>=50 | **%93.0** | %11.4 | %93.0 | %11.4 |
+| ML sınıf=Malicious | **%92.8** | %11.0 | %92.8 | %11.0 |
+| OR-Gate (ML>=70) | **%83.2** | %4.5 | %83.2 | %4.5 |
+| OR-Gate (ML>=60) | **%89.2** | %7.8 | %89.2 | %7.8 |
+| OR-Gate (ML>=50) | **%93.0** | %11.4 | %93.0 | %11.4 |
 
 **Yorum:** Recall'i %29'dan yükseltmek FP'yi de yükseltir (bu bir **tercih**, ücretsiz düzeltme değil).
 Modelin ayrım gücü (bu sette ~AUC 0.86) bu ödünleşim eğrisini belirler.
@@ -74,16 +74,16 @@ Modelin ayrım gücü (bu sette ~AUC 0.86) bu ödünleşim eğrisini belirler.
 
 **Not:** `OR-Gate` ile `ML≥X` **AYNI DEĞİLDİR**. OR-Gate = `ML≥X OR regex_score≥60 OR hard_stego`;
 ek olarak `hard_stego` (Kiril FP'si düzeltilmeden önce) FP'yi yükseltiyordu. Ölçüm (düzeltme sonrası):
-  - ML-only `ML≥70`: recall 72.4 / FP 12.0
-  - OR-Gate `ML≥70`: recall 73.2 / FP 12.0
+  - ML-only `ML≥70`: recall 82.5 / FP 4.4
+  - OR-Gate `ML≥70`: recall 83.2 / FP 4.5
 
 **Önerilen kural: `OR-Gate (ML≥70)`** (veya modelin kalibre optimal eşiği τ*=0.4567 → ~`ML≥46`):
 
 | Seçenek | Blok (in-scope) | FP (in-scope) | Saldırı Blok (tüm) | Uygun senaryo |
 |---|---:|---:|---:|---|
-| A. Mevcut (thr=60) | %32.1 | %0.5 | %30.3 | FP toleransı sıfır, recall düşük |
-| B. **OR-Gate ML≥70 (önerilen)** | **%77.3** | %12.0 | %73.2 | **Dengeli kurumsal** |
-| C. OR-Gate ML≥50 | %90.5 | %20.2 | %86.1 | Recall-kritik (SOC alarm) |
+| A. Mevcut (thr=60) | %36.5 | %0.3 | %36.5 | FP toleransı sıfır, recall düşük |
+| B. **OR-Gate ML≥70 (önerilen)** | **%83.2** | %4.5 | %83.2 | **Dengeli kurumsal** |
+| C. OR-Gate ML≥50 | %93.0 | %11.4 | %93.0 | Recall-kritik (SOC alarm) |
 
 **Bağımsız kararlar (eşikten ayrı):**
 1. **Benchmark küratı:** OR-Bench (kapsam belirsiz) çıkar → in-scope set daha net.
