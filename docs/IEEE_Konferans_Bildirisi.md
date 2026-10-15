@@ -93,9 +93,9 @@ CyberTech Neural Shield v5, gelen istekleri ardışık 4 katmandan geçiren asen
           │
           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ BİLEŞİK RİSK & KARAR MOTORU (Config-Driven & Dinamik Ban)   │
-│ Composite = 0.70·ML + 0.20·Regex + 0.10·Stego               │
-│ Risk >= Etkin Eşik (Varsayılan: 60) -> 🛑 HTTP 403 BLOCKED  │
+│ OR-GATE KARAR & DİNAMİK BAN MOTORU (Config-Driven)          │
+│ Block = hard_stego ∨ regex≥60 ∨ ml_risk≥70 ∨ (regex∧ML_Mal) │
+│ Tetiklenirse -> 🛑 HTTP 403 BLOCKED (Model Çağrılmaz)       │
 └─────────────────────────────────────────────────────────────┘
           │ (Güvenli: ALLOWED)
           ▼
@@ -186,7 +186,7 @@ ProtectAI'ın orijinal `deberta-v3-base` modeli ham Türkçe girdilerde %100'e v
 Modelin CyberFocalLoss ($\gamma=2.0$) ile eğitilmesi, karmaşık rol yapma ve sinsi kurgularda (Adversarial Framing) kayıp fonksiyonunun zor örneklere ağırlık vermesini sağlamış; bu sayede 10.716 örnekli geniş hold-out test kümesinde %94.64 doğruluk ve optimal eşikte %96.89 F1 başarımı elde edilmiştir.
 
 ### A. Tehdit Modeli ve Değerlendirme Kapsamı Sınırları (Threat Model & Scope Limitations)
-Deneysel kıyaslamalarda gözlemlenen %0 Saldırı Başarı Oranı (ASR); bilinen prompt injection kalıpları, Unicode Tag steganografisi, çoklu kodlama teknikleri ve hedeflenen semantik saldırı korpusları (JailbreakBench, Do-Not-Answer, adaptive_adversarial_50) sınırları dahilindeki performansı yansıtmaktadır. Siber güvenlikte hiçbir tekil sınıflandırıcı daha önce hiç karşılaşılmamış sıfır gün (zero-day) mantıksal manipülasyonlara karşı mutlak %100 bağışıklık sağlayamaz. Bu yapısal gerçeğin bilinciyle NeuralShield; yalnızca yapay zeka sınıflandırıcısına bel bağlamak yerine, Katman 0 normalizasyonu, Katman 1 sezgisel kural filtreleri, dinamik ban politikası ve Katman 3 DLP çıktı denetimini bir araya getirerek çok katmanlı derinlemesine savunma (*Defense-in-Depth*) mekanizması kurgulamıştır.
+Deneysel kıyaslamalarda gözlemlenen %0 Saldırı Başarı Oranı (ASR); bilinen prompt injection kalıpları, Unicode Tag steganografisi, çoklu kodlama teknikleri ve hedeflenen AppSec saldırı korpusları (`evren_unified_benchmark_25`, `adaptive_adversarial_50`) sınırları dahilindeki performansı yansıtmaktadır. Siber güvenlikte hiçbir tekil sınıflandırıcı daha önce hiç karşılaşılmamış sıfır gün (zero-day) mantıksal manipülasyonlara karşı mutlak %100 bağışıklık sağlayamaz. Bu yapısal gerçeğin bilinciyle NeuralShield; yalnızca yapay zeka sınıflandırıcısına bel bağlamak yerine, Katman 0 normalizasyonu, Katman 1 sezgisel kural filtreleri, dinamik ban politikası ve Katman 3 DLP çıktı denetimini bir araya getirerek çok katmanlı derinlemesine savunma (*Defense-in-Depth*) mekanizması kurgulamıştır.
 
 ### B. Kapsam Tanımı ve Delege Edilen Alanlar (In-Scope vs. Out-of-Scope)
 NeuralShield bir **Uygulama Güvenliği (AppSec / LLM SOC Gateway)** kalkanıdır; bir içerik moderasyonu veya "ahlak polisi" modeli **değildir**. Sistem, **saldırı mekanizmasını** hedefler, **konuyu** değil:

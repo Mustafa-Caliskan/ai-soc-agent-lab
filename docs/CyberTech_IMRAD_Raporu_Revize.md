@@ -69,9 +69,9 @@ CyberTech Neural Shield v5, gelen kullanıcı mesajlarını modele ulaşmadan ö
          │
          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ BİLEŞİK RİSK & DİNAMİK BAN MOTORU (Config-Driven)           │
-│  - Composite = 0.70·ML + 0.20·Regex + 0.10·Stego            │
-│  - Risk >= Eşik (60) ise 🛑 BLOCKED (HTTP 403)              │
+│ OR-GATE KARAR & DİNAMİK BAN MOTORU (Config-Driven)          │
+│  - Block = hard_stego ∨ regex≥60 ∨ ml_risk≥70 ∨ (regex∧ML)  │
+│  - Tetiklenirse 🛑 BLOCKED (HTTP 403, Model Çağrılmaz)      │
 └─────────────────────────────────────────────────────────────┘
          │ (Güvenli ise Kurumsal Modele Gönder)
          ▼

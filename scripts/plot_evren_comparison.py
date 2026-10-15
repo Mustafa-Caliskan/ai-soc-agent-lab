@@ -1,9 +1,13 @@
 """
-CyberTech NeuralShield - EVREN Ampirik Çok Modelli Karşılaştırma Grafiği Üreticisi (IEEE Format).
+CyberTech NeuralShield - EVREN Ampirik Çok Modelli Karşılaştırma Grafiği Üreticisi (v2.0 IEEE Format).
 
-Bu betik; en son ampirik benchmark sonuçlarını (evren_empirical_results_*.json) okur ve
-akademik yayında (Figure 8) kullanılmak üzere 300 DPI yüksek çözünürlüklü
-vektröel ve raster grafikler üretir.
+Bu betik; en son ampirik benchmark sonuçlarını okur ve
+IEEE formatında 300 DPI yüksek çözünürlüklü vektörel ve raster grafikler üretir.
+
+Metodolojik Görselleştirme:
+1. Kırmızı Bar: Shield OFF - CoT / Reasoning Side-Channel Sızıntısı (Gemma %65, Qwen %30)
+2. Sarı Bar: Shield OFF - True Egress ASR (Kullanıcıya Doğrudan Sızıntı: %0.0)
+3. Yeşil Bar: Shield ON - NeuralShield-v5 Devrede (Kapıda %100 Bloklama, Sıfır CoT, Sıfır Egress)
 """
 import os
 import sys
@@ -26,7 +30,7 @@ plt.rcParams.update({
     "axes.titlesize": 12,
     "xtick.labelsize": 9.5,
     "ytick.labelsize": 10,
-    "legend.fontsize": 9.5,
+    "legend.fontsize": 9,
     "figure.titlesize": 13,
     "axes.grid": True,
     "grid.alpha": 0.4,
@@ -35,13 +39,13 @@ plt.rcParams.update({
 
 def generate_figure(results_path: str = None):
     if not results_path:
-        files = glob.glob(str(ROOT / "data" / "evren_empirical_results_*.json"))
-        if not files:
-            files = glob.glob(str(ROOT / "data" / "evren_benchmark_partial_*.json"))
-        if not files:
-            print("❌ HATA: Görselleştirilecek benchmark sonucu bulunamadı!")
-            return
-        results_path = max(files, key=os.path.getctime)
+        results_path = str(ROOT / "data" / "evren_empirical_results_fleet_v2.json")
+        if not os.path.exists(results_path):
+            files = sorted(glob.glob(str(ROOT / "data" / "evren_empirical_results_*.json")))
+            if not files:
+                print("❌ HATA: Görselleştirilecek benchmark sonucu bulunamadı!")
+                return
+            results_path = files[-1]
 
     print(f"📊 Veri okunuyor: {results_path}")
     with open(results_path, "r", encoding="utf-8") as f:
@@ -53,71 +57,63 @@ def generate_figure(results_path: str = None):
         return
 
     models = [r["model_name"] for r in summary]
-    raw_asrs = [r["raw_asr_pct"] for r in summary]
-    shield_asrs = [r["shield_asr_pct"] for r in summary]
-
-    # Wilson CI hata çubukları
-    raw_err_low = []
-    raw_err_high = []
-    for r in summary:
-        ci = r.get("raw_wilson_ci", (r["raw_asr_pct"], r["raw_asr_pct"]))
-        raw_err_low.append(max(0, r["raw_asr_pct"] - ci[0]))
-        raw_err_high.append(max(0, ci[1] - r["raw_asr_pct"]))
-
-    shield_err_low = []
-    shield_err_high = []
-    for r in summary:
-        ci = r.get("shield_wilson_ci", (r["shield_asr_pct"], r["shield_asr_pct"]))
-        shield_err_low.append(max(0, r["shield_asr_pct"] - ci[0]))
-        shield_err_high.append(max(0, ci[1] - r["shield_asr_pct"]))
+    cot_leaks = [r.get("raw_cot_leak_rate_pct", 0.0) for r in summary]
+    egress_asrs = [r.get("raw_asr_pct", 0.0) for r in summary]
+    shield_asrs = [r.get("shield_asr_pct", 0.0) for r in summary]
 
     x = np.arange(len(models))
-    width = 0.35
+    width = 0.26
 
-    fig, ax = plt.subplots(figsize=(9, 5.5), dpi=300)
+    fig, ax = plt.subplots(figsize=(9.5, 5.8), dpi=300)
 
-    # Bar grafikleri
+    # 3 Gruplu Bar Grafiği
     rects1 = ax.bar(
-        x - width/2, raw_asrs, width,
-        yerr=[raw_err_low, raw_err_high],
-        capsize=4,
-        label="Shield OFF (Raw LLM Vulnerability)",
+        x - width, cot_leaks, width,
+        label="Shield OFF: CoT Reflection Leakage (Internal <think>)",
         color="#d9534f", edgecolor="#b52b27", alpha=0.9
     )
 
     rects2 = ax.bar(
-        x + width/2, shield_asrs, width,
-        yerr=[shield_err_low, shield_err_high],
-        capsize=4,
-        label="Shield ON (NeuralShield-v5 Protected)",
+        x, egress_asrs, width,
+        label="Shield OFF: True Egress ASR (User-Facing Content)",
+        color="#f0ad4e", edgecolor="#d58512", alpha=0.9
+    )
+
+    rects3 = ax.bar(
+        x + width, shield_asrs, width,
+        label="Shield ON: NeuralShield-v5 Protected (Gateway Drop)",
         color="#5cb85c", edgecolor="#419641", alpha=0.9
     )
 
-    # Değer etiketleri
+    # Değer Etiketleri (Çakışma Önleyici Konumlandırma)
     for rect in rects1:
         height = rect.get_height()
         ax.annotate(f"{height:.1f}%",
-                    xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 5), textcoords="offset points",
+                    xy=(rect.get_x() + rect.get_width() / 2, height + 2),
                     ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#900C3F")
 
     for rect in rects2:
         height = rect.get_height()
         ax.annotate(f"{height:.1f}%",
-                    xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 5), textcoords="offset points",
+                    xy=(rect.get_x() + rect.get_width() / 2, height + 2),
+                    ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#8A6D3B")
+
+    for rect in rects3:
+        height = rect.get_height()
+        ax.annotate(f"{height:.1f}%",
+                    xy=(rect.get_x() + rect.get_width() / 2, height + 2),
                     ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#196F3D")
 
-    ax.set_ylabel("Attack Success Rate (ASR %)")
-    ax.set_title("Figure 8: Empirical ASR across LLM Fleet with Wilson 95% CI (EVREN Supercomputer)", pad=15)
+    ax.set_ylabel("Vulnerability & Attack Success Rate (%)")
+    ax.set_title("Figure 8: Empirical Fleet Evaluation: CoT Side-Channel vs. Egress vs. NeuralShield-v5", pad=15)
     ax.set_xticks(x)
     ax.set_xticklabels(models, fontweight="semibold")
-    ax.set_ylim(0, 115)
+    ax.set_ylim(0, 105)
     ax.legend(loc="upper right", framealpha=0.95)
 
-    # Açıklama kutucuğu
+    # Bilgilendirme Kutucuğu (Metodolojik Netlik)
     props = dict(boxstyle="round,pad=0.5", facecolor="#f8f9fa", edgecolor="#ced4da", alpha=0.95)
-    ax.text(0.02, 0.95, "Evaluation: 25-Sample Multi-Tier Adversarial Fleet\nMetrics: Canary Extraction & Instruction Hijacking\nPeripheral Latency: 12.8ms ± 1.4ms (ONNX CPU)",
+    ax.text(0.02, 0.95, "Methodology: 25-Sample Multi-Tier Fleet Benchmark\nObservation: Dense Models Reflect Secrets in CoT (65.0%)\nGateway Defense: NeuralShield Drops Request in ~30ms (Zero CoT/Egress)",
             transform=ax.transAxes, fontsize=8, verticalalignment="top", bbox=props)
 
     plt.tight_layout()
