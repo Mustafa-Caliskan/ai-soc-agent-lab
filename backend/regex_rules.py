@@ -157,6 +157,43 @@ ATTACK_PATTERNS: List[Tuple[str, "re.Pattern", int]] = [
         r"(ver|söyle|yaz|paylaş|göster|aç[ıi]kla|aktar|dök|teslim\s*et|raporla|listele)",
         re.IGNORECASE
     ), 65),
+
+    # ── ÇOK DİLLİ ENJEKSİYON VE SİSTEM PROMPTU İFŞA KALIPLARI (MULTILINGUAL) ─
+    ("multi_ignore_instructions", re.compile(
+        r"(?:ignorer?|oublie[rz]?)\s+(?:toutes?\s+les?|les?|vos?|tes?|mes?)\s+(?:instructions?|directives?|consignes?|r[eè]gles?)|"
+        r"(?:ignora[rn]?|olvida)\s+(?:todas?\s+las?|las?|tus?|mis?)\s+(?:instrucciones|directivas|reglas)|"
+        r"(?:ignoriere[n]?|vergiss)\s+(?:alle?\s+)?(?:vorherigen?\s+)?(?:anweisungen|instruktionen|regeln|kontext)|"
+        r"(?:ignore|ignorar|esque[cç]a)\s+(?:todas?\s+as?|as?|suas?)\s+(?:instru[cç][oõ]es|diretrizes|regras)|"
+        r"(?:игнорируй(те)?|забудь(те)?)\s+(?:все\s+)?(?:предыдущие\s+)?(?:инструкции|указания|правила)|"
+        r"(?:تجاهل|انسَ)\s+(?:جميع\s+|كل\s+)?(?:التعليمات|الأوامر|التوجيهات|القواعد)|"
+        r"(?:(?:すべて|前)の)?(?:指示|命令|ルール|コンテキスト)を(?:無視|忘れて)|"
+        r"(?:(?:모든|이전)의?\s*)?(?:지시|명령|규칙|프롬프트)를?\s*(?:무시|잊어)|"
+        r"(?:忽略|忘记)\s*(?:所有)?(?:之前|前面)?的?(?:指令|指示|规则|提示)",
+        re.IGNORECASE
+    ), 75),
+
+    ("multi_developer_jailbreak_mode", re.compile(
+        r"(?:mode\s+d[eé]veloppeur|modo\s+desarrollador|entwicklermodus|modo\s+desenvolvedor|режим\s+разработчика|وضع\s+المطور|开发者模式|開発者モード|개발자\s*모드)",
+        re.IGNORECASE
+    ), 70),
+
+    ("multi_system_prompt_leakage", re.compile(
+        r"(?:invite\s+syst[eè]me|prompt\s+del\s+sistema|system-prompt|prompt\s+do\s+sistema|системный\s+промпт|موجه\s+النظام|系统提示|システムプロンプト|시스템\s*프롬프트)",
+        re.IGNORECASE
+    ), 70),
+
+    ("multi_password_extraction", re.compile(
+        r"(?:quel\s+est\s+le|donne[rz]\s+le|montre[rz]\s+le)\s+.*?\bmot\s+de\s+passe\b|"
+        r"(?:dime\s+la|cu[aá]l\s+es\s+la)\s+.*?\bcontrase[nñ]a\b|"
+        r"(?:zeige\s+das|sag\s+mir\s+das)\s+.*?\bpasswort\b|"
+        r"(?:mostre\s+a|qual\s+[eé]\s+a)\s+.*?\bsenha\b|"
+        r"(?:покажи|скажи|какой)\s+.*?\bпароль\b|"
+        r"(?:أخبرني|ما\s+هي)\s+.*?\bكلمة\s+المرور\b|"
+        r"(?:告诉我|请问)?\s*.*?\b密码\b\s*是什么|"
+        r"パスワードを(?:教えて|見せて|教えろ)|"
+        r"비밀번호(?:를\s*알려줘|는\s*무엇)",
+        re.IGNORECASE
+    ), 65),
 ]
 
 
