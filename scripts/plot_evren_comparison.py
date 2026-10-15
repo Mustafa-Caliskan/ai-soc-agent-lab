@@ -61,47 +61,71 @@ def generate_figure(results_path: str = None):
     egress_asrs = [r.get("raw_asr_pct", 0.0) for r in summary]
     shield_asrs = [r.get("shield_asr_pct", 0.0) for r in summary]
 
+    cot_err_low, cot_err_high, cot_tops = [], [], []
+    for r, val in zip(summary, cot_leaks):
+        ci = r.get("raw_cot_wilson_ci", (val, val))
+        cot_err_low.append(max(0.0, val - ci[0]))
+        cot_err_high.append(max(0.0, ci[1] - val))
+        cot_tops.append(max(val, ci[1]))
+
+    egress_err_low, egress_err_high, egress_tops = [], [], []
+    for r, val in zip(summary, egress_asrs):
+        ci = r.get("raw_wilson_ci", (val, val))
+        egress_err_low.append(max(0.0, val - ci[0]))
+        egress_err_high.append(max(0.0, ci[1] - val))
+        egress_tops.append(max(val, ci[1]))
+
+    shield_err_low, shield_err_high, shield_tops = [], [], []
+    for r, val in zip(summary, shield_asrs):
+        ci = r.get("shield_wilson_ci", (val, val))
+        shield_err_low.append(max(0.0, val - ci[0]))
+        shield_err_high.append(max(0.0, ci[1] - val))
+        shield_tops.append(max(val, ci[1]))
+
     x = np.arange(len(models))
     width = 0.26
 
     fig, ax = plt.subplots(figsize=(9.5, 5.8), dpi=300)
 
-    # 3 Gruplu Bar Grafiği
+    # 3 Gruplu Bar Grafiği (Wilson %95 GA Hata Çubuklarıyla)
     rects1 = ax.bar(
         x - width, cot_leaks, width,
+        yerr=[cot_err_low, cot_err_high], capsize=4,
         label="Shield OFF: CoT Reflection Leakage (Internal <think>)",
         color="#d9534f", edgecolor="#b52b27", alpha=0.9
     )
 
     rects2 = ax.bar(
         x, egress_asrs, width,
+        yerr=[egress_err_low, egress_err_high], capsize=4,
         label="Shield OFF: True Egress ASR (User-Facing Content)",
         color="#f0ad4e", edgecolor="#d58512", alpha=0.9
     )
 
     rects3 = ax.bar(
         x + width, shield_asrs, width,
+        yerr=[shield_err_low, shield_err_high], capsize=4,
         label="Shield ON: NeuralShield-v5 Protected (Gateway Drop)",
         color="#5cb85c", edgecolor="#419641", alpha=0.9
     )
 
-    # Değer Etiketleri (Çakışma Önleyici Konumlandırma)
-    for rect in rects1:
+    # Değer Etiketleri (Wilson GA Hata Çubuğunun ÜSTÜNE Konumlandırma — Çakışma Sıfır)
+    for rect, top_y in zip(rects1, cot_tops):
         height = rect.get_height()
         ax.annotate(f"{height:.1f}%",
-                    xy=(rect.get_x() + rect.get_width() / 2, height + 2),
+                    xy=(rect.get_x() + rect.get_width() / 2, top_y + 1.8),
                     ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#900C3F")
 
-    for rect in rects2:
+    for rect, top_y in zip(rects2, egress_tops):
         height = rect.get_height()
         ax.annotate(f"{height:.1f}%",
-                    xy=(rect.get_x() + rect.get_width() / 2, height + 2),
+                    xy=(rect.get_x() + rect.get_width() / 2, top_y + 1.8),
                     ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#8A6D3B")
 
-    for rect in rects3:
+    for rect, top_y in zip(rects3, shield_tops):
         height = rect.get_height()
         ax.annotate(f"{height:.1f}%",
-                    xy=(rect.get_x() + rect.get_width() / 2, height + 2),
+                    xy=(rect.get_x() + rect.get_width() / 2, top_y + 1.8),
                     ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#196F3D")
 
     ax.set_ylabel("Vulnerability & Attack Success Rate (%)")

@@ -41,7 +41,7 @@ def comp(x, thr, wml=CONFIG['weight_ml'], wr=CONFIG['weight_regex'], ws=CONFIG['
 
 def orgate(x, mt):
     # Arkadaş önerisi: stego ve regex gücünü koru, ML'yi 0.70 ağırlığıyla EZME
-    return x['hard_stego'] or x['regex_score'] >= 60 or x['ml_risk'] >= mt
+    return x['hard_stego'] or x['regex_score'] >= 60 or x['ml_risk'] >= mt or (x.get('regex_triggered', False) and x.get('ml_class') == 'Malicious')
 
 RULES = {
  "Mevcut composite (thr=60)":        lambda x: comp(x, 60),

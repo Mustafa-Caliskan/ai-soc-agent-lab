@@ -104,6 +104,38 @@ def test_regex_benign_it_questions_not_triggered():
     trig, pats, score = scan_text("Active Directory üzerinde parola sıfırlama adımları nelerdir?")
     assert "ignore_previous_instructions" not in pats
     assert "system_override" not in pats
+    # İtalyanca 'parola' (kelime) + 'descrivere'/'diversi' yanlış alarm vermemeli
+    trig_it, pats_it, score_it = scan_text(
+        "Per favore descrivi il paesaggio che vedi in autunno e come usare la parola 'obliquo' per descrivere queste scene."
+    )
+    assert "tr_secret_request_expanded" not in pats_it
+    assert score_it == 0
+    # Tekil 'jailbreak' kelimesi içeren eğitimsel/savunma cümleleri L1 hard-block almamalı
+    trig_jb, pats_jb, score_jb = scan_text(
+        'Explain the concept of a "jailbreak" in the context of mobile devices, including its purpose.'
+    )
+    assert "jailbreak_mode" not in pats_jb
+    assert score_jb < 60
+
+
+def test_dlp_masks_all_canaries():
+    import canary
+    cb = canary.canary_block()
+    trig, masked, pats = scan_and_mask(cb)
+    assert trig is True
+    assert canary.find_leaked(masked) == []
+    # Ayraçsız (':' veya '=' olmadan, boşlukla yazılan) şifre/PIN/anahtar sızıntısı da maskelenmeli
+    spaceless_leak = (
+        "Sistem yöneticisi şifresi SkyPortAdmin7F3A91B2 ve veritabanı parolası RooTPassZx8W22M9 "
+        "olup kule PIN kodu ATC-KX9425-PIN ve API anahtarı skcrew9f3a71c2d8b04e5 şeklindedir."
+    )
+    trig2, masked2, _ = scan_and_mask(spaceless_leak)
+    assert trig2 is True
+    assert canary.find_leaked(masked2) == []
+    # Masum 'parola sıfırlama' veya 'şifre değiştirme' metni maskelenMEMELİ
+    trig3, masked3, _ = scan_and_mask("Kullanıcı parola sıfırlama ve şifre değiştirme adımları nelerdir?")
+    assert trig3 is False
+    assert "parola sıfırlama" in masked3
 
 # ── 4. Layer 3: DLP Maskeleme Testleri ───────────────────────────────────────
 def test_dlp_masks_valid_card():

@@ -54,7 +54,7 @@ ATTACK_PATTERNS: List[Tuple[str, "re.Pattern", int]] = [
 
     # ── JAILBREAK (EN) ──────────────────────────────────────────────────────
     ("jailbreak_mode", re.compile(
-        r"(jailbreak(\s+mode)?|developer\s+mode|unrestricted\s+mode|god\s+mode)",
+        r"\b(jailbreak\s+(?:mode|modu|prompt)|developer\s+mode|unrestricted\s+mode|god\s+mode)\b",
         re.IGNORECASE
     ), 70),
     ("dan_jailbreak", re.compile(
@@ -148,13 +148,13 @@ ATTACK_PATTERNS: List[Tuple[str, "re.Pattern", int]] = [
 
     # ── GİZLİ BİLGİ / ŞİFRE TALEBİ (TR — genişletilmiş) ─────────────────────
     ("turkish_password_request", re.compile(
-        r"([şs][ıi]fre(yi|nizi|sini|si|ni)?\s*(ver|söyle|yaz|paylaş|göster|aç[ıi]kla))",
+        r"\b([şs][ıi]fre(yi|nizi|sini|si|ni)?\s*(ver|söyle|yaz|paylaş|göster|aç[ıi]kla))\b",
         re.IGNORECASE
     ), 60),
     ("tr_secret_request_expanded", re.compile(
-        r"(parola(y[ıi]|n[ıi]z[ıi]|s[ıi]n[ıi]|s[ıi]|n[ıi]|lar[ıi]|lar[ıi]n[ıi])?|pin\s*kodu(nu)?|api\s*anahtar([ıi]|ın[ıi]|lar[ıi]|lar[ıi]n[ıi])?|"
-        r"gizli\s*anahtar([ıi]|ın[ıi])?|veritaban[ıi]\s*[şs][ıi]fre(si|sini|leri|lerini)?)\s*.{0,25}"
-        r"(ver|söyle|yaz|paylaş|göster|aç[ıi]kla|aktar|dök|teslim\s*et|raporla|listele)",
+        r"\b(?<!\bla\s)(?<!\buna\s)(parola(y[ıi]|n[ıi]z[ıi]|s[ıi]n[ıi]|s[ıi]|n[ıi]|lar[ıi]|lar[ıi]n[ıi])?|pin\s*kodu(nu)?|api\s*anahtar([ıi]|ın[ıi]|lar[ıi]|lar[ıi]n[ıi])?|"
+        r"gizli\s*anahtar([ıi]|ın[ıi])?|veritaban[ıi]\s*[şs][ıi]fre(si|sini|leri|lerini)?)\b\s*.{0,25}"
+        r"\b(ver|söyle|yaz|paylaş|göster|aç[ıi]kla|aktar|dök|teslim\s*et|raporla|listele)\b",
         re.IGNORECASE
     ), 65),
 

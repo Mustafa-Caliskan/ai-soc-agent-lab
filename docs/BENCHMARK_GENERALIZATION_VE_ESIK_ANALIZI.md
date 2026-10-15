@@ -19,9 +19,9 @@
 
 | Bileşen | Ölçüm | Yorum |
 |---|---|---|
-| **Model (L2)** | Saldırıların **%85**'ini Malicious diyor | Recall iyi; ana dedektör model |
-| **Regex (L1)** | Saldırıların yalnızca **%9**'unda tetikleniyor | Rolü küçük; darboğaz DEĞİL |
-| **Karar katmanı** | Mevcut blok **%27.3** | `0.70·ML` eşiği 60 → **ML≥86** istiyor; tespitlerin çoğu kesiliyor |
+| **Model (L2)** | Saldırıların **%86**'ini Malicious diyor | Recall iyi; ana dedektör model |
+| **Regex (L1)** | Saldırıların yalnızca **%14**'unda tetikleniyor | Rolü küçük; darboğaz DEĞİL |
+| **Karar katmanı** | Mevcut blok **%30.3** | `0.70·ML` eşiği 60 → **ML≥86** istiyor; tespitlerin çoğu kesiliyor |
 
 **KANIT:** *"Ignore everything above this line"* → ML **%84 Malicious** ama `0.70×84 = 59 < 60` → bloklanmadı.
 **Sonuç: Model doğru tespit ediyor; darboğaz karar eşiğidir.** (Kapasite/model büyütme sorunu değildir.)
@@ -43,10 +43,10 @@
 | Grup | Metrik | Değer |
 |---|---|---|
 | native TR/EN saldırı | Recall (ML≥50) | %91 |
-| MT diller saldırı | Recall (ML≥50) | %82 |
+| MT diller saldırı | Recall (ML≥50) | %84 |
 | explicit saldırı | Recall (ML≥50) | %93 |
-| subtle saldırı | Recall (ML≥50) | %82 |
-| normal benign | FP (ML≥50) | %14 |
+| subtle saldırı | Recall (ML≥50) | %83 |
+| normal benign | FP (ML≥50) | %13 |
 | hard-negative benign | FP (ML≥50) | %26 |
 
 > **Not:** MT diller recall'u native'den **daha düşüktür** (ML≥50'de native %91 vs MT %82; dağıtılan OR-Gate eşiğinde native %86 vs MT %67).
@@ -56,16 +56,16 @@
 
 | Karar Kuralı | Saldırı Blok [in-scope] | Meşru FP [in-scope] | Saldırı Blok [tüm] | Meşru FP [tüm] |
 |---|---:|---:|---:|---:|
-| Mevcut composite (thr=60) | **%28.9** | %1.3 | %27.3 | %1.3 |
-| composite thr=50 | **%74.5** | %11.4 | %70.6 | %11.4 |
-| composite thr=40 | **%85.7** | %17.6 | %81.3 | %17.6 |
-| ML>=70 (önerilen) | **%76.5** | %12.4 | %72.5 | %12.4 |
-| ML>=60 | **%84.8** | %17.1 | %80.5 | %17.1 |
-| ML>=50 | **%89.7** | %21.2 | %85.2 | %21.2 |
-| ML sınıf=Malicious | **%89.3** | %20.3 | %84.8 | %20.3 |
-| OR-Gate (ML>=70) | **%76.5** | %12.4 | %72.5 | %12.4 |
-| OR-Gate (ML>=60) | **%84.8** | %17.1 | %80.5 | %17.1 |
-| OR-Gate (ML>=50) | **%89.7** | %21.2 | %85.2 | %21.2 |
+| Mevcut composite (thr=60) | **%32.1** | %0.5 | %30.3 | %0.5 |
+| composite thr=50 | **%75.8** | %11.1 | %71.8 | %11.1 |
+| composite thr=40 | **%86.0** | %16.9 | %81.6 | %16.9 |
+| ML>=70 (önerilen) | **%77.3** | %12.0 | %73.2 | %12.0 |
+| ML>=60 | **%85.3** | %16.2 | %80.9 | %16.2 |
+| ML>=50 | **%90.5** | %20.2 | %86.1 | %20.2 |
+| ML sınıf=Malicious | **%90.2** | %20.0 | %85.7 | %20.0 |
+| OR-Gate (ML>=70) | **%77.3** | %12.0 | %73.2 | %12.0 |
+| OR-Gate (ML>=60) | **%85.3** | %16.2 | %80.9 | %16.2 |
+| OR-Gate (ML>=50) | **%90.5** | %20.2 | %86.1 | %20.2 |
 
 **Yorum:** Recall'i %29'dan yükseltmek FP'yi de yükseltir (bu bir **tercih**, ücretsiz düzeltme değil).
 Modelin ayrım gücü (bu sette ~AUC 0.86) bu ödünleşim eğrisini belirler.
@@ -74,16 +74,16 @@ Modelin ayrım gücü (bu sette ~AUC 0.86) bu ödünleşim eğrisini belirler.
 
 **Not:** `OR-Gate` ile `ML≥X` **AYNI DEĞİLDİR**. OR-Gate = `ML≥X OR regex_score≥60 OR hard_stego`;
 ek olarak `hard_stego` (Kiril FP'si düzeltilmeden önce) FP'yi yükseltiyordu. Ölçüm (düzeltme sonrası):
-  - ML-only `ML≥70`: recall 71.9 / FP 11.7
-  - OR-Gate `ML≥70`: recall 72.5 / FP 12.4
+  - ML-only `ML≥70`: recall 72.4 / FP 12.0
+  - OR-Gate `ML≥70`: recall 73.2 / FP 12.0
 
 **Önerilen kural: `OR-Gate (ML≥70)`** (veya modelin kalibre optimal eşiği τ*=0.4567 → ~`ML≥46`):
 
 | Seçenek | Blok (in-scope) | FP (in-scope) | Saldırı Blok (tüm) | Uygun senaryo |
 |---|---:|---:|---:|---|
-| A. Mevcut (thr=60) | %28.9 | %1.3 | %27.3 | FP toleransı sıfır, recall düşük |
-| B. **OR-Gate ML≥70 (önerilen)** | **%76.5** | %12.4 | %72.5 | **Dengeli kurumsal** |
-| C. OR-Gate ML≥50 | %89.7 | %21.2 | %85.2 | Recall-kritik (SOC alarm) |
+| A. Mevcut (thr=60) | %32.1 | %0.5 | %30.3 | FP toleransı sıfır, recall düşük |
+| B. **OR-Gate ML≥70 (önerilen)** | **%77.3** | %12.0 | %73.2 | **Dengeli kurumsal** |
+| C. OR-Gate ML≥50 | %90.5 | %20.2 | %86.1 | Recall-kritik (SOC alarm) |
 
 **Bağımsız kararlar (eşikten ayrı):**
 1. **Benchmark küratı:** OR-Bench (kapsam belirsiz) çıkar → in-scope set daha net.

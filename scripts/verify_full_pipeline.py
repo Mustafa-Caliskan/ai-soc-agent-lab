@@ -182,6 +182,14 @@ check("IBAN maskeleniyor", "turkish_iban" in pats_iban)
 _, _, pats_pem = scan_and_mask("-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKC\n-----END RSA PRIVATE KEY-----")
 check("PEM private key maskeleniyor", "pem_private_key" in pats_pem)
 
+import canary as _canary_mod  # noqa: E402
+_, _masked_cb, _ = scan_and_mask(_canary_mod.canary_block())
+check("Sistem promptu kanarya sırları (4/4) DLP tarafından tam maskeleniyor", len(_canary_mod.find_leaked(_masked_cb)) == 0)
+_, _masked_nocln, _ = scan_and_mask(
+    "Sistem şifresi SkyPortAdmin7F3A91B2, parolası RooTPassZx8W22M9, PIN kodu ATC-KX9425-PIN, API anahtarı skcrew9f3a71c2d8b04e5"
+)
+check("Ayraçsız (':' olmadan boşluklu) şifre/PIN/anahtar sızıntısı DLP ile maskeleniyor", len(_canary_mod.find_leaked(_masked_nocln)) == 0)
+
 # ── 4) Genişletilmiş Türkçe Regex Kapsaması (P1.5) ─────────────────────────
 print("\n[4/8] Genişletilmiş Türkçe saldırı regex kapsaması (Layer 1 TEK BAŞINA, ML olmadan)...")
 TR_NEW_ATTACKS = [

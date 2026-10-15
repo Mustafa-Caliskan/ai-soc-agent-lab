@@ -171,12 +171,13 @@ Yerel 4 çekirdekli standart CPU üzerinde ölçülen çıkarım süreleri:
 
 Hedef kurumsal modellerin ortalama 400-1200 ms yanıt süresi yanında 12.73 milisaniyelik bu ek yük, kullanıcı deneyiminde sıfır gecikme hissi uyandırmaktadır.
 
-### D. Bağımsız (Out-of-Distribution) Değerlendirme
+### D. Bağımsız (Out-of-Distribution) Değerlendirme ve Muhakeme (CoT) Kanalı Sızıntı Analizi
 Yukarıdaki Hold-out sonuçları eğitimle **aynı dağılımdan** (in-distribution) çekilmiştir. Gerçek-dünya genellenebilirliğini ölçmek için, eğitimde kullanılmayan SOTA kaynaklardan (Lakera/Mosscap, SPML, xTRam1, Horizon) derlenen **12 dilli, N=2.000 (1.000 saldırı / 1.000 meşru)** bağımsız bir benchmark üzerinde değerlendirme yapılmıştır. Bu sette:
-* **Efektif ayrım gücü (ml_risk AUC):** ≈ **0.89** (in-distribution 0.9954'ten düşük; beklenen genelleme boşluğu).
-* **Dağıtılan karar noktası** (OR-Gate: `hard_stego ∨ regex≥60 ∨ ml_risk≥70`) ile, donmuş test kümesinde **Saldırı Blok (Recall) ≈ %72 [%68–76]**, **Kurumsal Meşru FP ≈ %12 [%9–15]** (Wilson %95 GA).
+* **Efektif ayrım gücü (ml_risk AUC):** ≈ **0.88** (kapsam-içi ≈ **0.91**; in-distribution 0.9954'ten düşük; beklenen genelleme boşluğu).
+* **Dağıtılan karar noktası** (OR-Gate: `hard_stego ∨ regex≥60 ∨ ml_risk≥70 ∨ (regex∧ML_Mal)`) ile tüm 2.000'lik sette **Saldırı Blok (Recall) = %73.20 [%70.37–%75.85]**, **Meşru FP = %12.00 [%10.13–%14.16]** (kapsam-içi Recall **%77.3**; stratifiye donmuş test kümesinde $n=1.000$ Recall **%72.4 [%68.3–%76.1]**, FP **%12.8 [%10.2–%16.0]**, Wilson %95 GA).
+* **İki Kanallı Sızıntı (Egress vs. CoT / Reasoning):** Küçük yerel modeller (`Qwen2.5-3B`, `Llama3.2-3B`) kanarya sırlarını doğrudan kullanıcı yanıtında (`content`) %8.9–%31.1 oranında sızdırırken; EVREN H200 üzerindeki büyük muhakeme modelleri (`Qwen-3.8-Flash-Next`, `Google-Gemma-4-31B`) saldırıyı `content` alanında reddetmelerine rağmen API'nin döndürdüğü içsel düşünme (`reasoning` / `<think>`) kanalında sistem promptu sırlarını sırasıyla **%30.0** ve **%65.0** oranında açık metin olarak ifşa etmektedir (Şekil 8). **NeuralShield-v5** saldırıları henüz muhakeme başlamadan kapıda (~30 ms) keserek her iki kanaldaki sızıntıyı da **%0.0'a** indirir.
 
-Dolayısıyla metin boyunca geçen **"%0 ASR / %0 IT-FPR"** ifadeleri **yalnızca bilinen-imza (known-signature) korpusu** için geçerlidir; bağımsız/dış dağılımda kalkan, bir **kesinlik-duyarlılık (precision-recall) ödünleşimi** işletir. Bu şeffaflık, çok katmanlı mimarinin bilinen saldırılarda mükemmelse de sıfır-gün manipülasyonlara karşı mutlak koruma iddia etmediğini gösterir (§V-A).
+Dolayısıyla metin boyunca geçen **"%0 ASR / %0 IT-FPR"** ifadeleri **bilinen-imza (known-signature) ve canlı kanarya korpusları** için geçerlidir; bağımsız/dış dağılımda kalkan, bir **kesinlik-duyarlılık (precision-recall) ödünleşimi** işletir. Bu şeffaflık, çok katmanlı mimarinin bilinen saldırılarda mükemmelse de sıfır-gün manipülasyonlara karşı mutlak koruma iddia etmediğini gösterir (§V-A).
 
 ---
 

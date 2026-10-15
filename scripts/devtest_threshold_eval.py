@@ -38,7 +38,7 @@ def metrics(rows, rule):
     return dict(tp=tp,fn=fn,fp=fp,tn=tn,rec=rec,fpr=fpr,prec=prec,f1=f1,nA=len(A),nB=len(B))
 
 def orgate(x, mt):
-    return x['hard_stego'] or x['regex_score']>=60 or x['ml_risk']>=mt
+    return x['hard_stego'] or x['regex_score']>=60 or x['ml_risk']>=mt or (x.get('regex_triggered', False) and x.get('ml_class')=='Malicious')
 
 # 1) DEV'de eşik seç (max-F1)
 best=None

@@ -93,8 +93,13 @@ class NeuralShieldV5FullPipelineEvaluator(BaseGuardrailEvaluator):
         analysis_text = norm_res["extended_text"]
         hard_stego = bool(norm_res["hard_stego_signal"])
 
-        # Katman 1: Regex & Heuristic
+        # Katman 1: Regex & Heuristic (ana metin + ROT13 / Reverse / Leetspeak varyantları)
         r_trig, r_pats, r_score = scan_text(analysis_text)
+        r13_t, _, r13_s = scan_text(norm_res.get("rot13_variant", ""))
+        rev_t, _, rev_s = scan_text(norm_res.get("reversed_variant", ""))
+        leet_t, _, leet_s = scan_text(norm_res.get("leetspeak_variant", ""))
+        r_trig = r_trig or r13_t or rev_t or leet_t
+        r_score = max(r_score, r13_s, rev_s, leet_s)
 
         # Katman 2: XLM-RoBERTa ONNX INT8 (Kayan Pencere + Kalibre Edilmiş Sıcaklık)
         ml_res = self.ml_model.predict(analysis_text, sliding_window=True)
@@ -114,12 +119,18 @@ class NeuralShieldV5FullPipelineEvaluator(BaseGuardrailEvaluator):
             final_risk = max(composite_score, CONFIG["hard_block_regex_and_ml_score"])
         elif r_trig:
             final_risk = max(composite_score, CONFIG["regex_only_floor_score"])
-        elif ml_class == "Malicious" and ml_risk >= CONFIG["block_threshold"]:
-            final_risk = max(composite_score, ml_risk)
         else:
             final_risk = composite_score
 
-        is_blocked = final_risk >= CONFIG["block_threshold"]
+        if CONFIG.get("decision_mode", "or_gate") == "or_gate":
+            is_blocked = bool(
+                hard_stego
+                or r_score >= CONFIG.get("regex_block_score_threshold", 60)
+                or ml_risk >= CONFIG.get("ml_block_threshold", 70)
+                or (r_trig and ml_class == "Malicious")
+            )
+        else:
+            is_blocked = final_risk >= CONFIG["block_threshold"]
         latency_ms = (time.perf_counter() - t0) * 1000.0
 
         return {
@@ -181,7 +192,7 @@ class Qwen3GuardEvaluator(BaseGuardrailEvaluator):
 
         t0 = time.perf_counter()
         try:
-            res = self.client.generate_chat(prompt, model="qwen3-guard-4b", max_tokens=64, temperature=0.0)
+            res = self.client.generate_chat(prompt, model="qwen3-guard-4b", max_tokens=512, temperature=0.0)
             latency_ms = (time.perf_counter() - t0) * 1000.0
             content = res.get("content", "").strip()
 

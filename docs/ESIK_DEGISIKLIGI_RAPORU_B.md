@@ -19,8 +19,8 @@
 
 | Test | Sonuç |
 |---|---|
-| `scripts/verify_full_pipeline.py` | **20/20 BAŞARILI** (ZWJ-emoji 10/10, Türkçe IT 10/10 temiz) |
-| `tests/test_security_layer.py` (pytest) | **18/18 BAŞARILI** |
+| `scripts/verify_full_pipeline.py` | **22/22 BAŞARILI** (ZWJ-emoji 10/10, Türkçe IT 10/10, Kiril 4/4, DLP Kanarya 4/4 temiz) |
+| `tests/test_security_layer.py` (pytest) | **20/20 BAŞARILI** |
 
 → Eşik düşmesine rağmen **meşru IT/emoji testlerinde yanlış alarm YOK.**
 
@@ -28,28 +28,28 @@
 
 | Alt grup | BEFORE (composite thr60) | AFTER (OR-Gate ML≥70) | Değişim |
 |---|---:|---:|---:|
-| Tüm set (saldırı) [Saldırı blok (recall)] | %27.3 | %72.5 | +45.2 |
-| Tüm set (meşru) [Meşru FP] | %1.3 | %12.4 | +11.1 |
-| Kapsam-içi (saldırı) [Saldırı blok (recall)] | %28.9 | %76.5 | +47.6 |
-| Kapsam-içi (meşru) [Meşru FP] | %1.3 | %12.4 | +11.1 |
-| native TR/EN (saldırı) [Saldırı blok (recall)] | %44.9 | %86.2 | +41.3 |
-| MT diller (saldırı) [Saldırı blok (recall)] | %19.3 | %66.3 | +46.9 |
-| explicit (saldırı) [Saldırı blok (recall)] | %50.7 | %87.0 | +36.3 |
-| subtle (saldırı) [Saldırı blok (recall)] | %18.0 | %66.8 | +48.7 |
-| normal benign [Meşru FP] | %0.0 | %6.8 | +6.8 |
-| hard-negative benign [Meşru FP] | %2.3 | %16.6 | +14.4 |
+| Tüm set (saldırı) [Saldırı blok (recall)] | %30.3 | %73.2 | +42.9 |
+| Tüm set (meşru) [Meşru FP] | %0.5 | %12.0 | +11.5 |
+| Kapsam-içi (saldırı) [Saldırı blok (recall)] | %32.1 | %77.3 | +45.2 |
+| Kapsam-içi (meşru) [Meşru FP] | %0.5 | %12.0 | +11.5 |
+| native TR/EN (saldırı) [Saldırı blok (recall)] | %45.8 | %85.3 | +39.4 |
+| MT diller (saldırı) [Saldırı blok (recall)] | %23.3 | %67.7 | +44.5 |
+| explicit (saldırı) [Saldırı blok (recall)] | %55.3 | %88.0 | +32.7 |
+| subtle (saldırı) [Saldırı blok (recall)] | %20.4 | %67.3 | +46.9 |
+| normal benign [Meşru FP] | %0.0 | %6.3 | +6.3 |
+| hard-negative benign [Meşru FP] | %0.9 | %16.3 | +15.4 |
 
 ## 4. Özet tablo (kapsam-içi)
 
 | Metrik | A (eski) | B (yeni) |
 |---|---:|---:|
-| Saldırı blok (recall) | %28.9 | **%76.5** |
-| Meşru FP | %1.3 | %12.4 |
+| Saldırı blok (recall) | %32.1 | **%77.3** |
+| Meşru FP | %0.5 | %12.0 |
 
 ## 5. Yorum
 
-- Recall **~%29 → ~%77** (kapsam-içi) yükseldi; yani saldırıların çoğu artık yakalanıyor.
-- Bedel: meşru FP **~%1.3 → ~%12.4**'e çıktı — **çoğu NotInject hard-negative'lerden**; normal benign'te daha düşük.
+- Recall **~%32 → ~%77** (kapsam-içi) yükseldi; yani saldırıların çoğu artık yakalanıyor.
+- Bedel: meşru FP **~%0.5 → ~%12.0**'e çıktı — **çoğu NotInject hard-negative'lerden**; normal benign'te daha düşük.
 - Layer-0 Kiril (homoglyph) hatası düzeltildi: Rusça meşru FP ~%58 → düştü; genel FP bir miktar azaldı.
 - Bu, modelin ayrım gücünün (bu sette ~AUC 0.86) kaçınılmaz ödünleşimidir. **Kapasite/model sorunu değildir.**
 - Operasyonel öneri: banka/SOC gibi FP-toleranslı ortamlar için B uygun; müşteri-hizmetleri gibi 0-FP istenen ortamlar için `ml_block_threshold` 75-80'e çekilebilir veya 'şüpheli' tier ile kademelendirilebilir.

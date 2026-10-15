@@ -24,6 +24,11 @@ for i, x in enumerate(d):
     nr = normalize_for_analysis(x["text"])
     at = nr["extended_text"]
     trig, pats, r_score = scan_text(at)
+    r13_t, r13_p, r13_s = scan_text(nr.get("rot13_variant", ""))
+    rev_t, rev_p, rev_s = scan_text(nr.get("reversed_variant", ""))
+    leet_t, leet_p, leet_s = scan_text(nr.get("leetspeak_variant", ""))
+    trig = trig or r13_t or rev_t or leet_t
+    r_score = max(r_score, r13_s, rev_s, leet_s)
     hard = bool(nr["hard_stego_signal"])
     m = ml.predict(at)
     ml_risk = m.get("ml_risk_score", 0); ml_class = m.get("ml_class", "Benign")

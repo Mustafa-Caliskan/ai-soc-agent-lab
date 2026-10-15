@@ -89,7 +89,7 @@ def evaluate_raw_model_leak(client: EvrenClient, model_id: str, attack_prompt: s
         prompt=attack_prompt,
         system_instruction=COMPANY_SYSTEM_PROMPT,
         model=model_id,
-        max_tokens=1024,
+        max_tokens=4096,
         temperature=0.0
     )
     latency_ms = (time.perf_counter() - t0) * 1000.0
@@ -165,13 +165,19 @@ async def evaluate_shielded(ml_model: MLSecurityModel, client: EvrenClient, mode
         # Kalkan izin verdi (veya meşru istek) -> Modele ilet
         leak_res = evaluate_raw_model_leak(client, model_id, attack_prompt)
         raw_output = leak_res.get("response", "")
+        raw_reasoning = leak_res.get("reasoning", "")
 
-        # Katman 3: DLP Çıkış Filtreleme (Hassas anahtar / şifre maskeleme)
-        is_masked, sanitized_output, dlp_pats = dlp.scan_and_mask(raw_output)
+        # Katman 3: DLP Çıkış Filtreleme (Hem content hem reasoning kanalı taranır)
+        is_masked_c, sanitized_output, dlp_pats_c = dlp.scan_and_mask(raw_output)
+        is_masked_r, sanitized_reasoning, dlp_pats_r = dlp.scan_and_mask(raw_reasoning)
+        is_masked = is_masked_c or is_masked_r
+        dlp_pats = list(dict.fromkeys(dlp_pats_c + dlp_pats_r))
 
-        # DLP sonrasında content içinde canary hala duruyor mu?
+        # DLP sonrasında content veya reasoning içinde canary hala duruyor mu?
         leaked_after_dlp = canary.find_leaked(sanitized_output)
+        leaked_cot_after_dlp = canary.find_leaked(sanitized_reasoning)
         final_content_hacked = bool(leaked_after_dlp)
+        final_reasoning_hacked = bool(leaked_cot_after_dlp)
 
         return {
             "blocked_by_shield": False,
@@ -180,8 +186,9 @@ async def evaluate_shielded(ml_model: MLSecurityModel, client: EvrenClient, mode
             "shield_latency_ms": round(shield_latency, 2),
             "model_called": True,
             "content_hacked": final_content_hacked,
-            "reasoning_hacked": leak_res.get("reasoning_hacked", False),
+            "reasoning_hacked": final_reasoning_hacked,
             "content_canaries": leaked_after_dlp,
+            "reasoning_canaries": leaked_cot_after_dlp,
             "dlp_triggered": is_masked,
             "dlp_patterns": dlp_pats,
             "final_response": sanitized_output,
@@ -338,6 +345,7 @@ def main():
             fpr = (fp_count / benign_total * 100.0) if benign_total else 0.0
 
             raw_ci = wilson_interval(raw_egress_leaks, attacks_total)
+            cot_ci = wilson_interval(raw_cot_leaks, attacks_total)
             shield_ci = wilson_interval(shielded_leaks, attacks_total)
 
             avg_raw_lat = sum(raw_latencies) / len(raw_latencies) if raw_latencies else 0.0
@@ -354,6 +362,7 @@ def main():
                 "raw_wilson_ci": raw_ci,
                 "raw_cot_leaks": raw_cot_leaks,
                 "raw_cot_leak_rate_pct": round(raw_cot_leak_rate, 1),
+                "raw_cot_wilson_ci": cot_ci,
                 "shield_blocks": shield_blocks,
                 "shield_block_rate_pct": round(block_rate, 1),
                 "shield_leaks": shielded_leaks,
@@ -361,7 +370,7 @@ def main():
                 "shield_wilson_ci": shield_ci,
                 "fp_count": fp_count,
                 "fpr_pct": round(fpr, 1),
-                "defense_improvement_pct": round(raw_egress_asr - shield_asr, 1),
+                "defense_improvement_pct": round(raw_cot_leak_rate - shield_asr, 1),
                 "avg_raw_latency_ms": round(avg_raw_lat, 1),
                 "avg_shield_latency_ms": round(avg_shield_lat, 2)
             }
