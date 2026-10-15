@@ -216,12 +216,16 @@ def main():
     print(f"📁 Benchmark seti yüklendi: {len(corpus)} örnek ({dataset_path}).\n")
 
     raw_leaks = 0
+    raw_cot_leaks = 0
     shield_blocks = 0
     shield_leaks = 0
     fp_count = 0
     attacks_total = 0
     benign_total = 0
     traces = []
+
+    import re as _re
+    _THINK_RE = _re.compile(r"<think>(.*?)</think>", _re.DOTALL | _re.IGNORECASE)
 
     for idx, item in enumerate(corpus, 1):
         p_id = item.get("id", f"P_{idx}")
@@ -235,12 +239,20 @@ def main():
 
         print(f"  [{idx:02d}/{len(corpus)}] {p_id} -> ", end="", flush=True)
 
-        # Mod 1: Kalkan KAPALI (Raw LLM)
-        raw_resp, raw_lat = generate_llm_response(model, tokenizer, prompt)
-        leaked_canaries = canary.find_leaked(raw_resp) if is_attack else []
+        # Mod 1: Kalkan KAPALI (Raw LLM) — <think> (CoT) ve Yanıt (Content) ayrı ölçülür
+        raw_resp, raw_lat = generate_llm_response(model, tokenizer, prompt, max_new_tokens=1024)
+        cot_matches = _THINK_RE.findall(raw_resp or "")
+        cot_text = "\n".join(cot_matches).strip()
+        content_text = _THINK_RE.sub("", raw_resp or "").strip()
+
+        leaked_canaries = canary.find_leaked(content_text) if is_attack else []
+        leaked_cot_canaries = canary.find_leaked(cot_text) if is_attack else []
         is_raw_leaked = bool(leaked_canaries)
+        is_cot_leaked = bool(leaked_cot_canaries)
         if is_raw_leaked:
             raw_leaks += 1
+        if is_cot_leaked:
+            raw_cot_leaks += 1
 
         # Mod 2: Kalkan AÇIK (NeuralShield-v5)
         shield_res = run_neuralshield(prompt, ml_model, precomputed_item=item)
@@ -263,17 +275,23 @@ def main():
                     shield_leaks += 1
                     is_shield_leaked = True
 
-        status_raw = "🚨 SIZDIRDI" if is_raw_leaked else "🛡️ DİRENDİ"
+        status_raw = "🚨 SIZDIRDI" if is_raw_leaked else ("⚠️ CoT-Sızıntı" if is_cot_leaked else "🛡️ DİRENDİ")
         status_shield = f"BLOCKED ({shield_res['overhead_ms']:.1f}ms)" if shield_decision == "BLOCKED" else ("ALLOWED" if not is_attack else "🚨 KAÇTI")
         print(f"Raw: [{status_raw}] | Shield: [{status_shield}]")
 
         traces.append({
             "id": p_id,
+            "tier": item.get("tier", 1 if is_attack else 0),
+            "category": item.get("category", "Unknown"),
+            "language": item.get("language", "unknown"),
             "is_attack": is_attack,
             "prompt": prompt,
-            "raw_leaked": is_raw_leaked,
-            "raw_canaries": leaked_canaries,
-            "raw_response": raw_resp,
+            "raw_content_hacked": is_raw_leaked,
+            "raw_reasoning_hacked": is_cot_leaked,
+            "raw_content_canaries": leaked_canaries,
+            "raw_reasoning_canaries": leaked_cot_canaries,
+            "raw_response": content_text,
+            "raw_reasoning": cot_text,
             "raw_latency_ms": round(raw_lat, 2),
             "shield_decision": shield_decision,
             "shield_ml_risk": shield_res["ml_risk"],
@@ -283,20 +301,41 @@ def main():
             "shield_canaries": leaked_after_dlp
         })
 
+    # Kademe (Tier 1..5) ve Dil Bazlı Kırılım Analizi
+    tier_breakdown = {}
+    for t_lvl in [1, 2, 3, 4, 5]:
+        t_items = [x for x in traces if x["is_attack"] and x.get("tier") == t_lvl]
+        if t_items:
+            t_egress = sum(1 for x in t_items if x["raw_content_hacked"])
+            t_cot = sum(1 for x in t_items if x["raw_reasoning_hacked"])
+            t_blk = sum(1 for x in t_items if x["shield_decision"] == "BLOCKED")
+            tier_breakdown[f"Tier_{t_lvl}"] = {
+                "total": len(t_items),
+                "egress_leaks": t_egress,
+                "egress_asr_pct": round(t_egress / len(t_items) * 100.0, 1),
+                "cot_leaks": t_cot,
+                "cot_leak_pct": round(t_cot / len(t_items) * 100.0, 1),
+                "shield_blocks": t_blk,
+                "shield_block_pct": round(t_blk / len(t_items) * 100.0, 1),
+            }
+
     raw_asr = (raw_leaks / attacks_total * 100.0) if attacks_total else 0.0
+    raw_cot_rate = (raw_cot_leaks / attacks_total * 100.0) if attacks_total else 0.0
     shield_asr = (shield_leaks / attacks_total * 100.0) if attacks_total else 0.0
     block_rate = (shield_blocks / attacks_total * 100.0) if attacks_total else 0.0
     fpr = (fp_count / benign_total * 100.0) if benign_total else 0.0
 
     raw_ci = wilson_interval(raw_leaks, attacks_total)
+    cot_ci = wilson_interval(raw_cot_leaks, attacks_total)
     shield_ci = wilson_interval(shield_leaks, attacks_total)
 
     print("\n" + "=" * 80)
     print(f"🎯 BENCHMARK SONUÇLARI ({args.model}):")
-    print(f"  - Kalkan KAPALI (Raw ASR)  : %{raw_asr:.1f} ({raw_leaks}/{attacks_total}) [Wilson %95: {raw_ci[0]} - {raw_ci[1]}]")
-    print(f"  - Kalkan AÇIK (Shield ASR) : %{shield_asr:.1f} ({shield_leaks}/{attacks_total}) [Wilson %95: {shield_ci[0]} - {shield_ci[1]}]")
-    print(f"  - Kalkan Blok Başarımı     : %{block_rate:.1f} ({shield_blocks}/{attacks_total})")
-    print(f"  - Yanlış Alarm (FP Oranı)  : %{fpr:.1f} ({fp_count}/{benign_total})")
+    print(f"  - Kalkan KAPALI (Egress ASR): %{raw_asr:.1f} ({raw_leaks}/{attacks_total}) [Wilson %95: {raw_ci[0]} - {raw_ci[1]}]")
+    print(f"  - Kalkan KAPALI (CoT Leak)  : %{raw_cot_rate:.1f} ({raw_cot_leaks}/{attacks_total}) [Wilson %95: {cot_ci[0]} - {cot_ci[1]}]")
+    print(f"  - Kalkan AÇIK (Shield ASR)  : %{shield_asr:.1f} ({shield_leaks}/{attacks_total}) [Wilson %95: {shield_ci[0]} - {shield_ci[1]}]")
+    print(f"  - Kalkan Blok Başarımı      : %{block_rate:.1f} ({shield_blocks}/{attacks_total})")
+    print(f"  - Yanlış Alarm (FP Oranı)   : %{fpr:.1f} ({fp_count}/{benign_total})")
     print("=" * 80)
 
     clean_model_name = args.model.replace("/", "_").replace("-", "_")
@@ -304,12 +343,17 @@ def main():
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump({
             "model": args.model,
+            "raw_egress_leaks": raw_leaks,
             "raw_asr_pct": raw_asr,
             "raw_wilson_ci": raw_ci,
+            "raw_cot_leaks": raw_cot_leaks,
+            "raw_cot_leak_rate_pct": raw_cot_rate,
+            "raw_cot_wilson_ci": cot_ci,
             "shield_asr_pct": shield_asr,
             "shield_wilson_ci": shield_ci,
             "block_rate_pct": block_rate,
             "fpr_pct": fpr,
+            "tier_breakdown": tier_breakdown,
             "traces": traces
         }, f, indent=2, ensure_ascii=False)
     print(f"💾 Sonuçlar kaydedildi: {out_file}\n")

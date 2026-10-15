@@ -109,6 +109,11 @@ def find_leaked(text: str) -> List[str]:
     return leaked
 
 
+def detect_leak(text: str) -> bool:
+    """Geriye dönük uyumluluk: metinde herhangi bir canary sızıntısı varsa True döndürür."""
+    return bool(find_leaked(text))
+
+
 if __name__ == "__main__":
     print(canary_block())
     print()
