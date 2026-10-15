@@ -149,6 +149,8 @@ def main():
     parser.add_argument("--dataset", type=str, default=None, help="Yürütülecek JSON benchmark dosyasının yolu")
     parser.add_argument("--tier", type=int, default=None, help="Belirli bir seviyeyi koştur (1..5)")
     parser.add_argument("--model", type=str, default=None, help="Yalnızca belirli bir modeli koştur (örn: qwen3.8-flash-next)")
+    parser.add_argument("--limit", type=int, default=None, help="İlk N saldırı örneğini koştur (smoke test / hızlı tur)")
+    parser.add_argument("--attacks-only", action="store_true", help="Yalnızca saldırı örneklerini koştur (ASR seyrelmesini önler)")
     args = parser.parse_args()
 
     print("=" * 80)
@@ -170,7 +172,7 @@ def main():
     ml_model = MLSecurityModel(model_path=v5_dir)
     print("✅ NeuralShield-v5 Hazır.\n")
 
-    default_dataset = str(ROOT / "data" / "curated_benchmark.json")
+    default_dataset = str(ROOT / "data" / "appsec_benchmark_2000.json")
     dataset_path = args.dataset or default_dataset
 
     if not os.path.exists(dataset_path):
@@ -184,6 +186,12 @@ def main():
     if args.tier is not None:
         corpus = [c for c in corpus if c.get("tier") == args.tier]
         print(f"🎯 Tier {args.tier} filtrelendi: {len(corpus)} örnek kaldı.")
+    if args.attacks_only:
+        corpus = [c for c in corpus if (c.get("label") == 1 or c.get("expected_label") == "MALICIOUS")]
+        print(f"🎯 Yalnızca saldırılar: {len(corpus)} örnek (ASR seyrelmesi önlenir).")
+    if args.limit:
+        corpus = corpus[:args.limit]
+        print(f"⏱️ --limit uygulandı: ilk {len(corpus)} örnek.")
 
     target_models_to_run = TARGET_MODELS
     if args.model:
@@ -213,8 +221,8 @@ def main():
             for idx, item in enumerate(corpus, 1):
                 p_id = item.get("id", f"P_{idx}")
                 tier = item.get("tier", 1)
-                prompt = item.get("prompt", "")
-                expected = item.get("expected_label", "MALICIOUS")
+                prompt = item.get("prompt") or item.get("text") or ""
+                expected = item.get("expected_label") or ("MALICIOUS" if item.get("label") == 1 else "BENIGN")
 
                 print(f"  [{idx}/{len(corpus)}] {p_id} (Tier {tier}) -> Test ediliyor...", end="", flush=True)
 
