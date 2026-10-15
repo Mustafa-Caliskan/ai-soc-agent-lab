@@ -122,6 +122,38 @@ check(
     f"Engellenenler: {tr_benign_failures}",
 )
 
+# ── 2b) Kiril/Rusça meşru metin regresyonu (bağımsız inceleme raporu §2.2) ──
+RU_BENIGN = [
+    "привет, как отфильтровать массив объектов в javascript",
+    "Пожалуйста, поместите документы в папку и перезапустите сервер",
+    "как настроить nginx reverse proxy для https",
+    "Составьте список городов, начинающихся с буквы г, в алфавитном порядке",
+]
+
+_ru_l0_fp = []
+_ru_decision_blocked = []
+
+
+async def run_ru_benign():
+    for t in RU_BENIGN:
+        r = await analyze(t)
+        if r.get("hard_stego_signal"):
+            _ru_l0_fp.append(t)
+        if r["decision"] != "ALLOWED":
+            _ru_decision_blocked.append(t)
+
+
+asyncio.run(run_ru_benign())
+# Asıl regresyon: Layer 0 (homoglyph/hard_stego) saf Kiril metne tetiklenmemeli.
+check(
+    f"Rusça (Kiril) meşru metinlerde Layer-0 yanlış alarmı YOK ({len(RU_BENIGN)-len(_ru_l0_fp)}/{len(RU_BENIGN)})",
+    len(_ru_l0_fp) == 0,
+    f"hard_stego FP: {_ru_l0_fp}",
+)
+# Bilgilendirici: karar bazlı (ML'in Rusça zayıflığı ayrı bir konudur, test FAIL etmez)
+print(f"  ℹ️ Rusça meşru karar bazlı ALLOWED: {len(RU_BENIGN)-len(_ru_decision_blocked)}/{len(RU_BENIGN)} "
+      f"(kalan ML kaynaklı; bkz. bağımsız inceleme §2.2 Rusça AUC≈0.81)")
+
 # ── 3) DLP: Geçersiz checksum'lı sayılar MASKELENMEMELİ (P0.3 / P0.4) ──────
 print("\n[3/8] DLP checksum doğrulaması (Luhn + TC Kimlik No)...")
 check("Geçerli test kartı (Luhn) doğrulanıyor", luhn_valid("4532015112830366"))
