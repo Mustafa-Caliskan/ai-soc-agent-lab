@@ -131,6 +131,9 @@ Korunan modelin ürettiği yanıtlar kullanıcıya iletilmeden önce algoritmik 
 
 Kurumsal modellerin ~400-1200 ms yanıt süresi göz önüne alındığında, 12.73 ms'lik güvenlik gecikmesi kurumsal kullanıcı deneyimini kesinlikle etkilememektedir.
 
+### 3.2. Bağımsız (Out-of-Distribution) Değerlendirme
+Tablo 1'deki sonuçlar eğitimle aynı dağılımdan (in-distribution) çekilen Hold-out kümesine aittir. Genellenebilirliği ölçmek için, eğitimde kullanılmayan SOTA kaynaklardan derlenen **12 dilli, N=2.000 (1.000/1.000)** bağımsız bir benchmark kullanılmıştır. Bu sette efektif ayrım (ml_risk AUC) **≈ 0.89**, dağıtılan OR-Gate karar noktasında (`hard_stego ∨ regex≥60 ∨ ml_risk≥70`) **Saldırı Recall ≈ %72 [%68–76]** ve **Meşru FP ≈ %12 [%9–15]** (Wilson %95 GA) ölçülmüştür. Buna karşılık metindeki **"%0 ASR / %0 IT-FPR"** ifadeleri yalnızca **bilinen-imza (known-signature) korpusu** için geçerlidir; dış dağılımda sistem bir **kesinlik-duyarlılık ödünleşimi** işletir. Bu, mimarinin sıfır-gün manipülasyonlara karşı mutlak koruma iddia etmediğini şeffaf biçimde gösterir.
+
 ---
 
 ## 4. Tartışma ve Sonuç

@@ -12,7 +12,7 @@
 | `backend/security_layer.py` | Karar bloğu `composite` → **OR-Gate** oldu. Composite skoru yalnızca **raporlama** için korunur |
 | `scripts/verify_full_pipeline.py` | [6/8] testi yeni anahtarı (`ml_block_threshold`) kullanacak şekilde güncellendi |
 
-**Yeni karar kuralı:** `blocked = hard_stego OR regex_score>=60 OR ml_risk>=70`
+**Yeni karar kuralı (kodda 4 koşul):** `blocked = hard_stego OR regex_score>=60 OR ml_risk>=70 OR (regex_triggered AND ml_class=Malicious)`
 (Eski: `0.70·ML + 0.20·regex + 0.10·stego >= 60` — ML≥86 gerektiriyordu.)
 
 ## 2. Regresyon testleri (kanıt)

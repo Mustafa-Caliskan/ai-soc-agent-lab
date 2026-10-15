@@ -171,6 +171,13 @@ Yerel 4 çekirdekli standart CPU üzerinde ölçülen çıkarım süreleri:
 
 Hedef kurumsal modellerin ortalama 400-1200 ms yanıt süresi yanında 12.73 milisaniyelik bu ek yük, kullanıcı deneyiminde sıfır gecikme hissi uyandırmaktadır.
 
+### D. Bağımsız (Out-of-Distribution) Değerlendirme
+Yukarıdaki Hold-out sonuçları eğitimle **aynı dağılımdan** (in-distribution) çekilmiştir. Gerçek-dünya genellenebilirliğini ölçmek için, eğitimde kullanılmayan SOTA kaynaklardan (Lakera/Mosscap, SPML, xTRam1, Horizon) derlenen **12 dilli, N=2.000 (1.000 saldırı / 1.000 meşru)** bağımsız bir benchmark üzerinde değerlendirme yapılmıştır. Bu sette:
+* **Efektif ayrım gücü (ml_risk AUC):** ≈ **0.89** (in-distribution 0.9954'ten düşük; beklenen genelleme boşluğu).
+* **Dağıtılan karar noktası** (OR-Gate: `hard_stego ∨ regex≥60 ∨ ml_risk≥70`) ile, donmuş test kümesinde **Saldırı Blok (Recall) ≈ %72 [%68–76]**, **Kurumsal Meşru FP ≈ %12 [%9–15]** (Wilson %95 GA).
+
+Dolayısıyla metin boyunca geçen **"%0 ASR / %0 IT-FPR"** ifadeleri **yalnızca bilinen-imza (known-signature) korpusu** için geçerlidir; bağımsız/dış dağılımda kalkan, bir **kesinlik-duyarlılık (precision-recall) ödünleşimi** işletir. Bu şeffaflık, çok katmanlı mimarinin bilinen saldırılarda mükemmelse de sıfır-gün manipülasyonlara karşı mutlak koruma iddia etmediğini gösterir (§V-A).
+
 ---
 
 ## V. TARTIŞMA VE LİTERATÜRLE KIYASLAMA

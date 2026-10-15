@@ -49,7 +49,8 @@
 | normal benign | FP (ML≥50) | %14 |
 | hard-negative benign | FP (ML≥50) | %26 |
 
-> **Not:** MT diller recall'u native'den **daha kötü değil** → model dili bağımsız çalışıyor. FP'nin büyük kısmı **NotInject hard-negative**'lerden.
+> **Not:** MT diller recall'u native'den **daha düşüktür** (ML≥50'de native %91 vs MT %82; dağıtılan OR-Gate eşiğinde native %86 vs MT %67).
+> Yani model dili tamamen bağımsız DEĞİLDİR; FP'nin büyük kısmı ise **NotInject hard-negative**'lerden gelir.
 
 ## 4. KARAR EŞİĞİ ÖDÜNLEŞİM TABLOSU (Kapsam-içi set)
 
@@ -71,8 +72,10 @@ Modelin ayrım gücü (bu sette ~AUC 0.86) bu ödünleşim eğrisini belirler.
 
 ## 5. ÖNERİ VE KARAR SEÇENEKLERİ
 
-**Not:** `OR-Gate` ile `ML≥X` kuralları bu veride **birebir aynı** sonucu verir; çünkü regex tetiklendiğinde skoru zaten ≥60'tır.
-Yani arkadaş önerisi (stego/regex gücünü koru, ML'yi 0.70 ile ezme) hem doğru hem de en dengeli davranışı üretir.
+**Not:** `OR-Gate` ile `ML≥X` **AYNI DEĞİLDİR**. OR-Gate = `ML≥X OR regex_score≥60 OR hard_stego`;
+ek olarak `hard_stego` (Kiril FP'si düzeltilmeden önce) FP'yi yükseltiyordu. Ölçüm (düzeltme sonrası):
+  - ML-only `ML≥70`: recall 71.9 / FP 11.7
+  - OR-Gate `ML≥70`: recall 72.5 / FP 12.4
 
 **Önerilen kural: `OR-Gate (ML≥70)`** (veya modelin kalibre optimal eşiği τ*=0.4567 → ~`ML≥46`):
 
