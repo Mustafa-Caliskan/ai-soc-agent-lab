@@ -14,7 +14,7 @@
    - Sızıntı (leakage) denetimi + arındırılmış benchmark.
 3. **Benchmark temizliği:** slicing-bug düzeltildi, mosscap/NotInect bağımlılığı %50'den ~%10'a indi, OnerAYTAS/etik içerik çıkarıldı → **v4 dengeli 2000-seti** (12 dil, 0 sızıntı).
 4. **Karar motoru:** muhafazakâr composite → **OR-Gate** (`stego ∨ regex≥60 ∨ ML≥70`) → recall %29→%73.
-5. **Standart-araç çapraz doğrulama:** NVIDIA **garak** (679 probe) → injection/DAN %100.
+5. **Standart-araç çapraz doğrulama:** NVIDIA **garak** (679 probe) → promptinject **%98.9**, dan **%98.4**; genel (kapsam-dışı aileler dahil) **%46.2**.
 6. **Rakip kıyaslaması (adil, İngilizce + çok dilli):** ProtectAI / Patronus / (Llama-Guard bekliyor).
 7. **Karar:** v6 = **`mmBERT` (çok dilli ModernBERT)** — çünkü rakipler de mmBERT kullanıyor ve bizim Arapça zayıflığımız var.
 
