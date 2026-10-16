@@ -39,28 +39,39 @@ import re, pandas as pd
 from datasets import load_dataset, concatenate_datasets
 
 KEEP_ATTACK = [
+ # bizim v5 KEEP'lerimiz (kapsam-içi)
  "3nesdeniz/agentic-prompt-injection-5k","AltaySec/turkish-llm-injection",
  "MAlmasabi/Indirect-Prompt-Injection-BIPIA-GPT","S-Labs/prompt-injection-dataset",
  "cgoosen/prompt_injection_ctf_dataset_3","deepset/prompt-injections",
  "iamabhishekpanda/enterprise-prompt-injection-dataset","imoxto/prompt_injection_hackaprompt_gpt35",
  "prodnull/prompt-injection-repo-dataset","jayavibhav/prompt-injection",
  "3nesdeniz/turkish-conversation-prompt-injection",
- "rikka-snow/prompt-injection-multilingual",
- "dmtrdr/russian_prompt_injections","halilneed/turkish-prompt-injection-benchmark",
- "wambosec/prompt-injections","zachz/prompt-injection-benchmark",
+ # çok dilli / native (içerik denetiminden geçti)
+ "rikka-snow/prompt-injection-multilingual","dmtrdr/russian_prompt_injections",
+ "halilneed/turkish-prompt-injection-benchmark","wambosec/prompt-injections",
+ "wambosec/prompt-injections-subtle","zachz/prompt-injection-benchmark",
  "masahiroid/japanese-indirect-prompt-injection-probes",
+ # RAKİPLERİN izinli kaynaklarından (Horizon-Labs/ProtectAI reçetesi)
+ "neuralchemy/Prompt-injection-dataset","hendzh/PromptShield",
+ "Lakera/gandalf_ignore_instructions","Lakera/mosscap_prompt_injection",
+ "reshabhs/SPML_Chatbot_Prompt_Injection","rgeada/tool-response-injections",
+ "microsoft/llmail-inject-challenge","yanismiraoui/prompt_injections",
+ "TrustAIRLab/in-the-wild-jailbreak-prompts","JailbreakV-28K/JailBreakV-28k",
  "nvidia/Nemotron-RL-Agentic-Indirect-Prompt-Injection-v1" ]
-# NOT: DAMO-NLP-SG/MultiJail icerigi ZARARLI-URETIM agirlikli -> sadece 'coercion/framing' alt kumesi alinirsa eklenir.
-# GATED (HF token + onay gerekir, yerelde dogrulanamadi): nuhmanpk/prompt-sentinel, PromptInjectionDataset/*, Mindgard/*
-# MODEL (dataset degil, RAKIP olarak kullanilir): NAMAA-Space/Ara-Prompt-Guard (Arapca guardrail), Horizon-Labs/prompt-injection-guard-base
 KEEP_BENIGN = [
  "3nesdeniz/guardrail-hard-negatives","guychuk/benign-malicious-prompt-classification",
  "rogue-security/real-world-benign-use-cases","3nesdeniz/turkish-daily-dialogues-5k",
  "TFLai/Turkish-Dialog-Dataset","cisimcik/turkish-decisions-max-19k",
  "emreseyhan/Turkish-customer-service-conversations","kilicai/turkish-sft-multi-turn-dialogue-10k",
  "merve/turkish_instructions","CohereLabs/aya_collection_language_split",
- "dev-hussein/saudi-arabic-cs-conversations","halilneed/turkish-prompt-injection-false-alarm-benchmark" ]
-# KAPSAM DIŞI (yüklenmez): AdvBench, WildJailbreak, JailbreakHub, CAIS jailbreak, jackhhao, magpie...
+ "dev-hussein/saudi-arabic-cs-conversations","halilneed/turkish-prompt-injection-false-alarm-benchmark",
+ # rakiplerin benign kaynakları (izinli)
+ "OpenAssistant/oasst2","HuggingFaceH4/ultrachat_200k","fka/prompts.chat",
+ "glaiveai/glaive-function-calling-v2","CohereLabs/aya_dataset",
+ "natolambert/xstest-v2-copy","OpenSafetyLab/Salad-Data","alespalla/chatbot_instruction_prompts" ]
+# GATED/401 (token ister): or-bench-80k, Harelix/Prompt-Injection-Mixed-Techniques-2024, hlynurd/insecure-code
+# MODEL (rakip): NAMAA-Space/Ara-Prompt-Guard (Arapça), Horizon-Labs/prompt-injection-guard-base (mmBERT)
+# KAPSAM DIŞI (yüklenmez): AdvBench, WildJailbreak, JailbreakHub, CAIS, magpie, swiss-ai, vllm-sr
 
 ETHICS_PAT = re.compile(r"(suicide|self.?harm|intihar|genocide|soyk[ıi]r|organ mafya|ırkç|nefret söylemi|"
   r"11 eylül|9/11|nuke|bomb|bomba|meth|heroin|fentan|ricin|sarin|nerve agent|kimyasal silah|biyolojik silah)", re.I)
