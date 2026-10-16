@@ -12,10 +12,15 @@ C.append(md("""# 🧬 NeuralShield-v6 — mmBERT (çok dilli ModernBERT) Eğitim
 **Taban:** `jhu-clsp/mmBERT-base` · **Kayıp:** CyberFocalLoss (γ=2.0, α=0.65) · **Kapsam:** AppSec-only.
 Plan: `docs/V6_DATASET_PLAN.md` · Gerekçe: `docs/V6_RATIONALE_VE_KARSILASTIRMA.md`"""))
 
-C.append(code("""# @title 1. Kurulum + HF token
+C.append(code("""# @title 1. Kurulum + HF token + repo klonla (data/ icin)
 import os
 os.environ["TOKENIZERS_PARALLELISM"]="false"
 !pip install -q -U transformers datasets accelerate scikit-learn seaborn onnx onnxruntime langdetect 2>/dev/null
+if not os.path.exists('ai-soc-agent-lab'):
+    !git clone -q https://github.com/Mustafa-Caliskan/ai-soc-agent-lab.git
+if os.path.exists('ai-soc-agent-lab'):
+    os.chdir('ai-soc-agent-lab')
+!git pull -q
 HF_TOKEN=""
 try:
     from google.colab import userdata; HF_TOKEN=userdata.get('HF_TOKEN') or ""
@@ -24,7 +29,7 @@ if not HF_TOKEN: HF_TOKEN=os.getenv("HF_TOKEN","")
 if HF_TOKEN:
     os.environ["HF_TOKEN"]=HF_TOKEN
     from huggingface_hub import login; login(HF_TOKEN, add_to_git_credential=False)
-print("✅ kurulum tamam")"""))
+print("✅ kurulum tamam | cwd:", os.getcwd())"""))
 
 C.append(code("""# @title 2. Donanım + determinizm
 import torch
@@ -72,9 +77,9 @@ KEEP_BENIGN = [
 MARKER_REQUIRED = {"TrustAIRLab/in-the-wild-jailbreak-prompts","JailbreakV-28K/JailBreakV-28k"}
 
 SPEC = {
- "CohereLabs/aya_collection_language_split": {"config":"standard_arabic","text":"inputs"},
+ "CohereLabs/aya_collection_language_split": {"config":"standard_arabic","text":"inputs","split":"train[:10000]"},
  "CohereLabs/aya_dataset": {"text":"inputs"},
- "HuggingFaceH4/ultrachat_200k": {"split":"train_sft","text":"messages"},
+ "HuggingFaceH4/ultrachat_200k": {"split":"train_sft","text":"prompt"},
  "dev-hussein/saudi-arabic-cs-conversations": {"text":"conversation"},
  "kilicai/turkish-sft-multi-turn-dialogue-10k": {"text":"conversation"},
  "merve/turkish_instructions": {"text":"talimat"},
@@ -85,8 +90,8 @@ SPEC = {
  "halilneed/turkish-prompt-injection-false-alarm-benchmark": {"text":"text","label":"label"},
 }
 TEXT_COLS = ["text","prompt","instruction","user_prompt","goal","question","inputs","talimat","conversation","input","context"]
-LABEL_COLS = ["label","Prompt injection","is_attack","is_malicious","injection","output","type","class"]
-POSITIVE = {"1","injection","attack","malicious","jailbreak","unsafe","yes","true"}
+LABEL_COLS = ["label","labels","Prompt injection","is_attack","is_malicious","injection","output","type","class"]
+POSITIVE = {"1","1.0","injection","attack","malicious","jailbreak","unsafe","yes","true"}
 
 def pick(df, cols, override=None):
     if override and override in df.columns: return override
@@ -97,7 +102,7 @@ def pick(df, cols, override=None):
 def load_source(cid, fallback):
     spec = SPEC.get(cid, {})
     kw = {"split": spec.get("split","train")}
-    if spec.get("config"): kw["config"]=spec["config"]
+    if spec.get("config"): kw["name"]=spec["config"]
     try: ds = load_dataset(cid, **kw)
     except Exception:
         try: ds = load_dataset(cid, split=spec.get("split","train"))
@@ -147,6 +152,7 @@ for f in EVAL_TEXT_FILES:
                 if isinstance(x,dict) and x.get("text"): BLACKLIST.add(norm(x["text"]))
         except Exception: pass
 print(f"[i] Kara liste (eval metinleri): {len(BLACKLIST)}")
+assert len(BLACKLIST) >= 1500, "Sizinti kara listesi yuklenemedi (repo klonlanmadi / data eksik)!"
 ATTACKS=[t for t in ATTACKS if norm(t) not in BLACKLIST]
 BENIGN=[t for t in BENIGN if norm(t) not in BLACKLIST]
 print(f"[i] Purge sonrasi: attack={len(ATTACKS)} benign={len(BENIGN)}")"""))
@@ -159,8 +165,16 @@ LANGS = ["en","tr","de","fr","es","it","pt","ru","ar","ja","ko","zh"]
 TGT_ATK = {"en":15000,"tr":15000, **{l:2000 for l in ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]}}
 TGT_BEN = {"en":15000,"tr":15000, **{l:2000 for l in ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]}}
 def lang_of(t):
+    # 1) Hizli Unicode-script tespiti (langdetect'i atla, zh-cn bug'i yok)
+    for _lg, _pat in [("ar", r"[\u0600-\u06FF]"), ("ru", r"[\u0400-\u04FF]"),
+                      ("ko", r"[\uAC00-\uD7A3]"), ("ja", r"[\u3040-\u30FF]"),
+                      ("zh", r"[\u4E00-\u9FFF]")]:
+        if re.search(_pat, t): return _lg
+    if re.search(r"[çğıöşüÇĞİÖŞÜ]", t): return "tr"
+    # 2) Latin alfabesi icin langdetect (zh-cn/zh-tw -> zh)
     try:
-        lg = detect(t[:400]);  return lg if lg in LANGS else "en"
+        lg = detect(t[:400])
+        return "zh" if lg.startswith("zh") else (lg if lg in LANGS else "en")
     except Exception: return "en"
 def tier_of(t):
     tl=t.lower()
@@ -233,8 +247,8 @@ class FocalTrainer(Trainer):
         labels=inputs.get("labels")
         out=model(**inputs)
         ce=nn.functional.cross_entropy(out.logits, labels, reduction="none")
-        p=torch.softmax(out.logits,-1).gather(1,labels.unsqueeze(1)).squeeze(1)
-        pt = torch.where(labels==1, p, 1-p)
+        p=torch.softmax(out.logits,-1).gather(1,labels.unsqueeze(1)).squeeze(1)  # p = dogru sinifin olasiligi = pt
+        pt = p  # gather zaten p_t'yi secmis; where ile TERS CEVIRME YOK
         alpha_t = torch.where(labels==1, torch.full_like(pt, self.alpha), torch.full_like(pt, 1-self.alpha))
         loss=(alpha_t*((1-pt)**self.gamma)*ce).mean()
         return (loss,out) if return_outputs else loss
