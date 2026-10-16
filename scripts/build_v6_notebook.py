@@ -45,9 +45,14 @@ KEEP_ATTACK = [
  "iamabhishekpanda/enterprise-prompt-injection-dataset","imoxto/prompt_injection_hackaprompt_gpt35",
  "prodnull/prompt-injection-repo-dataset","jayavibhav/prompt-injection",
  "3nesdeniz/turkish-conversation-prompt-injection",
- "rikka-snow/prompt-injection-multilingual","DAMO-NLP-SG/MultiJail",
+ "rikka-snow/prompt-injection-multilingual",
  "dmtrdr/russian_prompt_injections","halilneed/turkish-prompt-injection-benchmark",
+ "wambosec/prompt-injections","zachz/prompt-injection-benchmark",
+ "masahiroid/japanese-indirect-prompt-injection-probes",
  "nvidia/Nemotron-RL-Agentic-Indirect-Prompt-Injection-v1" ]
+# NOT: DAMO-NLP-SG/MultiJail icerigi ZARARLI-URETIM agirlikli -> sadece 'coercion/framing' alt kumesi alinirsa eklenir.
+# GATED (HF token + onay gerekir, yerelde dogrulanamadi): nuhmanpk/prompt-sentinel, PromptInjectionDataset/*, Mindgard/*
+# MODEL (dataset degil, RAKIP olarak kullanilir): NAMAA-Space/Ara-Prompt-Guard (Arapca guardrail), Horizon-Labs/prompt-injection-guard-base
 KEEP_BENIGN = [
  "3nesdeniz/guardrail-hard-negatives","guychuk/benign-malicious-prompt-classification",
  "rogue-security/real-world-benign-use-cases","3nesdeniz/turkish-daily-dialogues-5k",

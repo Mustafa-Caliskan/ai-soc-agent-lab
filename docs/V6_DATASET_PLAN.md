@@ -76,6 +76,33 @@
 
 ---
 
+## 3.1. İÇERİK DENETİMİ SONUÇLARI (gerçek yükleme ile doğrulandı)
+
+### ✅ KEEP — içeriği in-scope (AppSec injection) DOĞRULANDI
+`wambosec/prompt-injections` · `zachz/prompt-injection-benchmark` · `masahiroid/japanese-indirect-prompt-injection-probes` (native JA) · `dmtrdr/russian_prompt_injections` (native RU) · `halilneed/turkish-prompt-injection-benchmark` (native TR) · `halilneed/turkish-prompt-injection-false-alarm-benchmark` (TR FP) · `rikka-snow/prompt-injection-multilingual` (⚠️ deepset ile kısmen örtüşüyor)
+
+### ❌ DROP — içerik kapsam-dışı / junk / yok
+| Dataset | Neden |
+|---|---|
+| `swiss-ai/polyglotoxicityprompts` | **Toksik** içerik (etik — AppSec değil) |
+| `vllm-sr/jailbreak-detection-dataset` | **Zararlı-üretim** ("nerve gas", "steal a purse") |
+| `emgena/omnimcp...teaser` | **Reklam/teaser** (gerçek veri değil) |
+| `QFIN/FCMBench-Data` | Veri dosyası yok |
+| `fevziegeyurtsevenler/multilingual-prompt-injection` | **Bu dataset YOK** (AI hallucination) |
+| `DAMO-NLP-SG/MultiJail` | İçerik **zararlı-üretim** → yalnızca coercion/framing alt-kümesi |
+
+### 🔴 GATED — HF token + onay gerekli (yerelde doğrulanamadı)
+`nuhmanpk/prompt-sentinel` · `PromptInjectionDataset/Injection-Attack-Detection-Dataset` (gpl-3.0) · `Mindgard/evaded-prompt-injection-and-jailbreak-samples` (cc-by-nc-4.0)
+
+### 🔧 MODEL (dataset değil → RAKİP olarak kullan)
+`NAMAA-Space/Ara-Prompt-Guard` (+_V1) → **Arapça guardrail modeli** · `Horizon-Labs/prompt-injection-guard-base`
+
+### 🚨 AI ÖNERİLERİNİN HATALARI
+1. "deepset Almanca" → **YANLIŞ** (İngilizce)
+2. "fevziegeyurtsevenler/multilingual-prompt-injection" → **YOK**
+3. "swiss-ai / vllm-sr güvenlik açıkları" → **toksik/zararlı** (kapsam dışı)
+4. "NAMAA-Space/Horizon-Labs dataset" → aslında **MODEL**
+
 ## 4. VERİ AÇIĞI VE SENİN ARAMAN GEREKEN KELİMELER
 
 Şu dillerde **native attack** bulamadım → MT gerekir (ama sen bulursan daha iyi):
