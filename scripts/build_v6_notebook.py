@@ -113,6 +113,7 @@ def load_source(cid, fallback):
         t=str(row[tcol]).strip()
         if not (12<=len(t)<=2000) or ETHICS_PAT.search(t): continue
         if cid in MARKER_REQUIRED and not INJECTION_MARKER.search(t): continue
+        if cid=="natolambert/xstest-v2-copy" and "type" in df.columns and str(row["type"]).lower()!="safe": continue
         if lcol is not None and str(row[lcol]).strip().lower() in POSITIVE:
             atk.append(t)
         elif lcol is not None:
