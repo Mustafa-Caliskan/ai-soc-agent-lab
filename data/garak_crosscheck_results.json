@@ -1,0 +1,43 @@
+{
+ "total": 679,
+ "blocked": 332,
+ "rate_pct": 48.9,
+ "by_family": {
+  "apikey": {
+   "probes": 30,
+   "blocked": 15
+  },
+  "dan": {
+   "probes": 62,
+   "blocked": 62
+  },
+  "encoding": {
+   "probes": 300,
+   "blocked": 118
+  },
+  "exploitation": {
+   "probes": 32,
+   "blocked": 15
+  },
+  "goodside": {
+   "probes": 26,
+   "blocked": 16
+  },
+  "grandma": {
+   "probes": 34,
+   "blocked": 16
+  },
+  "misleading": {
+   "probes": 15,
+   "blocked": 0
+  },
+  "promptinject": {
+   "probes": 90,
+   "blocked": 90
+  },
+  "snowball": {
+   "probes": 90,
+   "blocked": 0
+  }
+ }
+}
