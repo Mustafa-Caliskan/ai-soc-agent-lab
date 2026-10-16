@@ -71,6 +71,7 @@ KEEP_BENIGN = [
  "TFLai/Turkish-Dialog-Dataset","cisimcik/turkish-decisions-max-19k",
  "emreseyhan/Turkish-customer-service-conversations","kilicai/turkish-sft-multi-turn-dialogue-10k",
  "merve/turkish_instructions","CohereLabs/aya_collection_language_split",
+ "CohereLabs/aya_dataset",
  "dev-hussein/saudi-arabic-cs-conversations","halilneed/turkish-prompt-injection-false-alarm-benchmark",
  "OpenAssistant/oasst2","HuggingFaceH4/ultrachat_200k","fka/prompts.chat",
  "glaiveai/glaive-function-calling-v2","natolambert/xstest-v2-copy" ]

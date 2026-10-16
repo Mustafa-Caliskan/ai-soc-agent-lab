@@ -132,7 +132,8 @@ class EvrenClient:
             "model": target_model,
             "messages": messages,
             "max_tokens": max_tokens,
-            "temperature": temperature
+            "temperature": temperature,
+            "chat_template_kwargs": {"enable_thinking": False}
         }
 
         try:
@@ -182,7 +183,8 @@ class EvrenClient:
             "max_tokens": max_tokens,
             "temperature": temperature,
             "stream": True,
-            "stream_options": {"include_usage": True}
+            "stream_options": {"include_usage": True},
+            "chat_template_kwargs": {"enable_thinking": False}
         }
 
         try:

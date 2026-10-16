@@ -46,44 +46,63 @@ for f in ["appsec_benchmark_2000.json","stress_boundary_mosscap_notinject.json",
 print(f"[i] BLACKLIST: {len(BLACKLIST)}")
 
 # 2) Mevcut yerel cok dilli veri (CSV) - kural 1
-A_by=defaultdict(list); B_by=defaultdict(list)
+A_by=defaultdict(list); B_by=defaultdict(list); _SEEN=set()
+def add_local(t, lg, label):
+    """Havuza (A_by/B_by) ekle; BLACKLIST ve tekrar eden metni atla. Eklendiyse True."""
+    k=norm(t)
+    if k in _SEEN or k in BLACKLIST: return False
+    _SEEN.add(k); (A_by if label==1 else B_by)[lg].append(t); return True
 for fn in ["train_multilingual.csv","val_multilingual.csv","test_multilingual.csv"]:
     p=DATA/fn
     if not p.exists(): continue
     with open(p,encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             t=(row.get("text") or "").strip()
-            if len(t)<12 or ETHICS.search(t) or norm(t) in BLACKLIST: continue
+            if len(t)<12 or ETHICS.search(t): continue
             lab=1 if str(row.get("label","0")).strip() in ("1","1.0") else 0
-            lg=lang_of(t)
-            (A_by if lab==1 else B_by)[lg].append(t)
+            lg=lang_of(t); add_local(t, lg, lab)
 print("[i] Mevcut yerel (CSV) cok dilli:", {lg:len(v) for lg,v in sorted(A_by.items())})
 
+# RESUME: mevcut supplement'i havuza ekle (ONCE yap ki native/MT ayni metni tekrar eklemesin)
+supplement=[]
+_sp=DATA/"v6_multilingual_supplement.json"
+if _sp.exists():
+    try:
+        supplement=json.load(open(_sp,encoding="utf-8"))
+        for x in supplement: add_local(x['text'], x['language'], x['label'])
+        print(f"[i] RESUME: mevcut supplement {len(supplement)} havuza eklendi")
+    except Exception: supplement=[]
+
 # 2b) NATIVE benign (MT YOK) - oasst2 + aya_dataset (dogal insan metni)
+#     ONEMLI: native benign HEM havuza (B_by) HEM de supplement'e yazilir (kalici olsun).
 def add_native_benign():
+    def _push(lg, t):
+        t=str(t or "").strip()
+        if not (12<=len(t)<=2000) or ETHICS.search(t): return False
+        if not add_local(t, lg, 0): return False
+        supplement.append({"text":t,"label":0,"language":lg,"tier":0}); return True
     try:
         df=load_dataset("OpenAssistant/oasst2", split="train").to_pandas()
         n=0
         for _,r in df.iterrows():
             if str(r.get("role"))!="prompter": continue
             lg=str(r.get("lang","")).strip()
-            if lg in LANGS10:
-                t=str(r.get("text","")).strip()
-                if 12<=len(t)<=2000 and not ETHICS.search(t): B_by[lg].append(t); n+=1
+            if lg in LANGS10 and _push(lg, r.get("text","")): n+=1
         print(f"  [native] oasst2 benign: {n}")
     except Exception as e: print("  oasst2 atlandi:", str(e)[:60])
     try:
         df=load_dataset("CohereLabs/aya_dataset", split="train").to_pandas()
         n=0
+        NAME_TO_CODE={v.lower():k for k,v in LANG_NAME.items()}   # "arabic"->"ar", "german"->"de" ...
         for _,r in df.iterrows():
-            lg=str(r.get("language","") or r.get("lang","")).lower()
-            if lg in LANGS10:
-                t=str(r.get("inputs", r.get("text",""))).strip()
-                if 12<=len(t)<=2000 and not ETHICS.search(t): B_by[lg].append(t); n+=1
+            raw=str(r.get("language", r.get("lang","")) or "").strip().lower()
+            lg=raw if raw in LANGS10 else NAME_TO_CODE.get(raw,"")
+            if lg in LANGS10 and _push(lg, r.get("inputs", r.get("text",""))): n+=1
         print(f"  [native] aya_dataset benign: {n}")
     except Exception as e: print("  aya_dataset atlandi:", str(e)[:60])
 add_native_benign()
 print("[i] Native sonrasi benign:", {lg:len(B_by.get(lg,[])) for lg in LANGS10})
+print("[i] Native sonrasi supplement (kalici label=0 dahi):", dict(Counter(x['language'] for x in supplement if x['label']==0)))
 
 # 3) DISJOINT EN kaynagi (fallback havuzlardan) - kural 2
 EN_ATK=[]; EN_BEN=[]
@@ -104,23 +123,13 @@ def deficit(pool_by, kind):
         d[lg]=max(0, TGT - len(pool_by.get(lg,[])))
     return d
 
-# RESUME: mevcut supplement'i havuza ekle (kaldigi yerden devam)
-supplement=[]
-_sp=DATA/"v6_multilingual_supplement.json"
-if _sp.exists():
-    try:
-        supplement=json.load(open(_sp,encoding="utf-8"))
-        for x in supplement:
-            (A_by if x['label']==1 else B_by)[x['language']].append(x['text'])
-        print(f"[i] RESUME: mevcut supplement {len(supplement)} havuza eklendi")
-    except Exception: supplement=[]
-
+# RESUME bloğu yukari tasindi (native'den ONCE).
 atk_def=deficit(A_by,1); ben_def=deficit(B_by,0)
 print("[i] Eksik (attack):", atk_def)
 print("[i] Eksik (benign):", ben_def)
 
 ap=argparse.ArgumentParser(); ap.add_argument("--cap",type=int,default=400)
-ap.add_argument("--model",type=str,default="gemma-4-31b",help="EVREN MT modeli (or. gemma-4-31b | qwen3.8-flash-next)")  # NOT: deepseek-v4-flash da olur
+ap.add_argument("--model",type=str,default="gemma-4-31b",help="EVREN MT modeli (or. gemma-4-31b | qwen3.8-flash-next)")  # NOT: deepseek-v4.1-flash da olur
 ap.add_argument("--dry-run",action="store_true")
 args=ap.parse_args()
 MT_MODEL=args.model
@@ -130,7 +139,7 @@ if args.dry_run:
 # 4) EVREN MT (batched, disjoint, enable_thinking=False) - kural 2/4
 from evren_client import EvrenClient
 client=EvrenClient()
-def translate(texts, lang, workers=12, B=20):
+def translate(texts, lang, workers=8, B=20):
     name=LANG_NAME[lang]
     batches=[(i,texts[i:i+B]) for i in range(0,len(texts),B)]
     out=[None]*len(texts)
@@ -163,14 +172,19 @@ def ok(t, lang):
     if norm(t) in BLACKLIST: return False
     return True
 
-used=len(supplement)   # RESUME: mevcut supplement kadar ilerle (uzerine yazma)
+# RESUME: EN kaynak tuketim offsetini AYRI tut (supplement boyu DEGIL; native benign boyu sisiriyordu)
+_USED_F=DATA/"_v6_mt_used.json"; en_used={"attack":0,"benign":0}
+if _USED_F.exists():
+    try: en_used.update(json.load(open(_USED_F,encoding="utf-8")))
+    except Exception: pass
+print("[i] MT EN offset:", en_used)
 for kind, pool_by, en_pool, need in [("attack",A_by,EN_ATK,atk_def),("benign",B_by,EN_BEN,ben_def)]:
     label=1 if kind=="attack" else 0
     for lg in LANGS10:
         n=min(need[lg], args.cap)
         if n<=0 or not en_pool: continue
-        src=en_pool[used: used+n]; used += n          # DISJOINT slicing
-        if len(src)<n: src=(en_pool*3)[used-n:used]
+        s=en_used[kind]; src=en_pool[s: s+n]; en_used[kind]=s+n   # DISJOINT slicing
+        if len(src)<n: src=(en_pool*3)[s:s+n]
         print(f"  [{lg}/{kind}] MT: {len(src)} kaynak çevriliyor...")
         tr=translate(src, lg, workers=8)
         added=0
@@ -178,8 +192,9 @@ for kind, pool_by, en_pool, need in [("attack",A_by,EN_ATK,atk_def),("benign",B_
             if ok(t,lg):
                 supplement.append({"text":t.strip(),"label":label,"language":lg,"tier":2 if label else 0}); added+=1
         print(f"     +{added} yeni {lg} {kind}")
-        # checkpoint
+        # checkpoint (veri + offset)
         json.dump(supplement, open(DATA/"v6_multilingual_supplement.json","w",encoding="utf-8"), ensure_ascii=False, indent=1)
+        json.dump(en_used, open(_USED_F,"w",encoding="utf-8"), ensure_ascii=False)
 
 # dedup + finalize
 _seen=set(); _dd=[]
