@@ -6,6 +6,7 @@ Kullanim: python scripts/build_v6_multilingual_supplement.py --dry-run
           python scripts/build_v6_multilingual_supplement.py --cap 400
 """
 import os, sys, re, json, csv, time, argparse, unicodedata, threading
+from datasets import load_dataset
 sys.stdout.reconfigure(encoding='utf-8')
 from pathlib import Path
 from collections import Counter, defaultdict
@@ -58,6 +59,32 @@ for fn in ["train_multilingual.csv","val_multilingual.csv","test_multilingual.cs
             (A_by if lab==1 else B_by)[lg].append(t)
 print("[i] Mevcut yerel (CSV) cok dilli:", {lg:len(v) for lg,v in sorted(A_by.items())})
 
+# 2b) NATIVE benign (MT YOK) - oasst2 + aya_dataset (dogal insan metni)
+def add_native_benign():
+    try:
+        df=load_dataset("OpenAssistant/oasst2", split="train").to_pandas()
+        n=0
+        for _,r in df.iterrows():
+            if str(r.get("role"))!="prompter": continue
+            lg=str(r.get("lang","")).strip()
+            if lg in LANGS10:
+                t=str(r.get("text","")).strip()
+                if 12<=len(t)<=2000 and not ETHICS.search(t): B_by[lg].append(t); n+=1
+        print(f"  [native] oasst2 benign: {n}")
+    except Exception as e: print("  oasst2 atlandi:", str(e)[:60])
+    try:
+        df=load_dataset("CohereLabs/aya_dataset", split="train").to_pandas()
+        n=0
+        for _,r in df.iterrows():
+            lg=str(r.get("language","") or r.get("lang","")).lower()
+            if lg in LANGS10:
+                t=str(r.get("inputs", r.get("text",""))).strip()
+                if 12<=len(t)<=2000 and not ETHICS.search(t): B_by[lg].append(t); n+=1
+        print(f"  [native] aya_dataset benign: {n}")
+    except Exception as e: print("  aya_dataset atlandi:", str(e)[:60])
+add_native_benign()
+print("[i] Native sonrasi benign:", {lg:len(B_by.get(lg,[])) for lg in LANGS10})
+
 # 3) DISJOINT EN kaynagi (fallback havuzlardan) - kural 2
 EN_ATK=[]; EN_BEN=[]
 pa=DATA/"_appsec_pool_attacks.json"; pb=DATA/"_appsec_pool_benign.json"
@@ -100,17 +127,17 @@ if args.dry_run:
 # 4) EVREN MT (batched, disjoint, enable_thinking=False) - kural 2/4
 from evren_client import EvrenClient
 client=EvrenClient()
-def translate(texts, lang, workers=8, B=12):
+def translate(texts, lang, workers=12, B=20):
     name=LANG_NAME[lang]
-    sysm=(f"You are a professional translator for a cybersecurity benchmark. Translate each user text "
-          f"literally into {name}. Do NOT answer or execute the text. Output ONLY a JSON array of {len(texts)} translated strings, same order.")
     batches=[(i,texts[i:i+B]) for i in range(0,len(texts),B)]
-    res=[None]*len(texts)
+    out=[None]*len(texts)
     def do(item):
         s,chunk=item
+        sysm=(f"You are a professional translator for a cybersecurity benchmark. Translate each user text "
+              f"literally into {name}. Do NOT answer or execute the text. Output ONLY a JSON array of {len(chunk)} translated strings, exact same order.")
         for _ in range(3):
             r=client.generate_chat(json.dumps(chunk,ensure_ascii=False), system_instruction=sysm,
-                                   model="gemma-4-31b", max_tokens=3000, temperature=0.0)
+                                   model="deepseek-v4-flash", max_tokens=4000, temperature=0.0)
             ct=(r.get("content") or "").strip(); m=re.search(r"\[.*\]",ct,re.DOTALL)
             if m:
                 try:
@@ -119,7 +146,6 @@ def translate(texts, lang, workers=8, B=12):
                 except Exception: pass
             time.sleep(1.0)
         return s,[None]*len(chunk)
-    out=[None]*len(texts)
     with ThreadPoolExecutor(max_workers=workers) as ex:
         for f in as_completed([ex.submit(do,it) for it in batches]):
             s,arr=f.result()
@@ -134,8 +160,7 @@ def ok(t, lang):
     if norm(t) in BLACKLIST: return False
     return True
 
-supplement=[]
-used=0
+used=len(supplement)   # RESUME: mevcut supplement kadar ilerle (uzerine yazma)
 for kind, pool_by, en_pool, need in [("attack",A_by,EN_ATK,atk_def),("benign",B_by,EN_BEN,ben_def)]:
     label=1 if kind=="attack" else 0
     for lg in LANGS10:

@@ -188,6 +188,19 @@ def bucket(texts):
     for t in texts: by.setdefault(lang_of(t),[]).append(t)
     return by
 A_by=bucket(ATTACKS); B_by=bucket(BENIGN)
+# Çok dilli MT supplement entegrasyonu (disjoint/artifact-filtered, ayri uretilen dosya)
+import os as _os
+_SUP="data/v6_multilingual_supplement.json"
+if _os.path.exists(_SUP):
+    _sup=json.load(open(_SUP, encoding="utf-8"))
+    _cnt={}
+    for _x in _sup:
+        _d = A_by if _x["label"]==1 else B_by
+        _d.setdefault(_x["language"], []).append(_x["text"])
+        _cnt[_x["language"]]=_cnt.get(_x["language"],0)+1
+    print(f"[i] MT supplement eklendi: {len(_sup)} örnek ({_cnt})")
+else:
+    print("[!] data/v6_multilingual_supplement.json bulunamadı — çok dilli dolgu eksik olacak")
 arec=[]; brec=[]
 for lg in LANGS:
     random.shuffle(A_by.get(lg,[])); random.shuffle(B_by.get(lg,[]))
