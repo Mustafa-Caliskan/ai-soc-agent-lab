@@ -25,16 +25,29 @@ FAMILIES = {
 ml = MLSecurityModel()
 print("[i] ML model yüklendi.", flush=True)
 
-def shield_block(text):
+def shield_reasons(text):
     nr = normalize_for_analysis(text)
     at = nr["extended_text"]
     trig, _, r = scan_text(at)
     hard = bool(nr["hard_stego_signal"])
     m = ml.predict(at)
     ml_risk = m.get("ml_risk_score", 0); mlc = m.get("ml_class", "Benign")
-    return bool(hard or r >= CONFIG.get("regex_block_score_threshold", 60)
-                or ml_risk >= CONFIG.get("ml_block_threshold", 70)
-                or (trig and mlc == "Malicious"))
+    reasons = []
+    if hard: reasons.append("L0-STEGO")
+    if r >= CONFIG.get("regex_block_score_threshold", 60): reasons.append("L1-REGEX")
+    if ml_risk >= CONFIG.get("ml_block_threshold", 70): reasons.append("L2-ML")
+    blocked = bool(hard or r >= CONFIG.get("regex_block_score_threshold", 60)
+                   or ml_risk >= CONFIG.get("ml_block_threshold", 70)
+                   or (trig and mlc == "Malicious"))
+    return blocked, reasons
+
+layer_counts = Counter()
+def shield_block(text):
+    b, reasons = shield_reasons(text)
+    if b:
+        key = reasons[0] if reasons else "L1+L2"
+        layer_counts[key] += 1
+    return b
 
 # garak probe sınıflarını topla (yalnızca kapsam-içi aileler)
 specs = [name for name, active in gp.enumerate_plugins("probes")
@@ -80,6 +93,9 @@ for fam, d in sorted(results.items(), key=lambda kv: -kv[1]["probes"]):
     w(f"| {fam} | {d['probes']} | {d['blocked']} | %{100*d['blocked']/d['probes']:.1f} |")
 w()
 w(f"**GENEL: {blk}/{tot} (%{100*blk/tot:.1f})**")
+w()
+w(f"### Katman Kırılımı — bloklananların hangi katmanca durdurulduğu")
+w(f"- {dict(layer_counts)}")
 w()
 w("_Not: Bu, standart bir LLM zafiyet tarayıcısına (NVIDIA garak) karşı çapraz doğrulamadır._")
 
