@@ -16,8 +16,13 @@ sys.path.insert(0, str(ROOT/"backend"))
 
 LANGS10 = ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]
 TGT = 2000   # dil basina attack ve benign hedefi (v6 plani)
+# Turkce SALDIRI hedefi 15000 (notebook TGT_ATK tr=15000 ile hizali). tr BENIGN uretilmez:
+# notebook raw havuzdan zaten 15k Turkce masum sagliyor.
+ATK_LANGS = LANGS10 + ["tr"]
+TGT_ATK = {**{lg: TGT for lg in LANGS10}, "tr": 15000}
+TGT_BEN = {lg: TGT for lg in LANGS10}
 LANG_NAME = {"de":"German","fr":"French","es":"Spanish","it":"Italian","pt":"Portuguese",
-             "ru":"Russian","ar":"Arabic","ja":"Japanese","ko":"Korean","zh":"Chinese"}
+             "ru":"Russian","ar":"Arabic","ja":"Japanese","ko":"Korean","zh":"Chinese","tr":"Turkish"}
 SCRIPT_RE = {"ar":r"[\u0600-\u06FF]","ru":r"[\u0400-\u04FF]","ja":r"[\u3040-\u30FF]",
              "ko":r"[\uAC00-\uD7A3]","zh":r"[\u4E00-\u9FFF]"}
 ARTIFACT = re.compile(r"(cannot be translated|as an ai|yardımcı olamam|çevrilemez|翻訳できません|"
@@ -125,14 +130,11 @@ if pb.exists():
         if 12<=len(t)<=1000 and not ETHICS.search(t) and norm(t) not in BLACKLIST and x.get("language","en")=="en": EN_BEN.append(t)
 print(f"[i] Disjoint EN kaynagi: attack={len(EN_ATK)} benign={len(EN_BEN)}")
 
-def deficit(pool_by, kind):
-    d={}
-    for lg in LANGS10:
-        d[lg]=max(0, TGT - len(pool_by.get(lg,[])))
-    return d
+def deficit(pool_by, targets):
+    return {lg: max(0, targets[lg] - len(pool_by.get(lg,[]))) for lg in targets}
 
 # RESUME bloğu yukari tasindi (native'den ONCE).
-atk_def=deficit(A_by,1); ben_def=deficit(B_by,0)
+atk_def=deficit(A_by, TGT_ATK); ben_def=deficit(B_by, TGT_BEN)
 print("[i] Eksik (attack):", atk_def)
 print("[i] Eksik (benign):", ben_def)
 
@@ -173,10 +175,12 @@ def translate(texts, lang, workers=8, B=20):
                 if s+j<len(out): out[s+j]=v
     return out
 
+TURKISH_HINT = re.compile(r"[ğışĞİŞ]|\b(ve|bir|için|değil|nasıl|ile|olarak|gibi|ama|çok|bana|sana|sen|ben|bu|şu|lütfen|bunu|şifre|parola|talimat)\b", re.I)
 def ok(t, lang):
     if not t or len(t)<10: return False
     if ARTIFACT.search(t) or ETHICS.search(t): return False
     if lang in SCRIPT_RE and not re.search(SCRIPT_RE[lang], t): return False
+    if lang=="tr" and not TURKISH_HINT.search(t): return False   # Turkce ceviriyi dogrula (script yok)
     if norm(t) in BLACKLIST: return False
     return True
 
@@ -186,9 +190,9 @@ if _USED_F.exists():
     try: en_used.update(json.load(open(_USED_F,encoding="utf-8")))
     except Exception: pass
 print("[i] MT EN offset:", en_used)
-for kind, pool_by, en_pool, need in [("attack",A_by,EN_ATK,atk_def),("benign",B_by,EN_BEN,ben_def)]:
+for kind, pool_by, en_pool, need, tgts in [("attack",A_by,EN_ATK,atk_def,TGT_ATK),("benign",B_by,EN_BEN,ben_def,TGT_BEN)]:
     label=1 if kind=="attack" else 0
-    for lg in LANGS10:
+    for lg in tgts:
         n=min(need[lg], args.cap)
         if n<=0 or not en_pool: continue
         s=en_used[kind]; src=en_pool[s: s+n]; en_used[kind]=s+n   # DISJOINT slicing
