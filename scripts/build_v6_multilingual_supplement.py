@@ -128,12 +128,14 @@ if pa.exists():
         if 12<=len(t)<=600 and not ETHICS.search(t) and norm(t) not in BLACKLIST and x.get("language","en")=="en": EN_ATK.append(t)
 
 # 3b) 3'LU EN BENIGN HAVUZU (Kural 4): %40 hard-neg + %30 roleplay + %30 genel (v6.2)
-def build_en_benign_3way(n_hard=4400, n_role=3300, n_gen=3300):
+def build_en_benign_3way(n_hard=4800, n_role=3600, n_gen=3600):
     import random as _r
     rng = _r.Random(42); hard=[]; role=[]; gen=[]
+    ROLE_RE = re.compile(r"\b(you are\b|act as\b|pretend\b|imagine you|roleplay|play the role|from the perspective of|in the persona of|character named|speaking as)\b", re.I)
+    DANGER_RE = re.compile(r"\b(dan|jailbreak|unrestricted|ignore all|without rules|bypass|evil|malicious)\b", re.I)
     def add(lst, t):
         t=str(t or "").strip()
-        if 12<=len(t)<=600 and not ETHICS.search(t) and norm(t) not in BLACKLIST: lst.append(t)
+        if 15<=len(t)<=600 and t.isascii() and not ETHICS.search(t) and norm(t) not in BLACKLIST: lst.append(t)
     try:   # HARD-NEG
         d=load_dataset("xTRam1/safe-guard-prompt-injection", split="train")
         for r in d:
@@ -156,17 +158,26 @@ def build_en_benign_3way(n_hard=4400, n_role=3300, n_gen=3300):
     except Exception as e: print("  hard-neg PromptShield atla:", str(e)[:50])
     try:   # ROLEPLAY
         d=load_dataset("fka/prompts.chat", split="train")
-        for r in d: add(role, r.get("prompt"))
+        for r in d:
+            t=r.get("prompt")
+            if t and not DANGER_RE.search(str(t)): add(role, t)
     except Exception as e: print("  roleplay prompts.chat atla:", str(e)[:50])
-    try:   # GENERAL
+    try:   # ROLEPLAY + GENERAL
         d=load_dataset("OpenAssistant/oasst2", split="train")
         for r in d:
-            if str(r.get("lang","")).strip()=="en" and str(r.get("role"))=="prompter": add(gen, r.get("text"))
+            if str(r.get("lang","")).strip()=="en" and str(r.get("role"))=="prompter":
+                t=str(r.get("text") or "")
+                if ROLE_RE.search(t) and not DANGER_RE.search(t): add(role, t)
+                else: add(gen, t)
     except Exception as e: print("  genel oasst2 atla:", str(e)[:50])
     try:
-        d=load_dataset("HuggingFaceH4/ultrachat_200k", split="train_sft")
-        for r in d: add(gen, r.get("prompt"))
+        d=load_dataset("HuggingFaceH4/ultrachat_200k", split="train_sft[:160000]")
+        for r in d:
+            t=str(r.get("prompt") or "")
+            if ROLE_RE.search(t) and not DANGER_RE.search(t): add(role, t)
+            elif len(gen) < 25000: add(gen, t)
     except Exception as e: print("  genel ultrachat atla:", str(e)[:50])
+    hard=list(dict.fromkeys(hard)); role=list(dict.fromkeys(role)); gen=list(dict.fromkeys(gen))
     rng.shuffle(hard); rng.shuffle(role); rng.shuffle(gen)
     pool = hard[:n_hard] + role[:n_role] + gen[:n_gen]; rng.shuffle(pool)
     print(f"[i] 3'lu EN benign: hard={min(len(hard),n_hard)} role={min(len(role),n_role)} gen={min(len(gen),n_gen)} -> {len(pool)}")
