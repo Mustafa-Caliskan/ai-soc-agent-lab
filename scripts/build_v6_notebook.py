@@ -344,7 +344,7 @@ if _os.path.exists(_SUP):
     for _x in _sup:
         _t = str(_x.get("text") or "").strip()
         if not (12 <= len(_t) <= 600) or ETHICS_PAT.search(_t) or norm(_t) in BLACKLIST: continue
-        _src=_x.get("src","mt")
+        _src=_x.get("src") or ("mt" if int(_x.get("label",0))==1 or int(_x.get("tier",0))>0 else "native")
         (SUP_MT if _src=="mt" else SUP_NAT)[(_x["language"],_x["label"])].append(_t)
         _sc[_src]=_sc.get(_src,0)+1
     print(f"✅ supplement eklendi ({dict(_sc)})")

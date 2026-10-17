@@ -151,7 +151,8 @@ def build_en_benign_3way(n_hard=4400, n_role=3300, n_gen=3300):
     except Exception as e: print("  hard-neg SPML atla:", str(e)[:50])
     try:
         d=load_dataset("hendzh/PromptShield", split="train")
-        for r in d: add(hard, r.get("prompt") or r.get("text") or r.get("instruction"))
+        for r in d:
+            if str(r.get("label","0")).strip().lower() in ("0","0.0","benign","safe","false"): add(hard, r.get("prompt") or r.get("text") or r.get("instruction"))
     except Exception as e: print("  hard-neg PromptShield atla:", str(e)[:50])
     try:   # ROLEPLAY
         d=load_dataset("fka/prompts.chat", split="train")
