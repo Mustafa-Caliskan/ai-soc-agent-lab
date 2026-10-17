@@ -252,7 +252,8 @@ print(f"[i] Ham: attack={len(ATTACKS)} benign={len(BENIGN)}")"""))
 import unicodedata, json, os
 def norm(s): return re.sub(r"\\s+"," ",unicodedata.normalize("NFKC", s or "").lower().strip())
 EVAL_TEXT_FILES = ["data/appsec_benchmark_2000.json","data/stress_boundary_mosscap_notinject.json",
-                   "data/colab_e2e_suite_stratified.json","data/rivals_english_set.json","data/rivals_full_set.json"]
+                   "data/colab_e2e_suite_stratified.json","data/rivals_english_set.json","data/rivals_full_set.json",
+                   "data/heldout_benchmark_v6.json"]
 BLACKLIST=set()
 for f in EVAL_TEXT_FILES:
     if os.path.exists(f):
@@ -334,39 +335,41 @@ A_by = smart_bucket(ATTACKS, TGT_ATK)
 print(f"  -> Saldırı tamamlandı (EN={len(A_by['en'])}, TR={len(A_by['tr'])}). Masum havuzu gruplanıyor...", flush=True)
 B_by = smart_bucket(BENIGN, TGT_BEN)
 print(f"  -> Masum tamamlandı (EN={len(B_by['en'])}, TR={len(B_by['tr'])}).", flush=True)
+# --- Kural 5 (v6.2): deterministik native/MT alt-kota (rastgele cap_to YOK) ---
+from collections import defaultdict
+SUP_NAT=defaultdict(list); SUP_MT=defaultdict(list)
 _SUP="data/v6_multilingual_supplement.json"
 if _os.path.exists(_SUP):
-    _sup=json.load(open(_SUP, encoding="utf-8"))
-    _cnt={}
+    _sup=json.load(open(_SUP, encoding="utf-8")); _sc={}
     for _x in _sup:
         _t = str(_x.get("text") or "").strip()
-        if not (12 <= len(_t) <= 2000) or ETHICS_PAT.search(_t) or norm(_t) in BLACKLIST: continue
-        _d = A_by if _x["label"]==1 else B_by
-        _d.setdefault(_x["language"], []).append(_t)
-        _cnt[_x["language"]]=_cnt.get(_x["language"],0)+1
-    print(f"✅ MT/Native supplement eklendi: {sum(_cnt.values())} örnek ({_cnt})")
+        if not (12 <= len(_t) <= 600) or ETHICS_PAT.search(_t) or norm(_t) in BLACKLIST: continue
+        _src=_x.get("src","mt")
+        (SUP_MT if _src=="mt" else SUP_NAT)[(_x["language"],_x["label"])].append(_t)
+        _sc[_src]=_sc.get(_src,0)+1
+    print(f"✅ supplement eklendi ({dict(_sc)})")
 else:
     print("⚠️ UYARI: data/v6_multilingual_supplement.json bulunamadı!")
 
+# Kural 4 kota tablosu (native + MT)
+NINE=["de","fr","es","it","pt","ar","ja","ko","zh"]
+ATK_NAT={"tr":1010,"ru":1800,"en":15000}; ATK_MT={"tr":13990,"ru":200,"en":0}
+BEN_NAT={"tr":4000,"ru":1800,"en":15000}; BEN_MT={"tr":11000,"ru":200,"en":0}
+for _lg in NINE:
+    ATK_NAT[_lg]=0; ATK_MT[_lg]=2000; BEN_NAT[_lg]=400; BEN_MT[_lg]=1600
+
+def _u(xs): return list(dict.fromkeys(xs))
 arec=[]; brec=[]
 for lg in LANGS:
-    a_uniq = list(dict.fromkeys(A_by.get(lg, [])))
-    b_uniq = list(dict.fromkeys(B_by.get(lg, [])))
-    random.shuffle(a_uniq); random.shuffle(b_uniq)
-    for t in a_uniq[:int(TGT_ATK[lg]*1.5)]:
+    for t in _u(A_by.get(lg,[]))[:ATK_NAT[lg]]:
         arec.append({"text":t,"label":1,"language":lg,"tier":tier_of(t)})
-    for t in b_uniq[:int(TGT_BEN[lg]*1.5)]:
+    for t in _u(SUP_MT.get((lg,1),[]))[:ATK_MT[lg]]:
+        arec.append({"text":t,"label":1,"language":lg,"tier":tier_of(t)})
+    _bn=_u(list(B_by.get(lg,[]))+SUP_NAT.get((lg,0),[]))
+    for t in _bn[:BEN_NAT[lg]]:
         brec.append({"text":t,"label":0,"language":lg,"tier":0})
-
-def cap_to(recs, tgt):
-    out=[]; have={}
-    for r in recs:
-        lg=r['language']
-        if have.get(lg,0) >= tgt[lg]: continue
-        have[lg]=have.get(lg,0)+1; out.append(r)
-    return out
-
-arec=cap_to(arec, TGT_ATK); brec=cap_to(brec, TGT_BEN)
+    for t in _u(SUP_MT.get((lg,0),[]))[:BEN_MT[lg]]:
+        brec.append({"text":t,"label":0,"language":lg,"tier":0})
 print("Attack dil dağılımı:", pd.Series([x['language'] for x in arec]).value_counts().to_dict())
 print("Benign dil dağılımı:", pd.Series([x['language'] for x in brec]).value_counts().to_dict())
 print(f"[i] Dengeli Havuz: attack={len(arec)} benign={len(brec)}")"""))

@@ -92,7 +92,7 @@ def add_native_benign():
         t=str(t or "").strip()
         if not (12<=len(t)<=2000) or ETHICS.search(t): return False
         if not add_local(t, lg, 0): return False
-        supplement.append({"text":t,"label":0,"language":lg,"tier":0}); _ct[lg]+=1; return True
+        supplement.append({"text":t,"label":0,"language":lg,"tier":0,"src":"native"}); _ct[lg]+=1; return True
     try:
         df=load_dataset("OpenAssistant/oasst2", split="train").to_pandas()
         n=0
@@ -250,7 +250,7 @@ for kind, en_pool, tgts in [("attack", EN_ATK, TGT_ATK), ("benign", EN_BEN, TGT_
         added=0
         for t in tr:
             if ok(t,lg):
-                supplement.append({"text":t.strip(),"label":label,"language":lg,"tier":2}); added+=1
+                supplement.append({"text":t.strip(),"label":label,"language":lg,"tier":2,"src":"mt"}); added+=1
         print(f"     +{added} yeni {lg} {kind}")
         # checkpoint (veri + offset)
         json.dump(supplement, open(DATA/"v6_multilingual_supplement.json","w",encoding="utf-8"), ensure_ascii=False, indent=1)
