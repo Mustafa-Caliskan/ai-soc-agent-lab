@@ -272,12 +272,17 @@ LANGS = ["en","tr","de","fr","es","it","pt","ru","ar","ja","ko","zh"]
 TGT_ATK = {"en":15000,"tr":15000, **{l:2000 for l in ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]}}
 TGT_BEN = {"en":15000,"tr":15000, **{l:2000 for l in ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]}}
 
-def lang_of(t):
+_EN_WORDS_RE = re.compile(r"\\b(the|and|to|is|you|in|that|it|for|of|with|as|on|at|by|this|from|be|have|not)\\b", re.I)
+
+print(f"[i] Havuz dengeleniyor (Ham: attack={len(ATTACKS)}, benign={len(BENIGN)})...", flush=True)
+
+def fast_lang_of(t):
     for _lg, _pat in [("ar", r"[\\u0600-\\u06FF]"), ("ru", r"[\\u0400-\\u04FF]"),
                       ("ko", r"[\\uAC00-\\uD7A3]"), ("ja", r"[\\u3040-\\u30FF]"),
                       ("zh", r"[\\u4E00-\\u9FFF]")]:
         if re.search(_pat, t): return _lg
     if re.search(r"[çğıöşüÇĞİÖŞÜ]", t): return "tr"
+    if t.isascii() and _EN_WORDS_RE.search(t): return "en"
     try:
         lg = detect(t[:400])
         return "zh" if lg.startswith("zh") else (lg if lg in LANGS else "en")
@@ -291,12 +296,24 @@ def tier_of(t):
     if any(k in tl for k in ("<system","tool_call","function_call","agent","mcp")): return 5
     return 1
 
-def bucket(texts):
-    by={}
-    for t in texts: by.setdefault(lang_of(t),[]).append(t)
+def smart_bucket(texts, tgt, cap_mult=2.0):
+    shuffled = list(texts)
+    random.shuffle(shuffled)
+    by = {lg: [] for lg in LANGS}
+    limits = {lg: int(tgt[lg] * cap_mult) for lg in LANGS}
+    for t in shuffled:
+        if len(by["en"]) >= limits["en"] and len(by["tr"]) >= limits["tr"]:
+            break
+        lg = fast_lang_of(t)
+        if len(by[lg]) < limits[lg]:
+            by[lg].append(t)
     return by
 
-A_by=bucket(ATTACKS); B_by=bucket(BENIGN)
+print("  -> Saldırı havuzu gruplanıyor...", flush=True)
+A_by = smart_bucket(ATTACKS, TGT_ATK)
+print(f"  -> Saldırı tamamlandı (EN={len(A_by['en'])}, TR={len(A_by['tr'])}). Masum havuzu gruplanıyor...", flush=True)
+B_by = smart_bucket(BENIGN, TGT_BEN)
+print(f"  -> Masum tamamlandı (EN={len(B_by['en'])}, TR={len(B_by['tr'])}).", flush=True)
 _SUP="data/v6_multilingual_supplement.json"
 if _os.path.exists(_SUP):
     _sup=json.load(open(_SUP, encoding="utf-8"))
