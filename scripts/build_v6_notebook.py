@@ -156,7 +156,8 @@ KEEP_BENIGN = [
  "merve/turkish_instructions","CohereLabs/aya_collection_language_split","CohereLabs/aya_dataset",
  "dev-hussein/saudi-arabic-cs-conversations","halilneed/turkish-prompt-injection-false-alarm-benchmark",
  "OpenAssistant/oasst2","HuggingFaceH4/ultrachat_200k","fka/prompts.chat",
- "glaiveai/glaive-function-calling-v2","natolambert/xstest-v2-copy"
+ "glaiveai/glaive-function-calling-v2","natolambert/xstest-v2-copy",
+ "xTRam1/safe-guard-prompt-injection","leolee99/NotInject"   # OOD benign'in kaynagi olan hard-negative setler (egitimde eksikti)
 ]
 MARKER_REQUIRED = {
  "TrustAIRLab/in-the-wild-jailbreak-prompts",
@@ -184,6 +185,7 @@ SPEC = {
  "yanismiraoui/prompt_injections": {"text":"prompt_injections"},
  "glaiveai/glaive-function-calling-v2": {"text":"chat"},
  "microsoft/llmail-inject-challenge": {"split":"Phase1[:5000]","text":"body","no_label":True},  # output sutunu label DEGIL -> hepsi atak
+ "leolee99/NotInject": {"split":"NotInject_one+NotInject_two+NotInject_three","text":"prompt"},  # 3 split birlesik, hepsi benign
 }
 TEXT_COLS = ["text","prompt","instruction","user_prompt","goal","question","inputs","talimat","conversation","input","context","prompt_ru","prompt_injections","jailbreak_query","chat","body"]
 LABEL_COLS = ["label","labels","Prompt injection","is_attack","is_malicious","injection","type","class"]
