@@ -180,13 +180,13 @@ SPEC = {
  "halilneed/turkish-prompt-injection-benchmark": {"split":"test","text":"text","label":"label"},
  "halilneed/turkish-prompt-injection-false-alarm-benchmark": {"split":"test","text":"text","label":"label"},
  "natolambert/xstest-v2-copy": {"split":"prompts","text":"prompt"},
- "dmtrdr/russian_prompt_injections": {"text":"prompt_ru","label":"class"},
+ "dmtrdr/russian_prompt_injections": {"text":"prompt_ru","no_label":True},   # class = saldiri TEKNIGI -> hepsi atak (label=1)
  "yanismiraoui/prompt_injections": {"text":"prompt_injections"},
  "glaiveai/glaive-function-calling-v2": {"text":"chat"},
- "microsoft/llmail-inject-challenge": {"split":"Phase1[:5000]","text":"body"},
+ "microsoft/llmail-inject-challenge": {"split":"Phase1[:5000]","text":"body","no_label":True},  # output sutunu label DEGIL -> hepsi atak
 }
 TEXT_COLS = ["text","prompt","instruction","user_prompt","goal","question","inputs","talimat","conversation","input","context","prompt_ru","prompt_injections","jailbreak_query","chat","body"]
-LABEL_COLS = ["label","labels","Prompt injection","is_attack","is_malicious","injection","output","type","class"]
+LABEL_COLS = ["label","labels","Prompt injection","is_attack","is_malicious","injection","type","class"]
 POSITIVE = {"1","1.0","injection","attack","malicious","jailbreak","unsafe","yes","true"}
 
 def pick(df, cols, override=None):
@@ -220,7 +220,7 @@ def load_source(cid, fallback):
     tcol = pick(df, TEXT_COLS, spec.get("text"))
     if not tcol and "messages" not in df.columns:
         print(f"  UYARI {cid}: metin sutunu yok ({list(df.columns)[:6]})"); return [],[]
-    lcol = pick(df, LABEL_COLS, spec.get("label"))
+    lcol = None if spec.get("no_label") else pick(df, LABEL_COLS, spec.get("label"))
     atk=[]; ben=[]
     for _,row in df.iterrows():
         t = extract_row_text(row, tcol)
