@@ -272,7 +272,15 @@ LANGS = ["en","tr","de","fr","es","it","pt","ru","ar","ja","ko","zh"]
 TGT_ATK = {"en":15000,"tr":15000, **{l:2000 for l in ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]}}
 TGT_BEN = {"en":15000,"tr":15000, **{l:2000 for l in ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]}}
 
-_EN_WORDS_RE = re.compile(r"\\b(the|and|to|is|you|in|that|it|for|of|with|as|on|at|by|this|from|be|have|not)\\b", re.I)
+# Latin diller icin hizli stopword-tabanli siniflandirici (langdetect'i ~%95 eleme, EN'e Avrupa sizmasini onler)
+_LATIN_STOP = {
+ "en": re.compile(r"\\b(the|and|to|is|you|that|it|for|of|with|as|on|at|by|this|from|be|have|not|are|was|were|will|would|can|could|should|do|does|did|your|our|their|what|when|which)\\b", re.I),
+ "de": re.compile(r"\\b(der|die|das|und|nicht|ist|ich|du|sie|wir|mit|für|auf|ein|eine|dass|wie|was|auch|aber|oder|von|zu|im|dem|den|des|sind|wird|kann|muss|nur|noch|schon|sehr|bitte)\\b", re.I),
+ "fr": re.compile(r"\\b(le|la|les|un|une|et|est|pas|que|qui|pour|vous|nous|avec|dans|sur|des|du|au|aux|ce|cette|je|tu|il|elle|ils|elles|ne|se|sont|votre|être|avoir|mais|plus|tout|comme|s'il)\\b", re.I),
+ "es": re.compile(r"\\b(el|la|los|las|un|una|y|que|en|no|es|por|para|con|como|pero|más|se|su|sus|del|al|este|esta|esto|yo|tú|él|ella|son|tiene|puede|muy|todo|hay|también|porque|cómo)\\b", re.I),
+ "it": re.compile(r"\\b(il|lo|la|gli|le|un|una|che|di|non|è|per|con|come|ma|più|si|suo|sua|del|al|questo|questa|io|tu|lui|lei|sono|ha|può|molto|tutto|anche|perché|puoi)\\b", re.I),
+ "pt": re.compile(r"\\b(os|as|um|uma|que|de|em|não|é|para|com|como|mais|seu|sua|do|da|dos|das|este|esta|isso|eu|você|ele|ela|são|tem|pode|muito|todo|também|porque|você)\\b", re.I),
+}
 
 print(f"[i] Havuz dengeleniyor (Ham: attack={len(ATTACKS)}, benign={len(BENIGN)})...", flush=True)
 
@@ -281,10 +289,20 @@ def fast_lang_of(t):
                       ("ko", r"[\\uAC00-\\uD7A3]"), ("ja", r"[\\u3040-\\u30FF]"),
                       ("zh", r"[\\u4E00-\\u9FFF]")]:
         if re.search(_pat, t): return _lg
-    if re.search(r"[çğıöşüÇĞİÖŞÜ]", t): return "tr"
-    if t.isascii() and _EN_WORDS_RE.search(t): return "en"
+    if re.search(r"[ğışĞİŞ]", t): return "tr"   # YALNIZ Turkce'ye ozgu harfler (ç/ö/ü degil: Alm/Fr/Pt'de de var)
+    if ("ß" in t) or ("ä" in t): return "de"     # Almanca'ya ozgu isaretler
+    if ("ñ" in t) or ("¿" in t) or ("¡" in t): return "es"
+    if ("ã" in t) or ("õ" in t): return "pt"
+    if "œ" in t: return "fr"
+    if t.isascii():
+        _best, _bestc = None, 0
+        for _lg, _rx in _LATIN_STOP.items():
+            _c = len(_rx.findall(t))
+            if _c > _bestc: _bestc, _best = _c, _lg
+        if _bestc >= 2: return _best          # en az 2 stopword isabeti -> o dil (langdetect YOK)
+        if _best == "en": return "en"          # tek/az isabette bile EN'e egilim (havuz agirlikli)
     try:
-        lg = detect(t[:400])
+        lg = detect(t[:400])                   # yalnizca belirsiz/kisa metinler icin (nadir)
         return "zh" if lg.startswith("zh") else (lg if lg in LANGS else "en")
     except Exception: return "en"
 
