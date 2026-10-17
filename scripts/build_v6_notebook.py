@@ -139,7 +139,7 @@ INJECTION_MARKER = re.compile(r"(ignore|disregard|forget|override|overrid|bypass
 KEEP_ATTACK = [
  "deepset/prompt-injections","reshabhs/SPML_Chatbot_Prompt_Injection","S-Labs/prompt-injection-dataset",
  "3nesdeniz/agentic-prompt-injection-5k","iamabhishekpanda/enterprise-prompt-injection-dataset",
- "imoxto/prompt_injection_hackaprompt_gpt35","prodnull/prompt-injection-repo-dataset","jayavibhav/prompt-injection",
+ "imoxto/prompt_injection_hackaprompt_gpt35","jayavibhav/prompt-injection",
  "3nesdeniz/turkish-conversation-prompt-injection","AltaySec/turkish-llm-injection","MAlmasabi/Indirect-Prompt-Injection-BIPIA-GPT",
  "cgoosen/prompt_injection_ctf_dataset_3","rikka-snow/prompt-injection-multilingual","dmtrdr/russian_prompt_injections",
  "halilneed/turkish-prompt-injection-benchmark","wambosec/prompt-injections","wambosec/prompt-injections-subtle",
@@ -147,12 +147,11 @@ KEEP_ATTACK = [
  "neuralchemy/Prompt-injection-dataset","hendzh/PromptShield","Lakera/gandalf_ignore_instructions",
  "Lakera/mosscap_prompt_injection","rgeada/tool-response-injections","microsoft/llmail-inject-challenge",
  "yanismiraoui/prompt_injections","TrustAIRLab/in-the-wild-jailbreak-prompts","JailbreakV-28K/JailBreakV-28k",
- "nvidia/Nemotron-RL-Agentic-Indirect-Prompt-Injection-v1"
 ]
 KEEP_BENIGN = [
  "3nesdeniz/guardrail-hard-negatives","guychuk/benign-malicious-prompt-classification",
  "rogue-security/real-world-benign-use-cases","3nesdeniz/turkish-daily-dialogues-5k",
- "TFLai/Turkish-Dialog-Dataset","cisimcik/turkish-decisions-max-19k",
+ "TFLai/Turkish-Dialog-Dataset",
  "emreseyhan/Turkish-customer-service-conversations","kilicai/turkish-sft-multi-turn-dialogue-10k",
  "merve/turkish_instructions","CohereLabs/aya_collection_language_split","CohereLabs/aya_dataset",
  "dev-hussein/saudi-arabic-cs-conversations","halilneed/turkish-prompt-injection-false-alarm-benchmark",
@@ -172,15 +171,21 @@ SPEC = {
  "CohereLabs/aya_dataset": {"text":"inputs"},
  "HuggingFaceH4/ultrachat_200k": {"split":"train_sft","text":"prompt"},
  "dev-hussein/saudi-arabic-cs-conversations": {"text":"conversation"},
- "kilicai/turkish-sft-multi-turn-dialogue-10k": {"text":"conversation"},
  "merve/turkish_instructions": {"text":"talimat"},
  "MAlmasabi/Indirect-Prompt-Injection-BIPIA-GPT": {"text":"context"},
  "TrustAIRLab/in-the-wild-jailbreak-prompts": {"config":"jailbreak_2023_12_25","text":"prompt"},
  "reshabhs/SPML_Chatbot_Prompt_Injection": {"text":"User Prompt","label":"Prompt injection"},
  "wambosec/prompt-injections": {"text":"prompt","label":"label"},
- "halilneed/turkish-prompt-injection-false-alarm-benchmark": {"text":"text","label":"label"},
+ "JailbreakV-28K/JailBreakV-28k": {"config":"JailBreakV_28K","split":"JailBreakV_28K","text":"jailbreak_query"},
+ "halilneed/turkish-prompt-injection-benchmark": {"split":"test","text":"text","label":"label"},
+ "halilneed/turkish-prompt-injection-false-alarm-benchmark": {"split":"test","text":"text","label":"label"},
+ "natolambert/xstest-v2-copy": {"split":"prompts","text":"prompt"},
+ "dmtrdr/russian_prompt_injections": {"text":"prompt_ru","label":"class"},
+ "yanismiraoui/prompt_injections": {"text":"prompt_injections"},
+ "glaiveai/glaive-function-calling-v2": {"text":"chat"},
+ "microsoft/llmail-inject-challenge": {"split":"Phase1[:5000]","text":"body"},
 }
-TEXT_COLS = ["text","prompt","instruction","user_prompt","goal","question","inputs","talimat","conversation","input","context"]
+TEXT_COLS = ["text","prompt","instruction","user_prompt","goal","question","inputs","talimat","conversation","input","context","prompt_ru","prompt_injections","jailbreak_query","chat","body"]
 LABEL_COLS = ["label","labels","Prompt injection","is_attack","is_malicious","injection","output","type","class"]
 POSITIVE = {"1","1.0","injection","attack","malicious","jailbreak","unsafe","yes","true"}
 
@@ -189,6 +194,18 @@ def pick(df, cols, override=None):
     for c in cols:
         if c in df.columns: return c
     return None
+
+def extract_row_text(row, tcol):
+    if tcol and tcol in row and str(row[tcol]).strip():
+        return str(row[tcol]).strip()
+    if "messages" in row and hasattr(row["messages"], "__iter__") and not isinstance(row["messages"], (str, bytes)):
+        for m in row["messages"]:
+            if isinstance(m, dict):
+                if m.get("role") in ("user", "human") and m.get("content"):
+                    return str(m["content"]).strip()
+                if m.get("from") in ("user", "human") and m.get("value"):
+                    return str(m["value"]).strip()
+    return ""
 
 def load_source(cid, fallback):
     spec = SPEC.get(cid, {})
@@ -201,15 +218,14 @@ def load_source(cid, fallback):
             print(f"  UYARI {cid}: {str(e)[:50]}"); return [],[]
     df = ds.to_pandas() if ds.num_rows < 300000 else ds.select(range(80000)).to_pandas()
     tcol = pick(df, TEXT_COLS, spec.get("text"))
-    if not tcol:
+    if not tcol and "messages" not in df.columns:
         print(f"  UYARI {cid}: metin sutunu yok ({list(df.columns)[:6]})"); return [],[]
     lcol = pick(df, LABEL_COLS, spec.get("label"))
     atk=[]; ben=[]
     for _,row in df.iterrows():
-        t=str(row[tcol]).strip()
+        t = extract_row_text(row, tcol)
         if not (12<=len(t)<=2000) or ETHICS_PAT.search(t): continue
         if cid in MARKER_REQUIRED and not INJECTION_MARKER.search(t): continue
-        if cid=="natolambert/xstest-v2-copy" and "type" in df.columns and str(row["type"]).lower()!="safe": continue
         if lcol is not None and str(row[lcol]).strip().lower() in POSITIVE:
             atk.append(t)
         elif lcol is not None:
