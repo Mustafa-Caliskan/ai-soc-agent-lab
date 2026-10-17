@@ -15,12 +15,14 @@ ROOT = Path(__file__).resolve().parent.parent; DATA = ROOT/"data"
 sys.path.insert(0, str(ROOT/"backend"))
 
 LANGS10 = ["de","fr","es","it","pt","ru","ar","ja","ko","zh"]
-TGT = 2000   # dil basina attack ve benign hedefi (v6 plani)
-# Turkce SALDIRI hedefi 15000 (notebook TGT_ATK tr=15000 ile hizali). tr BENIGN uretilmez:
-# notebook raw havuzdan zaten 15k Turkce masum sagliyor.
+TGT = 2000   # dil basina varsayilan hedef
 ATK_LANGS = LANGS10 + ["tr"]
 TGT_ATK = {**{lg: TGT for lg in LANGS10}, "tr": 15000}
-TGT_BEN = {lg: TGT for lg in LANGS10}
+TGT_BEN = {lg: TGT for lg in LANGS10}          # native+MT toplam masum (notebook Cell 5 kotasi)
+# v6.2 (Kural 4/5): uretilecek EVREN-MT BENIGN sayilari (3'lu karisim %40 hard-neg + %30 roleplay + %30 genel)
+# tr MT-agirlikli; ru native-agirlikli (sadece 200); diger 9 dil MT-agirlikli.
+TGT_BEN_MT = {"tr": 11000, "ru": 200,
+              **{lg: 1600 for lg in ["de","fr","es","it","pt","ar","ja","ko","zh"]}}
 LANG_NAME = {"de":"German","fr":"French","es":"Spanish","it":"Italian","pt":"Portuguese",
              "ru":"Russian","ar":"Arabic","ja":"Japanese","ko":"Korean","zh":"Chinese","tr":"Turkish"}
 SCRIPT_RE = {"ar":r"[\u0600-\u06FF]","ru":r"[\u0400-\u04FF]","ja":r"[\u3040-\u30FF]",
@@ -119,15 +121,56 @@ print("[i] Native sonrasi supplement (kalici label=0 dahi):", dict(Counter(x['la
 
 # 3) DISJOINT EN kaynagi (fallback havuzlardan) - kural 2
 EN_ATK=[]; EN_BEN=[]
-pa=DATA/"_appsec_pool_attacks.json"; pb=DATA/"_appsec_pool_benign.json"
+pa=DATA/"_appsec_pool_attacks.json"
 if pa.exists():
     for x in json.load(open(pa,encoding="utf-8")):
         t=x.get("text","")
-        if 12<=len(t)<=1000 and not ETHICS.search(t) and norm(t) not in BLACKLIST and x.get("language","en")=="en": EN_ATK.append(t)
-if pb.exists():
-    for x in json.load(open(pb,encoding="utf-8")):
-        t=x.get("text","")
-        if 12<=len(t)<=1000 and not ETHICS.search(t) and norm(t) not in BLACKLIST and x.get("language","en")=="en": EN_BEN.append(t)
+        if 12<=len(t)<=600 and not ETHICS.search(t) and norm(t) not in BLACKLIST and x.get("language","en")=="en": EN_ATK.append(t)
+
+# 3b) 3'LU EN BENIGN HAVUZU (Kural 4): %40 hard-neg + %30 roleplay + %30 genel (v6.2)
+def build_en_benign_3way(n_hard=4400, n_role=3300, n_gen=3300):
+    import random as _r
+    rng = _r.Random(42); hard=[]; role=[]; gen=[]
+    def add(lst, t):
+        t=str(t or "").strip()
+        if 12<=len(t)<=600 and not ETHICS.search(t) and norm(t) not in BLACKLIST: lst.append(t)
+    try:   # HARD-NEG
+        d=load_dataset("xTRam1/safe-guard-prompt-injection", split="train")
+        for r in d:
+            if str(r.get("label"))=="0": add(hard, r.get("text"))
+    except Exception as e: print("  hard-neg safe-guard atla:", str(e)[:50])
+    try:
+        d=load_dataset("leolee99/NotInject", split="NotInject_one+NotInject_two+NotInject_three")
+        for r in d: add(hard, r.get("prompt"))
+    except Exception as e: print("  hard-neg NotInject atla:", str(e)[:50])
+    try:
+        d=load_dataset("reshabhs/SPML_Chatbot_Prompt_Injection", split="train")
+        POS={"1","1.0","prompt injection","injection","attack","malicious","jailbreak","unsafe","yes","true"}
+        for r in d:
+            if str(r.get("Prompt injection","0")).strip().lower() not in POS: add(hard, r.get("User Prompt"))
+    except Exception as e: print("  hard-neg SPML atla:", str(e)[:50])
+    try:
+        d=load_dataset("hendzh/PromptShield", split="train")
+        for r in d: add(hard, r.get("prompt") or r.get("text") or r.get("instruction"))
+    except Exception as e: print("  hard-neg PromptShield atla:", str(e)[:50])
+    try:   # ROLEPLAY
+        d=load_dataset("fka/prompts.chat", split="train")
+        for r in d: add(role, r.get("prompt"))
+    except Exception as e: print("  roleplay prompts.chat atla:", str(e)[:50])
+    try:   # GENERAL
+        d=load_dataset("OpenAssistant/oasst2", split="train")
+        for r in d:
+            if str(r.get("lang","")).strip()=="en" and str(r.get("role"))=="prompter": add(gen, r.get("text"))
+    except Exception as e: print("  genel oasst2 atla:", str(e)[:50])
+    try:
+        d=load_dataset("HuggingFaceH4/ultrachat_200k", split="train_sft")
+        for r in d: add(gen, r.get("prompt"))
+    except Exception as e: print("  genel ultrachat atla:", str(e)[:50])
+    rng.shuffle(hard); rng.shuffle(role); rng.shuffle(gen)
+    pool = hard[:n_hard] + role[:n_role] + gen[:n_gen]; rng.shuffle(pool)
+    print(f"[i] 3'lu EN benign: hard={min(len(hard),n_hard)} role={min(len(role),n_role)} gen={min(len(gen),n_gen)} -> {len(pool)}")
+    return pool
+EN_BEN = build_en_benign_3way()
 print(f"[i] Disjoint EN kaynagi: attack={len(EN_ATK)} benign={len(EN_BEN)}")
 
 def deficit(pool_by, targets):
@@ -149,7 +192,7 @@ if args.dry_run:
 # 4) EVREN MT (batched, disjoint, enable_thinking=False) - kural 2/4
 from evren_client import EvrenClient
 client=EvrenClient()
-def translate(texts, lang, workers=8, B=20):
+def translate(texts, lang, workers=8, B=8):
     name=LANG_NAME[lang]
     batches=[(i,texts[i:i+B]) for i in range(0,len(texts),B)]
     out=[None]*len(texts)
@@ -177,7 +220,7 @@ def translate(texts, lang, workers=8, B=20):
 
 TURKISH_HINT = re.compile(r"[ğışĞİŞ]|\b(ve|bir|için|değil|nasıl|ile|olarak|gibi|ama|çok|bana|sana|sen|ben|bu|şu|lütfen|bunu|şifre|parola|talimat)\b", re.I)
 def ok(t, lang):
-    if not t or len(t)<10: return False
+    if not t or len(t)<10 or len(t)>600: return False
     if ARTIFACT.search(t) or ETHICS.search(t): return False
     if lang in SCRIPT_RE and not re.search(SCRIPT_RE[lang], t): return False
     if lang=="tr" and not TURKISH_HINT.search(t): return False   # Turkce ceviriyi dogrula (script yok)
@@ -190,10 +233,15 @@ if _USED_F.exists():
     try: en_used.update(json.load(open(_USED_F,encoding="utf-8")))
     except Exception: pass
 print("[i] MT EN offset:", en_used)
-for kind, pool_by, en_pool, need, tgts in [("attack",A_by,EN_ATK,atk_def,TGT_ATK),("benign",B_by,EN_BEN,ben_def,TGT_BEN)]:
+# mevcut MT benign (resume) sayilari (tier==2 & label==0)
+_mt_have = Counter(x['language'] for x in supplement if x.get('label')==0 and x.get('tier')==2)
+for kind, en_pool, tgts in [("attack", EN_ATK, TGT_ATK), ("benign", EN_BEN, TGT_BEN_MT)]:
     label=1 if kind=="attack" else 0
     for lg in tgts:
-        n=min(need[lg], args.cap)
+        if kind=="attack":
+            n=min(atk_def.get(lg,0), args.cap)                       # attack: eksik kadar (deficit)
+        else:
+            n=min(max(0, TGT_BEN_MT.get(lg,0) - _mt_have.get(lg,0)), args.cap)   # benign: sabit MT kotasi
         if n<=0 or not en_pool: continue
         s=en_used[kind]; src=en_pool[s: s+n]; en_used[kind]=s+n   # DISJOINT slicing
         if len(src)<n: src=(en_pool*3)[s:s+n]
@@ -202,7 +250,7 @@ for kind, pool_by, en_pool, need, tgts in [("attack",A_by,EN_ATK,atk_def,TGT_ATK
         added=0
         for t in tr:
             if ok(t,lg):
-                supplement.append({"text":t.strip(),"label":label,"language":lg,"tier":2 if label else 0}); added+=1
+                supplement.append({"text":t.strip(),"label":label,"language":lg,"tier":2}); added+=1
         print(f"     +{added} yeni {lg} {kind}")
         # checkpoint (veri + offset)
         json.dump(supplement, open(DATA/"v6_multilingual_supplement.json","w",encoding="utf-8"), ensure_ascii=False, indent=1)
