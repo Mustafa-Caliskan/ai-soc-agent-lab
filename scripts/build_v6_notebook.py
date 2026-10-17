@@ -388,10 +388,11 @@ train, val = train_test_split(tv, test_size=0.1765, stratify=strat2, random_stat
 print(f"train={len(train)} | val={len(val)} | test={len(test)} | toplam={len(df)} | denge={df['label'].value_counts().to_dict()}")"""))
 
     C.append(code(f"""# @title 7. Tokenizasyon + Model Yükleme ({model_id})
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, DataCollatorWithPadding
 from datasets import Dataset
 MODEL = "{model_id}"
 tok = AutoTokenizer.from_pretrained(MODEL)
+collator = DataCollatorWithPadding(tok)   # dinamik padding (padding=False map ile uyumlu)
 def tk(batch): return tok(batch["text"], truncation=True, max_length=512, padding=False)
 ds_tr = Dataset.from_pandas(train[['text','label']]).map(tk, batched=True)
 ds_va = Dataset.from_pandas(val[['text','label']]).map(tk, batched=True)
@@ -454,7 +455,8 @@ args = TrainingArguments(
 )
 trainer = FocalTrainer(
     model=model, args=args, train_dataset=ds_tr, eval_dataset=ds_va,
-    compute_metrics=metrics, callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]
+    compute_metrics=metrics, data_collator=collator,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]
 )
 t_train_start = time.time()
 trainer.train()
