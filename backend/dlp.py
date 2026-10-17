@@ -81,15 +81,19 @@ def _mask_with_validator(
 DLP_PATTERNS: List[Tuple[str, "re.Pattern", str, Optional[Callable]]] = [
 
     ("generic_password", re.compile(
-        r"(?i)\b(?:password|[şs][ıi]fre(?:si|sini|leri|lerini)?|parola(?:s[ıi]|s[ıi]n[ıi]|lar[ıi])?|passwd|tan[ıi]mlay[ıi]c[ıi]|pin(?:\s*kodu(?:nu)?)?|pass(?:word)?)"
-        r"(?:\s*(?::|=|\bis\b|\bare\b)\s*['\"`]?([A-Za-z0-9_\-!@#$%^&*]{6,})['\"`]?"
-        r"|\s+(?:olarak\s+)?['\"`]?(?=[^\s'\"`]*\d)([A-Za-z0-9_\-!@#$%^&*]{6,})['\"`]?)",
+        r"(?i)(?:\b(?:password|[şs][ıi]fre(?:si|sini|leri|lerini)?|parola(?:s[ıi]|s[ıi]n[ıi]|lar[ıi])?|passwd|tan[ıi]mlay[ıi]c[ıi]|pin(?:\s*kodu(?:nu)?)?|pass(?:word)?|"
+        r"passwort|kennwort|mot\s+de\s+passe|contrase[nñ]a|clave|senha|пароль|пин[- ]?код)"
+        r"|(?:كلمة\s+المرور|الرقم\s+السري|密码|口令|パスワード|暗証番号|비밀번호|암호))"
+        r"[*_`'~]*(?:\s*(?:(?:\b(?:is|are|lautet|est|es)\b|هي|是)\s*)?(?::|=|：)[*_`'~\s]*([A-Za-z0-9_\-!@#$%^&*]{6,})[*_`'~]?"
+        r"|\s+(?:\b(?:is|are|lautet|est|es)\b|هي|是)[*_`'~\s]*([A-Za-z0-9_\-!@#$%^&*]{6,})[*_`'~]?"
+        r"|\s+(?:olarak\s+)?[*_`'~]*(?=[^\s'\"`*_]*\d)([A-Za-z0-9_\-!@#$%^&*]{6,})[*_`'~]?)",
     ), "[SANSÜRLENDİ]", None),
 
     ("api_key", re.compile(
-        r"(?i)\b(api[_\s]?(?:key|anahtar[ıi]|anahtarlar[ıi])|access[_\s]?token|secret[_\s]?(?:key|anahtar[ıi])|auth[_\s]?token)"
-        r"(?:\s*(?::|=|\bis\b|\bare\b)\s*['\"`]?([A-Za-z0-9_\-]{12,})['\"`]?"
-        r"|\s+['\"`]?(?=[^\s'\"`]*\d)([A-Za-z0-9_\-]{12,})['\"`]?)"
+        r"(?i)(?:\b(?:api[_\s]?(?:key|anahtar[ıi]|anahtarlar[ıi]|schl[üu]ssel|cl[eé]|clave|chave|ключ)|access[_\s]?token|secret[_\s]?(?:key|anahtar[ıi])|auth[_\s]?token)"
+        r"|(?:مفتاح\s*api|api\s*密钥|api\s*キー|api\s*키))"
+        r"[*_`'~]*(?:\s*(?::|=|：|\bis\b|\bare\b)[*_`'~\s]*([A-Za-z0-9_\-]{12,})[*_`'~]?"
+        r"|\s+[*_`'~]*(?=[^\s'\"`*_]*\d)([A-Za-z0-9_\-]{12,})[*_`'~]?)"
     ), "[API_KEY_SANSÜRLENDİ]", None),
 
     ("connection_string", re.compile(

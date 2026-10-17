@@ -224,10 +224,17 @@ def fold_homoglyphs(text: str) -> str:
 # except bloğu yüzünden) payload'ın SESSİZCE kaçırılmasına yol açıyordu.
 # `(?!\w)` negatif lookahead ile aynı sınır güvenliği, dolguyu kırpmadan
 # sağlanır. Ayrıca decode öncesi eksik dolgu otomatik tamamlanır (çifte güvence).
-_B64_RE = re.compile(r"\b[A-Za-z0-9+/]{16,}={0,2}(?!\w)")
+_B64_RE = re.compile(r"\b[A-Za-z0-9+/]{16,}={0,2}(?![\w=])")
+_B32_RE = re.compile(r"\b[A-Z2-7]{16,}={0,6}(?![\w=])")
 _HEX_RE = re.compile(r"\b(?:[0-9A-Fa-f]{2}){6,}\b")
 _URL_PCT_RE = re.compile(r"(?:%[0-9A-Fa-f]{2}){3,}")
 _INTERLEAVED_RE = re.compile(r"\b(?:[a-zA-ZçğıöşüÇĞİÖŞÜ][.\-_*~]){3,}[a-zA-ZçğıöşüÇĞİÖŞÜ]\b")
+_DECODED_INJECTION_HINT_RE = re.compile(
+    r"\b(?:ignore\s+(?:all|previous|prior|above)|disregard\s+(?:all|previous)|"
+    r"system\s+prompt|developer\s+mode|reveal\s+(?:the|your)|override\s+system|"
+    r"admin\s+password|önceki\s+talimat|sistem\s+prompt|gizli\s+şifre)\b",
+    re.IGNORECASE,
+)
 
 
 def extract_and_decode_base64(text: str, _depth: int = 0) -> List[str]:
@@ -240,13 +247,36 @@ def extract_and_decode_base64(text: str, _depth: int = 0) -> List[str]:
             candidate += "=" * (4 - missing_padding)
         try:
             raw = base64.b64decode(candidate, validate=False).decode("utf-8", errors="ignore")
-            if len(raw) >= 4 and any(c.isalpha() for c in raw):
+            if not raw:
+                continue
+            printable_ratio = sum(1 for ch in raw if ch.isprintable() or ch.isspace()) / len(raw)
+            if len(raw) >= 4 and printable_ratio > 0.85 and any(c.isalpha() for c in raw):
                 decoded_payloads.append(raw)
                 if _depth < 1:
                     decoded_payloads.extend(extract_and_decode_base64(raw, _depth=_depth + 1))
         except Exception:
             pass
     return decoded_payloads
+
+
+def decode_base32(text: str) -> List[str]:
+    """Base32 kodlanmış (>=16 karakter) dizgeleri bulur ve yazdırılabilir ise çözer."""
+    out: List[str] = []
+    for match in _B32_RE.findall(text):
+        candidate = match
+        missing_padding = len(candidate) % 8
+        if missing_padding:
+            candidate += "=" * (8 - missing_padding)
+        try:
+            raw = base64.b32decode(candidate, casefold=False).decode("utf-8", errors="ignore")
+            if not raw:
+                continue
+            printable_ratio = sum(1 for ch in raw if ch.isprintable()) / len(raw)
+            if len(raw) >= 4 and printable_ratio > 0.85 and any(c.isalpha() for c in raw):
+                out.append(raw)
+        except Exception:
+            pass
+    return out
 
 
 def decode_hex(text: str) -> List[str]:
@@ -483,11 +513,16 @@ def normalize_for_analysis(text: str) -> Dict[str, object]:
     if homoglyph_found:
         alerts.append("HOMOGLYPH / KİRİL-LATİN KARIŞIK HARF TESPİT EDİLDİ")
 
-    # 6) Çoklu Kodlama / Payload Deşifresi (Base64, Hex, URL-Percent, HTML Entities, Noktalı Ayırma)
+    # 6) Çoklu Kodlama / Payload Deşifresi (Base64, Base32, Hex, URL-Percent, HTML Entities, Noktalı Ayırma)
     b64_payloads = extract_and_decode_base64(folded_text)
     if b64_payloads:
         preview = "; ".join(b64_payloads)[:60]
         alerts.append(f"ŞİFRELİ (BASE64) GİZLİ PAYLOAD DEŞİFRE EDİLDİ: '{preview}'")
+
+    b32_payloads = decode_base32(folded_text)
+    if b32_payloads:
+        preview = "; ".join(b32_payloads)[:60]
+        alerts.append(f"ŞİFRELİ (BASE32) GİZLİ PAYLOAD DEŞİFRE EDİLDİ: '{preview}'")
 
     hex_payloads = decode_hex(folded_text)
     if hex_payloads:
@@ -514,23 +549,30 @@ def normalize_for_analysis(text: str) -> Dict[str, object]:
         preview = "; ".join(structured_payloads)[:60]
         alerts.append(f"YAPILANDIRILMIŞ (JSON/TOOL-CALL) GİZLİ PAYLOAD AYRIŞTIRILDI: '{preview}'")
 
+    # 7) ROT13 / Ters-yazma / Leetspeak varyantları
+    rot13_variant = decode_rot13(folded_text)
+    reversed_variant = decode_reversed(folded_text)
+    leetspeak_variant = decode_leetspeak(folded_text)
+
+    variant_extra: List[str] = []
+    for var_text in (rot13_variant, reversed_variant, leetspeak_variant):
+        if var_text != folded_text and _DECODED_INJECTION_HINT_RE.search(var_text) and not _DECODED_INJECTION_HINT_RE.search(folded_text):
+            variant_extra.append(var_text)
+
     decoded_extra = (
-        hidden_tag_payloads + b64_payloads + hex_payloads +
+        hidden_tag_payloads + b64_payloads + b32_payloads + hex_payloads +
         url_payloads + html_payloads + interleaved_payloads +
-        structured_payloads
+        structured_payloads + variant_extra
     )
     extended_text = folded_text
     if decoded_extra:
         extended_text = folded_text + "\n" + "\n".join(decoded_extra)
 
-    # 7) ROT13 / Ters-yazma / Leetspeak varyantları (yalnızca Layer 1 regex taraması için)
-    rot13_variant = decode_rot13(folded_text)
-    reversed_variant = decode_reversed(folded_text)
-    leetspeak_variant = decode_leetspeak(folded_text)
-
+    # NOT: url_payloads tek başına hard_stego_signal yapılmaz (Türkçe/Arapça/Rusça
+    # Wikipedia linklerindeki %C3%BC vb. UTF-8 kodlamalarının yanlış alarm vermemesi için).
+    # Çözülen URL içeriği zaten extended_text üzerinden Layer 1 ve Layer 2'de taranır.
     hard_stego_signal = bool(
-        zw_suspicious or unicode_tag_found or vs_suspicious or homoglyph_found or
-        bool(url_payloads)
+        zw_suspicious or unicode_tag_found or vs_suspicious or homoglyph_found
     )
 
     return {

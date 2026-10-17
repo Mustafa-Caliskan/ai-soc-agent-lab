@@ -76,11 +76,16 @@ if _sp.exists():
 # 2b) NATIVE benign (MT YOK) - oasst2 + aya_dataset (dogal insan metni)
 #     ONEMLI: native benign HEM havuza (B_by) HEM de supplement'e yazilir (kalici olsun).
 def add_native_benign():
+    NATIVE_CAP=2500   # dil basina native benign ust siniri (or. ispanyolca 11845 dosyayi sismesin)
+    _ct=Counter()
+    for x in supplement:   # mevcut dosyadaki benign tier0'lari da say (tekrar calistirmada cap asilmasin)
+        if x.get('label')==0 and x.get('tier',0)==0: _ct[x['language']]+=1
     def _push(lg, t):
+        if _ct[lg]>=NATIVE_CAP: return False
         t=str(t or "").strip()
         if not (12<=len(t)<=2000) or ETHICS.search(t): return False
         if not add_local(t, lg, 0): return False
-        supplement.append({"text":t,"label":0,"language":lg,"tier":0}); return True
+        supplement.append({"text":t,"label":0,"language":lg,"tier":0}); _ct[lg]+=1; return True
     try:
         df=load_dataset("OpenAssistant/oasst2", split="train").to_pandas()
         n=0
@@ -97,6 +102,9 @@ def add_native_benign():
         for _,r in df.iterrows():
             raw=str(r.get("language", r.get("lang","")) or "").strip().lower()
             lg=raw if raw in LANGS10 else NAME_TO_CODE.get(raw,"")
+            if not lg:   # "standard arabic" / "modern standard arabic" / "chinese (simplified)" gibi varyantlar
+                if "arabic" in raw: lg="ar"
+                elif "chinese" in raw: lg="zh"
             if lg in LANGS10 and _push(lg, r.get("inputs", r.get("text",""))): n+=1
         print(f"  [native] aya_dataset benign: {n}")
     except Exception as e: print("  aya_dataset atlandi:", str(e)[:60])
@@ -203,6 +211,15 @@ for x in supplement:
     if k in _seen: continue
     _seen.add(k); _dd.append(x)
 supplement=_dd
+# native benign (tier0) dil basina 2500 ile sinirla (eski sismis dosyayi da temizler)
+NATIVE_CAP=2500; _nc=Counter(); _trimmed=[]
+for x in supplement:
+    if x.get('label')==0 and x.get('tier',0)==0:
+        if _nc[x['language']]>=NATIVE_CAP: continue
+        _nc[x['language']]+=1
+    _trimmed.append(x)
+if len(_trimmed)<len(supplement): print(f"[i] native benign trim: {len(supplement)-len(_trimmed)} atildi")
+supplement=_trimmed
 print(f"\n[FINAL] supplement N={len(supplement)} | dil:", dict(Counter(x['language'] for x in supplement)))
 print("  label:", dict(Counter(x['label'] for x in supplement)))
 json.dump(supplement, open(DATA/"v6_multilingual_supplement.json","w",encoding="utf-8"), ensure_ascii=False, indent=1)

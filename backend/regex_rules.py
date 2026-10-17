@@ -58,8 +58,14 @@ ATTACK_PATTERNS: List[Tuple[str, "re.Pattern", int]] = [
         re.IGNORECASE
     ), 70),
     ("dan_jailbreak", re.compile(
-        r"\b(DAN|DUDE|STAN|AIM|KEVIN|UCAR|JAILBREAK)\b",
-    ), 65),
+        r"(?:\b(?:act\s+as|you\s+are(?:\s+now)?|pretend\s+to\s+be|enable|activate|enter|switch\s+to)\s+(?:a\s+|an\s+|the\s+)?\b(?:DAN|DUDE|STAN|AIM|UCAR)\b|"
+        r"\b(?:DAN|DUDE|STAN|AIM|UCAR)\s+(?:mode|modu|persona|moduna)\b|"
+        r"\[\s*(?:DAN|JAILBREAK)\s*\]|\b(?:DAN|STAN)\s*:)",
+        re.IGNORECASE
+    ), 70),
+    ("dan_acronyms_standalone", re.compile(
+        r"\b(DAN|DUDE|STAN|UCAR|JAILBREAK)\b",
+    ), 45),
     ("evil_alter_ego", re.compile(
         r"(evil\s+(twin|alter\s+ego|version)|dark\s+mode\s+ai|unfiltered\s+(ai|version|mode))",
         re.IGNORECASE
@@ -87,7 +93,11 @@ ATTACK_PATTERNS: List[Tuple[str, "re.Pattern", int]] = [
         re.IGNORECASE
     ), 60),
     ("reveal_system_prompt", re.compile(
-        r"(show|reveal|tell|give|print|output|display|repeat|leak|share|expose)\s+(me\s+)?(your|the)?\s*(system\s*prompt|instructions?|context|secrets?|credentials?|initial\s+prompt|original\s+prompt)",
+        r"(show|reveal|tell|give|print|output|display|repeat|leak|share|expose)\s+(?:me\s+)?(?:"
+        r"(?:your\s+|the\s+|all\s+)?(?:system\s*prompt|initial\s+prompt|original\s+prompt|hidden\s+prompt|developer\s+prompt|secrets?|credentials?)|"
+        r"(?:your|the\s+(?:system|initial|original|hidden|secret|internal|previous|prior|above|confidential)|"
+        r"system|initial|original|hidden|secret|internal|previous|prior|above|confidential)\s+"
+        r"(?:system\s+|hidden\s+|secret\s+|initial\s+|original\s+)?(?:instructions?|context|rules?|directives?|prompts?))",
         re.IGNORECASE
     ), 80),
     ("what_were_you_told", re.compile(
