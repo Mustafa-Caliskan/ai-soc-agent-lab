@@ -79,11 +79,21 @@ def build_cells(cfg: dict) -> list:
 - **Taban Model:** `{model_id}` ({desc})
 - **Kayıp Fonksiyonu:** `CyberFocalLoss (γ=2.0, α=0.65)`
 - **Efektif Batch Boyutu:** `{bs} × {ga} = {bs * ga}` | **Max Token:** `512` | **Epoch:** `3`
-- **Çıktı Paketi:** `{bundle}.zip` (FP32 ONNX + INT8 ONNX + Kalibrasyon `T*` + 12-Dil OOD Raporu + CPU Gecikme Ölçümü)"""))
+- **Kalıcı Kayıt (Google Drive):** `/content/drive/MyDrive/NeuralShield_v6_{slug}` + `{bundle}.zip`"""))
 
-    C.append(code("""# @title 1. Kurulum + HF token + Repo Klonlama (data/ ve supplement için)
+    C.append(code(f"""# @title 1. Kurulum + Google Drive Bağlantısı + HF token + Repo Klonlama
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+DRIVE_ROOT = None
+try:
+    from google.colab import drive
+    drive.mount('/content/drive', force_remount=False)
+    DRIVE_ROOT = "/content/drive/MyDrive/NeuralShield_v6_{slug}"
+    os.makedirs(DRIVE_ROOT, exist_ok=True)
+    print("💾 Google Drive bağlandı, kalıcı kayıt dizini:", DRIVE_ROOT)
+except Exception as _e:
+    print("[i] Google Drive bağlanmadı (yerel disk kullanılacak):", _e)
+
 !pip install -q -U transformers datasets accelerate scikit-learn seaborn onnx onnxruntime langdetect 2>/dev/null
 if not os.path.exists('ai-soc-agent-lab'):
     !git clone -q https://github.com/Mustafa-Caliskan/ai-soc-agent-lab.git
@@ -363,8 +373,9 @@ import time
 use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
 EFF_BS = {bs} * {ga}
 steps = len(ds_tr) // EFF_BS
+CKPT_DIR = f"{{DRIVE_ROOT}}/checkpoints" if DRIVE_ROOT else "./v6_{slug}_out"
 args = TrainingArguments(
-    output_dir="./v6_{slug}_out",
+    output_dir=CKPT_DIR,
     learning_rate=2e-5,
     weight_decay=0.01,
     num_train_epochs=3,
@@ -374,13 +385,14 @@ args = TrainingArguments(
     warmup_steps=int(steps * 3 * 0.10),
     eval_strategy="epoch",
     save_strategy="epoch",
+    save_total_limit=1,
     load_best_model_at_end=True,
     metric_for_best_model="f1",
     bf16=use_bf16,
     fp16=(torch.cuda.is_available() and not use_bf16),
     report_to="none",
     logging_steps=100,
-     seed=SEED,
+    seed=SEED,
 )
 trainer = FocalTrainer(
     model=model, args=args, train_dataset=ds_tr, eval_dataset=ds_va,
@@ -389,7 +401,7 @@ trainer = FocalTrainer(
 t_train_start = time.time()
 trainer.train()
 TRAIN_MIN = round((time.time() - t_train_start) / 60.0, 2)
-print(f"✅ Eğitim tamamlandı ({{TRAIN_MIN}} dk)")"""))
+print(f"✅ Eğitim tamamlandı ({{TRAIN_MIN}} dk) | Checkpoint dizini: {{CKPT_DIR}}")"""))
 
     C.append(code(f"""# @title 10. Hold-Out Test Değerlendirmesi + Confusion Matrix
 import numpy as np, seaborn as sns, matplotlib.pyplot as plt
@@ -494,7 +506,7 @@ ax[2].plot(fpr, tpr, label=f"AUC={{auc(fpr,tpr):.4f}}")
 ax[2].plot([0, 1], [0, 1], '--', color='gray'); ax[2].set_title("ROC ({slug})"); ax[2].legend()
 plt.tight_layout(); plt.savefig("v6_{slug}_curves.png", dpi=300); plt.show()"""))
 
-    C.append(code(f"""# @title 14. ONNX INT8 Export + CPU Gecikme (ms) Ölçümü + Tam Paket İndirme
+    C.append(code(f"""# @title 14. ONNX INT8 Export + CPU Gecikme (ms) Ölçümü + Google Drive Kayıt & İndirme
 import torch, os, shutil, json, time, numpy as np
 import onnxruntime as ort
 from onnxruntime.quantization import quantize_dynamic, QuantType
@@ -561,9 +573,18 @@ if os.path.exists(onnx_fp32) and os.path.getsize(onnx_fp32) > 800 * 1024 * 1024:
     os.remove(onnx_fp32)  # >800MB FP32 ONNX (örn. bge-m3) zip boyutunu şişirmesin, INT8 ONNX + HF model zaten içeride
 
 shutil.make_archive("{bundle}", "zip", BUNDLE_DIR)
-from google.colab import files
-files.download("{bundle}.zip")
-print("🎉 {bundle}.zip başarıyla hazırlandı ve indirme başlatıldı!")"""))
+
+if DRIVE_ROOT and os.path.exists(DRIVE_ROOT):
+    shutil.copy("{bundle}.zip", f"{{DRIVE_ROOT}}/{bundle}.zip")
+    shutil.copy(f"{{BUNDLE_DIR}}/v6_{slug}_summary.json", f"{{DRIVE_ROOT}}/v6_{slug}_summary.json")
+    print(f"💾 Google Drive'a kalıcı olarak kaydedildi: {{DRIVE_ROOT}}/{bundle}.zip")
+
+try:
+    from google.colab import files
+    files.download("{bundle}.zip")
+    print("🎉 {bundle}.zip başarıyla hazırlandı ve tarayıcı indirmesi başlatıldı!")
+except Exception as _dl_err:
+    print(f"[i] Tarayıcı indirmesi atlandı (dosya Google Drive'da güvende): {{_dl_err}}")"""))
 
     return C
 
