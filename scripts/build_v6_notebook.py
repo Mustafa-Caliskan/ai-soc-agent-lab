@@ -133,8 +133,8 @@ ETHICS_PAT = re.compile(r"(suicide|self.?harm|intihar|genocide|soyk[ıi]r|organ 
 INJECTION_MARKER = re.compile(r"(ignore|disregard|forget|override|overrid|bypass|system prompt|system message|"
   r"developer mode|do anything now|act as|you are now|pretend|roleplay|reveal|expose|leak|"
   r"print (?:your|the)|output (?:your|the)|instructions|previous|new (?:task|instruction|rule)|jailbreak|"
-  r"base64|rot13|decode|execute|confidential|password|passwd|api[_ ]?key|credential|admin|token|config|"
-  r"talimat|y[öo]nerge|şifre|sistem|unrestricted|verbatim|injection|<system|</?tool)", re.I)
+  r"base64|rot13|decode|execute|confidential|password|passwd|secret|api[_ ]?key|credential|admin|token|config|"
+  r"spell|backwards|in reverse|first letter|last letter|acrostic|talimat|y[öo]nerge|şifre|sistem|unrestricted|verbatim|injection|<system|</?tool)", re.I)
 
 KEEP_ATTACK = [
  "deepset/prompt-injections","reshabhs/SPML_Chatbot_Prompt_Injection","S-Labs/prompt-injection-dataset",
@@ -159,7 +159,13 @@ KEEP_BENIGN = [
  "OpenAssistant/oasst2","HuggingFaceH4/ultrachat_200k","fka/prompts.chat",
  "glaiveai/glaive-function-calling-v2","natolambert/xstest-v2-copy"
 ]
-MARKER_REQUIRED = {"TrustAIRLab/in-the-wild-jailbreak-prompts","JailbreakV-28K/JailBreakV-28k"}
+MARKER_REQUIRED = {
+ "TrustAIRLab/in-the-wild-jailbreak-prompts",
+ "JailbreakV-28K/JailBreakV-28k",
+ "Lakera/mosscap_prompt_injection",
+ "Lakera/gandalf_ignore_instructions",
+ "cgoosen/prompt_injection_ctf_dataset_3",
+}
 
 SPEC = {
  "CohereLabs/aya_collection_language_split": {"config":"standard_arabic","text":"inputs","split":"train[:10000]"},
@@ -280,11 +286,12 @@ if _os.path.exists(_SUP):
     _sup=json.load(open(_SUP, encoding="utf-8"))
     _cnt={}
     for _x in _sup:
-        if norm(_x["text"]) in BLACKLIST: continue
+        _t = str(_x.get("text") or "").strip()
+        if not (12 <= len(_t) <= 2000) or ETHICS_PAT.search(_t) or norm(_t) in BLACKLIST: continue
         _d = A_by if _x["label"]==1 else B_by
-        _d.setdefault(_x["language"], []).append(_x["text"])
+        _d.setdefault(_x["language"], []).append(_t)
         _cnt[_x["language"]]=_cnt.get(_x["language"],0)+1
-    print(f"✅ MT/Native supplement eklendi: {len(_sup)} örnek ({_cnt})")
+    print(f"✅ MT/Native supplement eklendi: {sum(_cnt.values())} örnek ({_cnt})")
 else:
     print("⚠️ UYARI: data/v6_multilingual_supplement.json bulunamadı!")
 
