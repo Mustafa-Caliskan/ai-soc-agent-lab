@@ -70,6 +70,7 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 2. **Rusça/tr etiket gürültüsü:** Hücre 6'da silinen ilk 15'in neredeyse tamamı ru/tr idi (zararlı ama injection olmayan, "saldırı" etiketli). Qwen yalnızca en şüpheli 800'ü inceledi → gerçek gürültü daha yüksek olabilir.
 3. **Rusça sistematik FP:** ru FP üç modelde de yüksek (12.5/11.7/7.5) → sistematik veri sorunu sinyali.
 4. **Sızıntı kontrolü:** `heldout_benchmark_v6_fair.json` ↔ `train_v6_clean.parquet` **tam ve yakın-kopya** eşleşmesi (2 dk). Ayrıca "dolly/Simsonsun Patronus'ta yok" **model kartından çıkarım**, kesin değil — belirtilecek.
+5. **MT çeşitliliği (kritik):** 34.063 MT saldırının **kaç benzersiz İngilizce tohumdan** türediğini ölç (tohum imzası / benzerlik kümeleme). Az sayıda tohumdan çoğaltılmışsa **gerçek çeşitlilik görünenden düşüktür** → yeni çeviri eklemek aynı tohumu çoğaltır; **benzersiz insan-yazımı saldırı** gerekir.
 
 **Karar kapısı:** Bu analiz, veri düzenlemesinin **ne kadarının etiket temizliği, ne kadarının yeni veri** olacağını belirler.
 
@@ -116,9 +117,13 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 ## 6. Değerlendirme Protokolü ve Başarı Koşulları (ölçülebilir)
 
 ### 6.1 Benchmark hiyerarşisi (aşırı-uydurmayı önle)
-1. **GENİŞLETİLMİŞ DEV benchmark:** Havuzdaki **tüm benzersiz** saldırılar (~1.400) + dolly masum (~14.500) dillere dağıtılıp NLLB ile çevrilir. Etkin örneklem ~12× artar. İterasyon **yalnızca dev** üzerinde.
-2. **FINAL TEST (dokunulmaz):** Kaynakları farklı, hiç iterasyon yapılmayan ayrı bir set (ör. yalnızca rubend18 + ayrı benign havuzu).
-3. **Kaynak-düzeyi sızıntı:** benchmark kaynakları eğitimle **0 ortak**.
+1. **GENİŞLETİLMİŞ DEV benchmark:** Havuzdaki **tüm benzersiz** saldırılar (~1.400) + dolly masum (~14.500) dillere dağıtılıp NLLB ile çevrilir. İterasyon **yalnızca dev** üzerinde.
+2. **FINAL TEST (dokunulmaz ve YETERİNCE BÜYÜK):**
+   - **Yakın-kopya (near-dup) kümeleme** (MinHash/SimHash, eşik ~%90) yapılır ve **bölme kümeler düzeyinde** yapılır → aynı şablonun varyantları iki tarafa düşmez.
+   - **Hedef: ≥300 benzersiz saldırı + ≥1.000 masum.** (rubend18'deki ~79 ile yetinilmez → CI ±11 puan olur.)
+   - **Zor-masum bileşeni ZORUNLU:** güvenlik dokümanı, kod/markup, sistem-prompt/politika, saldırı açıklaması (dolly'nin kolay talimatına ek). Aksi halde **Recall@FP=1% iyimser ve eşik kararsız** olur.
+   - Kaynaklar: Simsonsun (küme-ayrık) + rubend18 + diğer tutulmayan kaynaklar; benign: dolly + zor-benign.
+3. **Kaynak-düzeyi sızıntı:** benchmark kaynakları eğitimle **0 ortak**; ayrıca near-dup kontrolü yapılır.
 
 ### 6.2 Metrikler (gürültüye dayanıklı)
 - **Birincil:** **Recall@FP=1%** (eşikten bağımsız) + **AUC** + bootstrap **%95 CI**.
@@ -139,6 +144,20 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 - [ ] CPU ONNX ≤ 10 ms (mmBERT).
 
 > **Not:** "Patronus'u geç" yerine **"CI içinde denk veya üstün, Recall@FP=1%'de daha iyi"** — dürüst ve savunulabilir.
+
+### 6.5 Durma Kuralı (Ön-Kayıt / Pre-Registration)
+Aşağıdakiler **veri/eğitim başlamadan sabitlenir** (sonradan değiştirilmez):
+
+| Karar | Kural |
+|---|---|
+| **Birincil metrik** | Recall@FP=1% (final test) + AUC + bootstrap %95 CI |
+| **Karşılaştırma** | Patronus aynı final testte ölçülür; CI'lar karşılaştırılır |
+| **Dur (başarı)** | Recall@FP=1% CI_alt ≥ Patronus CI_üst **VEYA** AUC ≥ 0.96 ve ar ≥ 80 |
+| **Aşama A durur** | Veri değişikliği tek başına AUC'yi ≥0.955'e çıkardıysa → B'ye geç |
+| **Aşama A→C** | A hâlâ AUC<0.955 veya ar<80 ise → hata analizinin gösterdiği **spesifik** açığa C uygulanır (körlemesine veri eklenmez) |
+| **Aşama B durur** | AUC ≥0.96 ve Recall@FP=1% Patronus CI'sına girdiyse → dur |
+| **Aşama C durur** | 2 iterasyondan sonra ilerleme yoksa → dur, sınırlamaları yaz |
+| **Asla** | Benchmark'a uyum için tekrar tekrar eğitim (dev dışında iterasyon yok) |
 
 ---
 
@@ -177,8 +196,10 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 | 4 | Eşleşmeli hard-neg + counterfactual + Arapça native | ~1,5 saat |
 | 5 | **Aşama A:** mmBERT, yalnızca veri | ~30 dk |
 | 6 | **Aşama B:** mmBERT + contrastive/FreeLB | **~1,5–2 saat** (FreeLB 3–4× yavaşlatır) |
+| 7 | **Aşama C (KOŞULLU):** hata analizinin gösterdiği açığa göre veri ekleme (uzun EN jailbreak / Arapça native / yeni insan-yazımı kaynak) | +2–3 saat |
+| 8 | (koşullu) mmBERT yeniden eğitim | +~30 dk |
 
-**Gerçekçi toplam: ~5–6 saat** (QC/jüri indirmeleri ve FreeLB dahil). Önceki "30 dk" tahmini geçersiz.
+**Gerçekçi toplam: ~5–6 saat (A+B); Aşama C yalnızca A/B hedefi tutmazsa.** Önceki "30 dk" tahmini geçersiz.
 
 ---
 
@@ -198,4 +219,6 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 ---
 
 ## 10. Tek Cümlelik Özet (diğer ajan için)
-> v6.3: **önce hata analizi + sızıntı kontrolü**, sonra **genişletilmiş dev + dokunulmaz final test**; **ru/tr tam etiket denetimi**; Arapça native (her iki sınıf aynı origin), counterfactual-eşleşmeli hedefli hard-neg, tr native-ağırlıklı; **Aşama A yalnız veri**, **Aşama B +contrastive/FreeLB**. Başarı: **Recall@FP=1% + AUC + bootstrap CI** ile **"Patronus'a denk veya üstün"**; hold-out kriteri kaldırıldı. Mevcut: mmBERT adil F1 84.8 / AUC 0.949; Patronus 84.2 / 0.977 (kontamine 86.9 sızıntıydı).
+> v6.3: **önce hata analizi** (uzunluk + ru/tr etiket gürültüsü + **MT-tohum çeşitliliği** + sızıntı), sonra **küme-bazlı bölünmüş genişletilmiş dev** ve **≥300 saldırı/≥1.000 masum + zor-benign içeren dokunulmaz final test**; ru/tr tam Qwen denetimi; Arapça native (her iki sınıf aynı origin), counterfactual-eşleşmeli hedefli hard-neg, tr native-ağırlıklı; **Aşama A yalnız veri → Aşama B +contrastive/FreeLB → (koşullu) Aşama C**; **ön-kayıtlı durma kuralı** (Recall@FP=1% + AUC + bootstrap CI; "Patronus'a CI içinde denk veya üstün"). Hold-out kriteri kaldırıldı. Mevcut: mmBERT adil F1 84.8 / AUC 0.949; Patronus 84.2 / 0.977 (kontamine 86.9 sızıntıydı).
+>
+> **Makale konumlandırması (öneri):** "her metrikte geçtik" değil; **çok dilli dayanıklılık** (de +20, ja +21.7, zh +15.8 — CI dışı), **benchmark sızıntısı bulgusu**, **adil kaynak-ayrık değerlendirme**, **8 ms CPU gecikmesi**, **kontrollü ablasyonlar**.
