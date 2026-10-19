@@ -256,3 +256,39 @@ Her metrik **aynı final testte**, aynı kalibrasyon protokolüyle **Patronus'a 
 > **Makale konumlandırması (öneri):** "her metrikte geçtik" değil; **çok dilli dayanıklılık** (de +20, ja +21.7, zh +15.8 — CI dışı), **benchmark sızıntısı bulgusu**, **adil kaynak-ayrık değerlendirme**, **8 ms CPU gecikmesi**, **kontrollü ablasyonlar**.
 >
 > **⚠️ Ana risk / çekince:** Hem eğitim (EVREN-MT) hem benchmark (NLLB) **çeviri metin** içeriyor → "translationese" kısayolu olabilir; çok dilli farkların bir kısmı buradan gelebilir. Bu yüzden **native/insan-yazımı alt küme** (§6.1-4) zorunlu; orada da tutmazsa üstünlük iddiası **çeviri artefaktı** olarak sınırlandırılır. Ayrıca Patronus'un Türkçe/Korece'de düşük, Arapça'da çok yüksek çıkması NLLB-artefaktı şüphesini artırır.
+
+---
+
+## 11. Doğrulama-1 Sonuçları (Küme-Bootstrap CI) ve İDDİA REVİZYONU
+
+`notebooks/Validation_CI_v6.ipynb` (N=2849, adil benchmark; **dil-küme bootstrap %95 CI**):
+
+| Model | AUC (CI) | F1@0.7 (CI) | Recall@FP=1% (CI) |
+|---|---|---|---|
+| mmBERT v6.2 | 0.9494 (0.919–0.972) | 0.8482 (0.809–0.880) | 0.5854 (0.454–0.690) |
+| mmBERT v6.3B | 0.9459 (0.906–0.973) | 0.8345 (0.779–0.879) | 0.5840 (0.387–0.722) |
+| BGE-M3 v6.2 | 0.9347 (0.892–0.963) | 0.7880 (0.738–0.826) | 0.5257 (0.397–0.690) |
+| XLM-R v6.2 | 0.8916 (0.840–0.931) | 0.7063 (0.656–0.752) | 0.3958 (0.311–0.512) |
+| **Patronus** | **0.9767 (0.967–0.986)** | 0.8423 (0.804–0.881) | **0.7222 (0.652–0.801)** |
+
+### Bulgular
+1. **F1: DENK** — v6.2 (0.809–0.880) vs Patronus (0.804–0.881) CI'ları birebir örtüşür. ✅
+2. **v6.2 vs v6.3B: AYIRT EDİLEMEZ** — tüm CI'lar örtüşür → A/B **ölçülebilir katkı yok**. ✅
+3. **AUC: Patronus önde** (0.977 vs 0.949; CI kısmen örtüşse de nokta farkı belirgin).
+4. **Recall@FP=1%: Patronus belirgin önde** (0.722 vs 0.585) → **düşük-FP bölgesi bizde zayıf.**
+
+### ❌ İDDİA GERİ ÇEKME: "Çok dilli üstünlük"
+Per-dil **AUC**, Patronus'un çoğu dilde önde olduğunu gösterir (tr 0.970 vs 0.853; ar 0.982 vs 0.893; ja 0.988 vs 0.949; zh 0.977 vs 0.940; ko 0.975 vs 0.896).
+- Önceki "de +20 / ja +21.7 / zh +15.8" farkları **recall@0.7**'ye dayanıyordu → **threshold-bağımlı**.
+- **AUC (sıralama) ile çürütülüyor.** Sadece **de (0.979 vs 0.976)** ve **it (0.988 vs 0.985)**'te hafif öndeyiz.
+- **Karar:** "çok dilli üstünlük" iddiası **geri çekildi**; makalede yalnızca **sabit eşikte (0.7) bazı dillerde recall farkı** olarak, AUC çekincesiyle yazılır.
+
+### Revize makale iddiaları
+- ✅ **Geçerli:** benchmark sızıntısı (%77), adil kaynak-ayrık 12-dil eval, **F1'de Patronus'la denk**, 8 ms CPU, EVREN CoT sızıntısı, ön-kayıtlı negatif ablasyonlar (A/B).
+- ⚠️ **Sınırlama:** AUC ve Recall@FP=1%'de Patronus önde (düşük-FP bölgesi); 2048 bağlam bu benchmark'ta test edilemedi.
+
+---
+
+## 12. Kalan Doğrulamalar
+- **Doğrulama-3 (Native alt küme):** tr/ar/de/ru × 50–100 native. Amaç artık "üstünlük kanıtı" değil, **MT vs native farkını ölçmek**. Kaynak bulunamazsa sınırlama yazılır.
+- **Doğrulama-4 (8 ms ONNX):** v6.2 backup checkpoint'ten ONNX INT8 **yeniden export + CPU gecikme ölçümü** (v6.3 koşusu artifact'i üzerine yazmış olabilir).
