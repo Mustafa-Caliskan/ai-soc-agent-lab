@@ -124,6 +124,7 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
    - **Zor-masum bileşeni ZORUNLU:** güvenlik dokümanı, kod/markup, sistem-prompt/politika, saldırı açıklaması (dolly'nin kolay talimatına ek). Aksi halde **Recall@FP=1% iyimser ve eşik kararsız** olur.
    - Kaynaklar: Simsonsun (küme-ayrık) + rubend18 + diğer tutulmayan kaynaklar; benign: dolly + zor-benign.
 3. **Kaynak-düzeyi sızıntı:** benchmark kaynakları eğitimle **0 ortak**; ayrıca near-dup kontrolü yapılır.
+4. **NATIVE / İNSAN-YAZIMI çok dilli alt küme (kanıt için ZORUNLU):** `tr, ar, de, ru` için dil başına **50–100 native** örnek (**çeviri DEĞİL**). Çok dilli üstünlük iddiası **yalnızca bu alt kümede de tutarsa** savunulabilir; aksi halde **"çeviri artefaktı (translationese)"** çekincesi makalede yazılır.
 
 ### 6.2 Metrikler (gürültüye dayanıklı)
 - **Birincil:** **Recall@FP=1%** (eşikten bağımsız) + **AUC** + bootstrap **%95 CI**.
@@ -134,30 +135,47 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 - Model seçimi **zor OOD dev** setinde (yalnızca val değil).
 - Eşik dev setinde kalibre edilir; final test'e sabit uygulanır.
 
-### 6.4 Başarı kriterleri (v6.3)
-- [ ] **Recall@FP=1% (final test): Patronus'un CI üst sınırı içinde veya daha iyi** (yani "denk veya üstün").
-- [ ] **AUC ≥ 0.960** (şu an 0.949; sıralama açığı kapanmalı).
-- [ ] **ar recall (CI ile) ≥ 80**; **en ≥ 80**.
-- [ ] ru FP ≤ %6; tr recall ≥ %50.
-- [ ] Sızıntı: eğitim ↔ benchmark **tam+yakın-kopya = 0**.
-- [ ] 687 çelişki **silinmemiş**, audit raporunda; **50 örnek elle** incelenip gürültü oranı raporlanmış.
-- [ ] CPU ONNX ≤ 10 ms (mmBERT).
+### 6.4 Başarı düzeyleri (üç kademe) — Patronus'a göre
+Her metrik **aynı final testte**, aynı kalibrasyon protokolüyle **Patronus'a karşı** değerlendirilir:
 
-> **Not:** "Patronus'u geç" yerine **"CI içinde denk veya üstün, Recall@FP=1%'de daha iyi"** — dürüst ve savunulabilir.
+1. **ÜSTÜN (superior):** Recall@FP=1% için **CI_alt(biz) > CI_üst(Patronus)**.
+2. **DENK (non-inferior):** CI'lar örtüşür **ve** fark önceden yazılan marj içinde: `Recall@FP=1% ≥ Patronus − 2 puan` **ve** `AUC ≥ Patronus − 0.01`.
+3. **BAŞARISIZ:** ne üstün ne denk.
 
-### 6.5 Durma Kuralı (Ön-Kayıt / Pre-Registration)
-Aşağıdakiler **veri/eğitim başlamadan sabitlenir** (sonradan değiştirilmez):
+**Ek zorunlu (Patronus karşılaştırmasından bağımsız):**
+- AUC ≥ 0.960
+- `ar` **nokta tahmin ≥ 85** ve **CI_alt ≥ 78**; `en` ≥ 80
+- ru FP ≤ %6; tr recall ≥ %50
+- Sızıntı: eğitim ↔ benchmark **tam + yakın-kopya = 0**
+- 687 çelişki **silinmemiş**, audit raporunda; **50 örnek elle** incelenip gürültü oranı raporlanmış
+- CPU ONNX ≤ 10 ms (mmBERT)
+
+> **Not:** "AUC≥0.96 & ar≥80" **tek başına** başarı ilanı **değildir**; mutlaka **Patronus karşılaştırması** gerekir. "Patronus'u geç" değil; **üstün/denk/başarısız** kademeleri raporlanır.
+
+### 6.5 Ölçüm kuralları ve Durma Kuralı (Ön-Kayıt)
+
+**Ölçüm kuralları (veri/eğitimden önce sabit):**
+- **Bootstrap KÜME düzeyinde:** aynı cümlenin 12 çevirisi bağımlıdır → **near-dup kümesi / benzersiz öğe** düzeyinde yeniden örnekle (satır düzeyinde DEĞİL).
+- **Eşik şeffaflığı:** Recall@FP=1% iki şekilde raporlanır:
+  - (a) final testte **oracle** eşik (yalnız bilgi),
+  - (b) **dev'de seçilen** eşiğin final testteki **gerçek Recall/FP** (birincil).
+- **FP=1% gürültüsü:** 1.000 masumda %1 = 10 örnek → gürültülü. **FP=2%** ve **pAUC** da raporlanır.
+- **ar tanımı:** "ar ≥ 80" = **nokta tahmin ≥ 85, CI_alt ≥ 78** (yalnız alt sınır değil).
+- **Patronus adilliği (sınırlama):** Patronus **2048 token + kendi eşiği**, biz **512**. Eğitim kaynakları kesin değil; final testin ona **sızıntısız olduğu garanti değil** → makalede sınırlama olarak yazılır.
+
+**Durma kuralı:**
 
 | Karar | Kural |
 |---|---|
-| **Birincil metrik** | Recall@FP=1% (final test) + AUC + bootstrap %95 CI |
-| **Karşılaştırma** | Patronus aynı final testte ölçülür; CI'lar karşılaştırılır |
-| **Dur (başarı)** | Recall@FP=1% CI_alt ≥ Patronus CI_üst **VEYA** AUC ≥ 0.96 ve ar ≥ 80 |
-| **Aşama A durur** | Veri değişikliği tek başına AUC'yi ≥0.955'e çıkardıysa → B'ye geç |
-| **Aşama A→C** | A hâlâ AUC<0.955 veya ar<80 ise → hata analizinin gösterdiği **spesifik** açığa C uygulanır (körlemesine veri eklenmez) |
-| **Aşama B durur** | AUC ≥0.96 ve Recall@FP=1% Patronus CI'sına girdiyse → dur |
+| **Birincil metrik** | Recall@FP=1% (final test, dev-eşiği) + AUC + **küme**-bootstrap %95 CI |
+| **Karşılaştırma** | Patronus **aynı final test** + aynı eşik protokolü |
+| **ÜSTÜN** | `CI_alt(biz) > CI_üst(Patronus)` (Recall@FP=1%) |
+| **DENK** | CI örtüşür **ve** `Recall@FP=1% ≥ Patronus−2` **ve** `AUC ≥ Patronus−0.01` |
+| **Aşama A durur** | Veri tek başına `AUC ≥ 0.955` **ve** `ar nokta ≥ 82` → B'ye geç |
+| **Aşama A→C** | A hâlâ `AUC<0.955` veya `ar<82` ise → hata analizinin gösterdiği **spesifik** açığa C |
+| **Aşama B durur** | `AUC ≥ 0.96` **ve** Recall@FP=1% **DENK/ÜSTÜN** → dur |
 | **Aşama C durur** | 2 iterasyondan sonra ilerleme yoksa → dur, sınırlamaları yaz |
-| **Asla** | Benchmark'a uyum için tekrar tekrar eğitim (dev dışında iterasyon yok) |
+| **Asla** | Dev dışında iterasyon / final teste uyum için yeniden eğitim |
 
 ---
 
@@ -222,3 +240,5 @@ Aşağıdakiler **veri/eğitim başlamadan sabitlenir** (sonradan değiştirilme
 > v6.3: **önce hata analizi** (uzunluk + ru/tr etiket gürültüsü + **MT-tohum çeşitliliği** + sızıntı), sonra **küme-bazlı bölünmüş genişletilmiş dev** ve **≥300 saldırı/≥1.000 masum + zor-benign içeren dokunulmaz final test**; ru/tr tam Qwen denetimi; Arapça native (her iki sınıf aynı origin), counterfactual-eşleşmeli hedefli hard-neg, tr native-ağırlıklı; **Aşama A yalnız veri → Aşama B +contrastive/FreeLB → (koşullu) Aşama C**; **ön-kayıtlı durma kuralı** (Recall@FP=1% + AUC + bootstrap CI; "Patronus'a CI içinde denk veya üstün"). Hold-out kriteri kaldırıldı. Mevcut: mmBERT adil F1 84.8 / AUC 0.949; Patronus 84.2 / 0.977 (kontamine 86.9 sızıntıydı).
 >
 > **Makale konumlandırması (öneri):** "her metrikte geçtik" değil; **çok dilli dayanıklılık** (de +20, ja +21.7, zh +15.8 — CI dışı), **benchmark sızıntısı bulgusu**, **adil kaynak-ayrık değerlendirme**, **8 ms CPU gecikmesi**, **kontrollü ablasyonlar**.
+>
+> **⚠️ Ana risk / çekince:** Hem eğitim (EVREN-MT) hem benchmark (NLLB) **çeviri metin** içeriyor → "translationese" kısayolu olabilir; çok dilli farkların bir kısmı buradan gelebilir. Bu yüzden **native/insan-yazımı alt küme** (§6.1-4) zorunlu; orada da tutmazsa üstünlük iddiası **çeviri artefaktı** olarak sınırlandırılır. Ayrıca Patronus'un Türkçe/Korece'de düşük, Arapça'da çok yüksek çıkması NLLB-artefaktı şüphesini artırır.
