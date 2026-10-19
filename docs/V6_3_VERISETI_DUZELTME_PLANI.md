@@ -1,198 +1,201 @@
 # 📋 NeuralShield-v6.3 — Verisetini Düzeltme Planı (Gerekçe + Uygulama + Hedefler)
 
-**Tarih:** 17 Ekim 2026
-**Durum:** v6.2 eğitimleri bitti; **adil (source-disjoint) benchmark** ile gerçek konum ölçüldü. Bu belge, **verisetinde yapılacak v6.3 düzenlemelerini**, **neden** yapıldığını, **nerelere bakılacağını** ve **başarı koşullarını** tanımlar.
+**Tarih:** 17 Ekim 2026 · **Sürüm:** v6.3-plan (peer-review düzeltmeleri dahil)
+**Durum:** v6.2 eğitimleri bitti; **adil (source-disjoint) benchmark** ile gerçek konum ölçüldü. Bu belge veri düzenlemelerini, gerekçesini, bakılacak yerleri ve **ölçülebilir** başarı koşullarını tanımlar.
+
+---
+
+## 0. Peer-Review Düzeltme Notu (v6.3-plan)
+
+Önceki taslak iki noktada düzeltildi:
+
+1. **"mmBERT, Patronus'u geçti" ifadesi fazla iddialıydı.** Adil benchmark 2.849 satır olsa da bunlar **240 benzersiz cümlenin 12 dile çevirisidir**; saldırı tarafında yalnızca **120 benzersiz** örnek (119'u tek kaynak: Simsonsun). Recall için %95 güven aralığı **±~8 puan**. F1 84.8 vs 84.2 → **beraberlik**. Patronus **AUC (0.977 vs 0.949)** ve **sıralama kalitesinde** önde.
+2. **"F1≥86, ar≥85" gibi kesin eşikler bu gürültüde ölçülemez.** Başarı, **bootstrap güven aralığı** ve **eşikten bağımsız Recall@FP=1%** ile ifade edilecek (bkz. Bölüm 6).
 
 ---
 
 ## 1. Proje Amacı
 
-**NeuralShield**, LLM uygulamalarına giden istemleri koruyan **4 katmanlı AppSec güvenlik geçididir** (L0 normalizer → L1 regex → L2 ML sınıflandırıcı → L3 DLP), OR-Gate karar mekanizmasıyla.
+**NeuralShield**, LLM uygulamalarına giden istemleri koruyan **4 katmanlı AppSec geçididir** (L0 normalizer → L1 regex → L2 ML sınıflandırıcı → L3 DLP), OR-Gate kararıyla.
 
 - **Kapsam:** Prompt injection, jailbreak, talimat iptali, sistem-prompt sızdırma, indirect/agentic injection, steganografi, exfiltration.
-- **Kapsam dışı:** İçerik moderasyonu / etik / nefret (delege edilir).
-- **Hedef:** 12 dilde (en, tr, de, fr, es, it, pt, ru, ar, ja, ko, zh) dengeli, **kaynak-ayrık (source-disjoint)**, düşük FP, yüksek recall ile **rakipleri adil koşulda geçmek** ve yayınlanabilir bir ablasyon sunmak.
-- **Omurgalar (ablasyon):** XLM-RoBERTa-base (278M), mmBERT-base (307M), BGE-M3 (568M). **Şampiyon adayı: mmBERT.**
+- **Kapsam dışı:** İçerik moderasyonu / etik / nefret (delege).
+- **Hedef:** 12 dilde dengeli, **kaynak-ayrık**, düşük FP + yüksek recall ile **rakiplerle adil kıyas** ve yayınlanabilir ablasyon.
+- **Omurgalar:** XLM-R-base (278M), mmBERT-base (307M, **şampiyon adayı**), BGE-M3 (568M, ablasyon).
 
 ---
 
-## 2. Mevcut Durum (v6.2 sonrası, adil benchmark)
+## 2. Mevcut Durum (v6.2, adil benchmark)
 
-### 2.1 Adil (source-disjoint) benchmark sonuçları — th=0.70
-Kaynak: `heldout_benchmark_v6_fair.json` (Simsonsun + rubend18 saldırı / dolly masum, NLLB 12-dil, **jackhhao YOK**)
+### 2.1 Adil benchmark — th=0.70 (⚠️ küçük örneklem, bkz. Bölüm 0)
+Kaynak: `heldout_benchmark_v6_fair.json` (Simsonsun + rubend18 / dolly; NLLB 12-dil; **jackhhao YOK**)
 
 | Model | Recall | FP | Macro-F1 | AUC |
 |---|---|---|---|---|
-| **mmBERT v6.2 (şampiyon)** | **74.0** | 3.8 | **84.8** | 0.9494 |
+| **mmBERT v6.2** | 74.0 | 3.8 | 84.8 | 0.9494 |
 | Patronus Wolf Defender | 70.1 | 0.8 | 84.2 | 0.9767 |
 | BGE-M3 v6.2 | 61.5 | 2.2 | 78.8 | 0.9347 |
 | XLM-R v6.2 | 47.5 | 2.2 | 70.6 | 0.8916 |
 
-> @th=0.50: mmBERT **86.2** vs Patronus **86.3** → F1'de **başabaş**.
-> **BGE-M3** hold-out'ta en iyi (97.0) ama adilde mmBERT'in gerisinde → aşırı-uydurma; **şampiyon yapılmaz**.
+> **Yorum:** F1'de beraberlik; **AUC ve sıralamada Patronus önde.** BGE-M3 hold-out'ta en iyi ama adilde zayıf (aşırı-uydurma) → şampiyon değil.
 
-### 2.2 Kritik bulgu: Eski benchmark kontamineydi
-- Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un eğitim kaynağı** (`jackhhao/jailbreak-classification`).
-- Bu yüzden Patronus'un oradaki 86.9 F1'i **şişik**; adilde 84.2'ye indi.
-- **Ders:** kıyas **yalnızca kaynak-ayrık** benchmark ile yapılmalı.
+### 2.2 Kontaminasyon bulgusu
+Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un eğitim kaynağıdır**. Patronus'un oradaki 86.9 F1'i şişikti; adilde 84.2. → **Kıyas yalnızca kaynak-ayrık benchmark ile.**
 
-### 2.3 Patronus'a göre kalan açıklar (mmBERT, adil, @0.7)
-| Dil/Metrik | mmBERT | Patronus | Açık |
-|---|---|---|---|
-| **ar (Arapça)** | 65.0 | **91.7** | **-26.7 (en büyük)** |
-| en | 75.8 | 86.7 | -10.9 |
-| tr | 46.7 | 51.7 | -5.0 |
-| ru FP | 12.5 | 0.8 | yüksek FP |
-| **AUC** | 0.949 | 0.977 | kalibrasyon |
-| de/fr/es/it/pt/ja/zh | ✅ | — | **biz öndeyiz** |
+### 2.3 Kalan açıklar (mmBERT, @0.7)
+`ar 65.0 vs 91.7 (-26.7)`, `en 75.8 vs 86.7 (-10.9)`, `tr 46.7 vs 51.7`, `ru FP 12.5 vs 0.8`, `AUC 0.949 vs 0.977`.
 
 ---
 
 ## 3. Neden Verisetini Düzenliyoruz? (Kök nedenler)
 
-1. **Arapça zayıf (65 vs 91.7):** Eğitimde Arapça saldırılar neredeyse tamamen MT/çeviri; native çeşitlilik az. → **native Arapça (saldırı + masum) gerekli.**
-2. **İngilizce açık (75.8 vs 86.7):** EN saldırı çeşitliliği ve "saldırıya komşu bening" (hard-negative) eksik.
-3. **FP ve AUC geride:** Patronus, **simetrik augmentasyon + hedefli hard-negative + contrastive + FreeLB** kullanıyor (model kartı). Bizim benign'imiz genel/roleplay ağırlıklı; sınıf-stil simetrisi zayıf.
-4. **Geçmişte yapılan hata (tekrarlanmayacak):** v6.2'de benign'i tek taraflı MT/roleplay ile doldurduk → sınıf-stil kısayolu + recall düşüşü. Bu kez **hedefli ve ölçülü** ekleme yapılacak.
-5. **Adil değerlendirme zorunluluğu:** Benchmark kaynakları hiçbir değerlendirilen modelin eğitiminde olmamalı.
+1. **Arapça zayıf:** Eğitimde ar saldırılar neredeyse tamamen MT; native çeşitlilik yok.
+2. **İngilizce açık:** EN saldırı çeşitliliği + hedefli hard-neg eksik; ayrıca **uzunluk farkı** olabilir (eğitim `len≤600` vs benchmark ≤1200).
+3. **FP/AUC:** Patronus **simetrik augmentasyon + hedefli hard-neg + contrastive + FreeLB** kullanıyor (model kartı).
+4. **Geçmiş hata:** v6.2'de benign tek taraflı MT/roleplay ile dolduruldu → stil kısayolu + recall düşüşü. Tekrarlanmayacak.
+5. **Değerlendirme hijyeni:** Benchmark hiçbir değerlendirilen modelin eğitiminde olmamalı; ayrıca benchmark'a **aşırı-uydurma** riski yönetilmeli.
 
-**Patronus model kartı (referans):** `https://huggingface.co/patronus-studio/wolf-defender-prompt-injection`
-- mmBERT-base, 2048 token, 3 epoch, LR 1e-5, BF16.
-- **Supervised contrastive loss (0.05, temp 0.07) + FreeLB (3 adım, 0.01, max norm 0.1).**
-- **Augmentasyon her iki sınıfa** (Unicode/homoglyph/Base64/tag/leet/case/boşluk).
-- **Counterfactual** çiftler + **hedefli hard-neg** (güvenlik dokümanı, kod, politika, saldırı açıklaması).
-- 90% dedup, long-context (2048) + Smooth-Max.
+**Patronus model kartı:** `https://huggingface.co/patronus-studio/wolf-defender-prompt-injection`
+- mmBERT, 2048 token, 3 epoch, LR 1e-5, BF16.
+- **Contrastive (0.05, temp 0.07) + FreeLB (3 adım, 0.01, max norm 0.1).**
+- **Her iki sınıfa** augmentasyon; **counterfactual** çiftler; **hedefli hard-neg** (güvenlik dokümanı, kod, politika, saldırı açıklaması); 90% dedup; Smooth-Max.
 
 ---
 
-## 4. Ne Değiştireceğiz? (v6.3 veri düzenlemeleri)
+## 4. Uygulamadan ÖNCE: Hata Analizi Kapısı (yeni, zorunlu)
 
-> **İlke:** Mevcut dengeli (50k/50k) iskeleti KORU. Saldırı sayısını bozmadan, **açığı olan dillere native çeşitlilik** ve **hedefli hard-negative** ekle. Benign'i genel roleplay ile DOLDURMA.
+> Veri üretmeden önce mmBERT'in adil benchmark'taki yanlışlarını dök ve hipotezleri test et. **Süre: ~15 dk.**
 
-### 4.1 Arapça (ve zayıf diller) native takviye — EN YÜKSEK ÖNCELİK
-- **Hedef:** `ar` saldırı + masum için **native** örnek ekle (MT değil).
-- Kaynaklar (doğrulanacak, eğitimde OLMAYAN): Arapça prompt-injection/guardrail setleri (ör. NAMAA-Space / Arabic injection), native benign (Arabic instruction/QA).
-- **Hedef kota:** `ar` saldırı ve masumda native oranı ≥%50.
-- Başarı: `ar` recall **65 → ≥85**, FP ≤%6.
+1. **Uzunluk hipotezi:** Eğitim `ok()` filtresi `len≤600`; benchmark ≤1200. Yüksek recall açığı uzun jailbreak'lerden mi? → yanlışların uzunluk dağılımı.
+2. **Rusça/tr etiket gürültüsü:** Hücre 6'da silinen ilk 15'in neredeyse tamamı ru/tr idi (zararlı ama injection olmayan, "saldırı" etiketli). Qwen yalnızca en şüpheli 800'ü inceledi → gerçek gürültü daha yüksek olabilir.
+3. **Rusça sistematik FP:** ru FP üç modelde de yüksek (12.5/11.7/7.5) → sistematik veri sorunu sinyali.
+4. **Sızıntı kontrolü:** `heldout_benchmark_v6_fair.json` ↔ `train_v6_clean.parquet` **tam ve yakın-kopya** eşleşmesi (2 dk). Ayrıca "dolly/Simsonsun Patronus'ta yok" **model kartından çıkarım**, kesin değil — belirtilecek.
 
-### 4.2 İngilizce saldırı çeşitliliği + hedefli hard-negative
-- **Saldırı:** subtle/örtük jailbreak & injection örnekleri (mevcut EN havuzundan çeşitlendir; aynı şablonları çoğaltma).
-- **Masum (hard-neg):** **genel roleplay DEĞİL**; şunlar:
-  - Güvenlik hakkında dokümanlar ("SQL injection nasıl önlenir?"),
-  - Kod/markup/konfig parçaları (talimat benzeri metin içeren),
-  - Sistem-prompt / politika dili,
-  - Saldırı **açıklamaları** (saldırıyı anlatan ama uygulamayan),
-  - Leksik olarak injection'a benzeyen ama yönlendirmeyen masum.
-- **Hedef:** EN benign'e **+3.000–5.000** hedefli hard-neg (mevcut 15k'yı bozmadan, kontrollü).
+**Karar kapısı:** Bu analiz, veri düzenlemesinin **ne kadarının etiket temizliği, ne kadarının yeni veri** olacağını belirler.
 
-### 4.3 Türkçe: native-ağırlıklı kal (MT ≤ %30)
-- v6.2'de tr benign %73 MT yapıldı → tr recall düştü (%46.7). **Geri al:** tr benign **native-ağırlıklı** (MT ≤ %30).
-- `halilneed` doğal Türkçe hard-neg korunur.
-
-### 4.4 Eğitim tarafı: Contrastive + FreeLB
-- `FocalTrainer`'a **supervised contrastive loss (w=0.05, temp=0.07)** ve **FreeLB (3 adım)** ekle (Patronus tarzı).
-- Amaç: **AUC 0.949 → ≥0.96**, FP düşüşü, genelleme.
-
-### 4.5 Değerlendirme: adil benchmark birincil
-- **Birincil metrik:** `heldout_benchmark_v6_fair.json` (jackhhao'suz).
-- İkincil: hold-out 15k, `OOD-2000`, `STRESS-1070`.
-- **Yapılmayacaklar:** sentetik persona şablonları (sızıntı), 687 etiket-çelişkisini otomatik silme (en zor örnekler), benign'i tek taraflı doldurma.
+### 4.1 ru/tr tam etiket denetimi (hata analizinin çıktısı)
+- Qwen yargıcı **ru ve tr native saldırı satırlarının tamamında** çalıştır (~4.000 örnek, birkaç dk).
+- Yüksek-gürültü kaynağı varsa eğitimden çıkar. **Bu, Arapça veri toplamaktan daha ucuz ve muhtemelen daha etkili.**
 
 ---
 
-## 5. Diğer Ajan Nereye Bakmalı? (Dosya + Anahtar Değerler)
+## 5. Veri Düzenlemeleri (v6.3) — Tasarım Kuralları
 
-### 5.1 Eğitim verisi
-- **`data/v6_multilingual_supplement.json`** (83.611 kayıt)
-  - `label`: {1: 34.063, 0: 49.548}
-  - `src`: {mt: 34.063 (saldırılar), native: 23.948}; **MT benign 25.600** (tier=2, src=mt)
-  - `language` başına: tr 25.253, ru 4.693, diğer ~6.000
-- **`scripts/build_v6_multilingual_supplement.py`**
-  - `TGT_BEN_MT` (~satır 30): tr 11.000, ru 200, 9 dil×1.600
-  - `build_en_benign_3way()` (~satır 136): hard-neg 4.800 + roleplay 3.600 + genel 3.600
-  - `ok()` (~satır 180+): `len<=600`, script/TR kontrolü
-  - **v6.3'te:** Arapça native kaynak + hedefli hard-neg + tr MT oranı düşürme buraya eklenecek.
+> **İlke:** Dengeli (50k/50k) iskeleti koru. Saldırı sayısını bozmadan açık dillere native çeşitlilik + hedefli hard-neg ekle. Benign'i roleplay ile DOLDURMA.
 
-### 5.2 Notebook (veri fabrikası + QC)
-- **`notebooks/Master_Dataset_QC_and_Builder_v6.ipynb`**
-  - Hücre 2: adil/contaminated benchmark üretimi
-  - Hücre 4: MT benign (repo fallback; **EVREN zorunlu** — Colab'da DNS çalışmaz, repo'dan okur)
-  - Hücre 5: deterministik kota (satır ~244 `take_deterministic`), şablon budama (`dedup_and_prune_templates`, max_per_prefix=5)
-  - Hücre 6: jüri (ProtectAI/Deepset/Patronus) + Qwen judge; **OUT_OF_SCOPE silinir, 687 çelişki SİLİNMEZ**
-  - Hücre 7: `train/val/test_v6_clean.parquet` + `qc_audit_report_v6.json`
-- **`scripts/build_v6_notebook.py`** (3 eğitim defterinin üreticisi)
-  - Cell 4: `EVAL_TEXT_FILES` (BLACKLIST) → `heldout_benchmark_v6.json` dahil
-  - Cell 5: deterministik `ATK_NAT/ATK_MT/BEN_NAT/BEN_MT` tablosu (Kural 5) ve `_src` fallback
-  - Cell 8: `FocalTrainer` (v6.3'te **contrastive + FreeLB** eklenecek)
+### 5.1 Arapça (ve zayıf diller) native takviye — EN YÜKSEK ÖNCELİK
+- `ar` **saldırı ve masum aynı kaynak türünden** olmalı (native ise ikisi de native; MT ise ikisi de MT). Aksi halde aynı stil kısayolu Arapça'da doğar.
+- Aday kaynaklar (eğitimde OLMAYAN, önce doğrulanacak): Arapça injection/guardrail setleri + Arapça native benign.
+- **Hedef:** ar native oranı ≥%50; `ar` recall ±CI içinde ≥80, FP ≤%6.
+- Kaynak bulunamazsa → **sınırlama yaz** (uydurma yok).
 
-### 5.3 Eğitim defterleri (parquet çift-mod)
-- **`notebooks/Train_mmBERT_v6.ipynb`**, **`Train_BGE_M3_v6.ipynb`**, **`Train_XLM_RoBERTa_v6.ipynb`**
-  - Cell 3: `MASTER_READY` → Drive'dan parquet yüklenir (HF indirme atlanır)
-  - Cell 5: parquet varsa atlanır
-  - Cell 6: `read_parquet` → train/val/test
-  - Cell 12: 3 benchmark (OOD-2000, STRESS-1070, **heldout_v6**)
-  - mmBERT: 16×2 batch; BGE: 8×4; XLM-R: 16×2
+### 5.2 İngilizce saldırı çeşitliliği + hedefli hard-neg
+- **Saldırı:** subtle/örtük jailbreak & injection; şablon çoğaltma yok.
+- **Masum (hard-neg):** güvenlik dokümanı, kod/markup/konfig, sistem-prompt/politika, saldırı **açıklaması**, leksik benzer ama yönlendirmeyen masum. **Genel roleplay değil.**
+- **+3.000–5.000** hedefli hard-neg (mevcut 15k'yı bozmadan, ölçülü).
 
-### 5.4 Benchmark'lar
-- **`heldout_benchmark_v6_clean.json`** → **KONTAMİNE** (jackhhao; Patronus bununla eğitilmiş). Sadece iç rapor.
-- **`heldout_benchmark_v6_fair.json`** → **BİRİNCİL** (Simsonsun+rubend18/dolly, jackhhao yok). 2.849 örnek.
-- **`notebooks/Build_Fair_Benchmark_v6.ipynb`** → adil benchmark + 4 model kıyası (XLM-R, mmBERT, BGE, Patronus).
+### 5.3 Üretici-stili kısayolunu önle (counterfactual) — ZORUNLU
+- Sentetik/LLM ile üretilen her hard-neg için **aynı üretici ve aynı şablonla eşleşen bir sentetik saldırı** üret (counterfactual çift). Yoksa *"LLM yazımı = masum"* kısayolu doğar (MT hatasının analogu).
+- Augmentasyon (Unicode/homoglyph/Base64/leet/case) **her iki sınıfa eşit** uygulanır.
 
-### 5.5 Anahtar ölçümler (özet)
-- v6.2 adil @0.7: mmBERT **74.0/3.8/84.8/0.9494**; Patronus **70.1/0.8/84.2/0.9767**.
-- mmBERT hold-out F1 96.8; BGE 97.0; XLM-R 96.15.
-- CPU ONNX: mmBERT **8.09 ms/266MB**; BGE **24.27 ms/543MB**.
+### 5.4 Türkçe: native-ağırlıklı (MT ≤ %30)
+- v6.2'de tr benign %73 MT idi → tr recall düştü. **Geri al**; `halilneed` doğal hard-neg korunur.
+
+### 5.5 Kontrollü ablasyon (tek seferde çok değişken değiştirme)
+- **Aşama A:** Yalnızca **veri** değişsin → mmBERT eğit.
+- **Aşama B:** Aynı veriyle **contrastive + FreeLB** ekle → yeniden eğit.
+- Böylece hangi değişikliğin işe yaradığı ayrılır; makalede ayrı katkı olur.
+
+### 5.6 Yapılmayacaklar
+- Sentetik persona şablonları (benchmark sızıntısı: `Wulfric`/`medieval blacksmith` yasak).
+- 687 etiket-çelişkisini otomatik silme (en zor örnekler).
+- Benign'i tek taraflı doldurma.
 
 ---
 
-## 6. Hedeflenen Başarı Koşulları (v6.3 kabul kriterleri)
+## 6. Değerlendirme Protokolü ve Başarı Koşulları (ölçülebilir)
 
-**Birincil (adil benchmark, `heldout_benchmark_v6_fair.json`, th=0.70):**
-- [ ] **Macro-F1 ≥ 86.0** (Patronus 84.2'yi geç)
-- [ ] **Recall ≥ 75.0**
-- [ ] **FP ≤ 2.0**
-- [ ] **AUC ≥ 0.960**
-- [ ] **Arapça recall ≥ 85** (65'ten)
-- [ ] **İngilizce recall ≥ 82** (75.8'den)
-- [ ] Türkçe recall ≥ 55, ru FP ≤ 6
+### 6.1 Benchmark hiyerarşisi (aşırı-uydurmayı önle)
+1. **GENİŞLETİLMİŞ DEV benchmark:** Havuzdaki **tüm benzersiz** saldırılar (~1.400) + dolly masum (~14.500) dillere dağıtılıp NLLB ile çevrilir. Etkin örneklem ~12× artar. İterasyon **yalnızca dev** üzerinde.
+2. **FINAL TEST (dokunulmaz):** Kaynakları farklı, hiç iterasyon yapılmayan ayrı bir set (ör. yalnızca rubend18 + ayrı benign havuzu).
+3. **Kaynak-düzeyi sızıntı:** benchmark kaynakları eğitimle **0 ortak**.
 
-**İkincil:**
-- [ ] Hold-out (15k) Macro-F1 ≥ 97.0
-- [ ] STRESS-1070 FP ≤ 10
-- [ ] CPU ONNX gecikme ≤ 10 ms (mmBERT)
-- [ ] Sızıntı: benchmark kaynakları ile eğitim kaynakları **0 ortak metin** (BLACKLIST) ve **kaynak-düzeyi ayrık**
-- [ ] 687 etiket-çelişkisi: **silinmemiş**, audit raporunda listelenmiş
+### 6.2 Metrikler (gürültüye dayanıklı)
+- **Birincil:** **Recall@FP=1%** (eşikten bağımsız) + **AUC** + bootstrap **%95 CI**.
+- İkincil: Macro-F1 (CI ile), Recall/FP sabit eşikte.
+- **Hold-out 15k kriteri KALDIRILDI** (rastgele bölme aynı kaynakları paylaşır; %97 yanıltıcı). Sadece bilgi amaçlı raporlanır.
 
-**Model seçimi:** v6.3 sonrası **mmBERT** şampiyon; BGE-M3 ablasyon; XLM-R baseline. En iyi skoru mmBERT almalı.
+### 6.3 Checkpoint/eşik seçimi
+- Model seçimi **zor OOD dev** setinde (yalnızca val değil).
+- Eşik dev setinde kalibre edilir; final test'e sabit uygulanır.
 
----
+### 6.4 Başarı kriterleri (v6.3)
+- [ ] **Recall@FP=1% (final test): Patronus'un CI üst sınırı içinde veya daha iyi** (yani "denk veya üstün").
+- [ ] **AUC ≥ 0.960** (şu an 0.949; sıralama açığı kapanmalı).
+- [ ] **ar recall (CI ile) ≥ 80**; **en ≥ 80**.
+- [ ] ru FP ≤ %6; tr recall ≥ %50.
+- [ ] Sızıntı: eğitim ↔ benchmark **tam+yakın-kopya = 0**.
+- [ ] 687 çelişki **silinmemiş**, audit raporunda; **50 örnek elle** incelenip gürültü oranı raporlanmış.
+- [ ] CPU ONNX ≤ 10 ms (mmBERT).
 
-## 7. Uygulama Sırası ve Süre
-
-1. **Arapça native + EN hedefli hard-neg veri üretimi** (script): ~1 saat
-2. **tr MT oranını düşür** (native-ağırlıklı): ~20 dk
-3. **Contrastive + FreeLB** trainer güncellemesi: ~1 saat
-4. **Yeni parquet** (Master Cell 5-7): ~30 dk
-5. **mmBERT retrain** (şampiyon): ~30 dk
-6. **Adil benchmark eval**: ~10 dk
-7. Kriterler tutarsa → BGE/XLM-R ablation; tutmazsa → hedefli iterasyon
-
-**Toplam (ilk tur):** ~3-3.5 saat
+> **Not:** "Patronus'u geç" yerine **"CI içinde denk veya üstün, Recall@FP=1%'de daha iyi"** — dürüst ve savunulabilir.
 
 ---
 
-## 8. Riskler ve Önlemler
+## 7. Diğer Ajan Nereye Bakmalı? (Dosya + Anahtar Değerler)
+
+### 7.1 Eğitim verisi
+- `data/v6_multilingual_supplement.json` (83.611): `label {1:34.063, 0:49.548}`, `src {mt:34.063, native:23.948}`, MT benign **25.600** (tier=2)
+- `scripts/build_v6_multilingual_supplement.py`: `TGT_BEN_MT` (~30), `build_en_benign_3way()` (~136), `ok()` (len≤600, ~180)
+- **v6.3'te eklenecek:** Arapça native (her iki sınıf aynı origin), counterfactual hard-neg, tr MT oranı düşürme
+
+### 7.2 Notebook (veri fabrikası + QC)
+- `notebooks/Master_Dataset_QC_and_Builder_v6.ipynb`: H2 benchmark, H4 MT (repo fallback/EVREN), H5 deterministik kota + şablon budama, H6 jüri+Qwen (OUT_OF_SCOPE sil / 687 silme), H7 parquet
+- `scripts/build_v6_notebook.py`: Cell4 BLACKLIST, Cell5 `ATK_NAT/ATK_MT/BEN_NAT/BEN_MT` + `_src` fallback, Cell8 `FocalTrainer`
+- Eğitim defterleri (`Train_*_v6.ipynb`): Cell3 `MASTER_READY`, Cell5 skip, Cell6 `read_parquet`, Cell12 3 benchmark
+
+### 7.3 Benchmark
+- `heldout_benchmark_v6_clean.json` → **kontamine** (jackhhao; Patronus eğitiminde) — sadece iç rapor
+- `heldout_benchmark_v6_fair.json` → **dev** (2849; Simsonsun/rubend18/dolly)
+- **v6.3'te:** **genişletilmiş dev** + **dokunulmaz final test**
+- `notebooks/Build_Fair_Benchmark_v6.ipynb` → benchmark + 4 model kıyası
+
+### 7.4 Ölçümler
+- Adil @0.7: mmBERT 74.0/3.8/84.8/0.9494; Patronus 70.1/0.8/84.2/0.9767
+- Hold-out: mmBERT 96.8, BGE 97.0, XLM-R 96.15 (bilgi amaçlı)
+- CPU ONNX: mmBERT 8.09ms/266MB; BGE 24.27ms/543MB
+
+---
+
+## 8. Uygulama Sırası ve Gerçekçi Süre
+
+| # | Adım | Süre |
+|---|---|---|
+| 1 | **Hata analizi + sızıntı kontrolü** | ~15 dk |
+| 2 | **Genişletilmiş adil benchmark (dev + final test)** | ~30 dk |
+| 3 | **ru/tr tam etiket denetimi (Qwen)** | ~15 dk |
+| 4 | Eşleşmeli hard-neg + counterfactual + Arapça native | ~1,5 saat |
+| 5 | **Aşama A:** mmBERT, yalnızca veri | ~30 dk |
+| 6 | **Aşama B:** mmBERT + contrastive/FreeLB | **~1,5–2 saat** (FreeLB 3–4× yavaşlatır) |
+
+**Gerçekçi toplam: ~5–6 saat** (QC/jüri indirmeleri ve FreeLB dahil). Önceki "30 dk" tahmini geçersiz.
+
+---
+
+## 9. Riskler ve Önlemler
 
 | Risk | Önlem |
 |---|---|
-| Benign'i aşırı doldurma → recall düşüşü | Hedefli, ölçülü ekleme; native oranı korunur |
-| MT motoru asimetrisi (EVREN vs NLLB) | Eğitimde **tek motor (EVREN)**; benchmark NLLB (eğitimden bağımsız) |
-| Arapça native kaynak bulunamaması | Aday kaynaklar önce doğrulanır; yoksa sınırlama yazılır |
-| Benchmark kontaminasyonu | Kaynak-ayrık tutulur (jackhhao çıkarıldı) |
-| Jüri (Qwen) gürültüsü | Yalnızca OUT_OF_SCOPE silinir; çelişkiler loglanır |
-| Overfitting (BGE örneği) | Adil benchmark birincil; hold-out tek başına yeterli değil |
+| Benign aşırı doldurma → recall↓ | Hedefli, ölçülü ekleme; native oranı korunur |
+| Üretici-stili kısayolu | Counterfactual çift (aynı üretici/şablon) |
+| Arapça: native benign + MT saldırı | Her iki sınıf aynı origin; yoksa sınırlama |
+| Çok değişken | Aşama A (veri) / B (+loss) ayrı |
+| Benchmark'a aşırı-uydurma | dev vs dokunulmaz final test |
+| MT motoru asimetrisi | Eğitim tek motor (EVREN); benchmark NLLB |
+| Qwen gürültüsü | Yalnız OUT_OF_SCOPE sil; çelişki logla |
+| Overfitting (BGE örneği) | Adil/CI birincil; hold-out kriteri yok |
 
 ---
 
-## 9. Tek Cümlelik Özet (diğer ajan için)
-> v6.3'te **Arapça/İngilizce native çeşitlilik** ve **hedefli (roleplay-olmayan) hard-negative** eklenecek, Türkçe native-ağırlıklıya dönecek, mmBERT'e **contrastive+FreeLB** uygulanacak; başarı **adil source-disjoint benchmark'ta F1≥86, ar≥85, AUC≥0.96** ile ölçülecek. Mevcut şampiyon mmBERT (adil F1 84.8), Patronus 84.2 (kontamine benchmark'taki 86.9 sızıntıydı).
+## 10. Tek Cümlelik Özet (diğer ajan için)
+> v6.3: **önce hata analizi + sızıntı kontrolü**, sonra **genişletilmiş dev + dokunulmaz final test**; **ru/tr tam etiket denetimi**; Arapça native (her iki sınıf aynı origin), counterfactual-eşleşmeli hedefli hard-neg, tr native-ağırlıklı; **Aşama A yalnız veri**, **Aşama B +contrastive/FreeLB**. Başarı: **Recall@FP=1% + AUC + bootstrap CI** ile **"Patronus'a denk veya üstün"**; hold-out kriteri kaldırıldı. Mevcut: mmBERT adil F1 84.8 / AUC 0.949; Patronus 84.2 / 0.977 (kontamine 86.9 sızıntıydı).
