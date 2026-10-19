@@ -84,23 +84,37 @@ Eski `heldout_benchmark_v6_clean.json` (jackhhao ağırlıklı) **Patronus'un e�
 
 > **İlke:** Dengeli (50k/50k) iskeleti koru. Saldırı sayısını bozmadan açık dillere native çeşitlilik + hedefli hard-neg ekle. Benign'i roleplay ile DOLDURMA.
 
-### 5.1 Arapça (ve zayıf diller) native takviye — EN YÜKSEK ÖNCELİK
-- `ar` **saldırı ve masum aynı kaynak türünden** olmalı (native ise ikisi de native; MT ise ikisi de MT). Aksi halde aynı stil kısayolu Arapça'da doğar.
-- Aday kaynaklar (eğitimde OLMAYAN, önce doğrulanacak): Arapça injection/guardrail setleri + Arapça native benign.
-- **Hedef:** ar native oranı ≥%50; `ar` recall ±CI içinde ≥80, FP ≤%6.
-- Kaynak bulunamazsa → **sınırlama yaz** (uydurma yok).
+### 4.3 Hata Analizi Sonuçları (v6.3, YÜRÜTÜLDÜ — `notebooks/Error_Analysis_v6_3.ipynb`)
+- **Sızıntı ≈ 0:** tam 2/2849, yakın-kopya (MinHash Jaccard≥0.85) 2/2849 (**%0.1**). Benchmark temiz → **yeniden kurmaya gerek yok** (sadece final'i büyüt/küme-ayır).
+- **Uzunluk hipotezi ELENDİ:** FN medyan **356** = TP medyan **357.5**; >600 char saldırılarda kaçma %19.8 ≈ genel %26 → **uzunluk etkisi yok**; uzun-jailbreak verisi **gereksiz**.
+- **FP'nin %98'i KISA metin (<150 char):** 53/54 → en yüksek getiri **kısa benign hard-neg**.
+- **Recall = dil yeteneği (kaynak değil):** aynı 119 EN jailbreak çevirileri → ru 95, it 81, es 81, zh 78, de/fr 77, ja 76, pt 72, **ar 65, ko 60, tr 46**.
+- **MT çeşitliliği:** çeviri-metni benzersiz küme oranı **%88–99** → ciddi duplikasyon yok. *(Not: bu, İngilizce tohum sayısını doğrudan kanıtlamaz.)*
+- **Düzeltme:** "Batı dilleri Patronus'u eziyor" **en için geçersiz** (Patronus EN 86.7 > bizim 75.8); de/fr/es/it/pt'de evet öndeyiz.
 
-### 5.2 İngilizce saldırı çeşitliliği + hedefli hard-neg
-- **Saldırı:** subtle/örtük jailbreak & injection; şablon çoğaltma yok.
-- **Masum (hard-neg):** güvenlik dokümanı, kod/markup/konfig, sistem-prompt/politika, saldırı **açıklaması**, leksik benzer ama yönlendirmeyen masum. **Genel roleplay değil.**
+---
+
+## 5. Veri Düzenlemeleri (v6.3) — Hata Analizine Göre Revize
+
+> **İlke:** Dengeli (50k/50k) iskeleti koru. **Nokta atışı** ekleme yap; benign'i roleplay ile DOLDURMA.
+
+### 5.1 Kısa benign hard-negative (FP) — EN YÜKSEK ÖNCELİK
+- FP'nin **%98'i <150 karakter** masum. → oasst2/aya + yerel havuzdan **dil başına kısa (<150 char) native benign** ekle (**MT değil**).
+- Hedef: **+5.000–8.000** kısa benign (12 dil), `src=native`, `tier=0`, marker `short_benign`.
+- Başarı: FP **3.8 → ≤1.5**.
+
+### 5.2 tr / ar / ko native takviye (recall) — zayıf diller
+- Aynı saldırıların çevirisi: **tr 46 / ko 60 / ar 65** → dil yeteneği zayıf.
+- **tr:** native saldırı+masum mevcut (3nesdeniz/AltaySec/halilneed/TFLai); **tr benign'i native-ağırlıklı** yap (MT ≤%30).
+- **ar / ko:** native saldırı kaynağı **önce doğrulanır**; yoksa daha fazla (MT) saldırı + **native benign** ile dengele ve **sınırlama yaz**. Native bulunursa **iki sınıf da aynı origin**.
+- Başarı: tr ≥55; ar nokta ≥85 (CI_alt ≥78); ko ≥70 (CI ile).
+
+### 5.3 İngilizce hedefli hard-neg (FP/AUC)
+- Güvenlik dokümanı, kod/markup/konfig, sistem-prompt/politika, saldırı açıklaması, leksik benzer ama yönlendirmeyen masum. **Genel roleplay değil.**
 - **+3.000–5.000** hedefli hard-neg (mevcut 15k'yı bozmadan, ölçülü).
 
-### 5.3 Üretici-stili kısayolunu önle (counterfactual) — ZORUNLU
-- Sentetik/LLM ile üretilen her hard-neg için **aynı üretici ve aynı şablonla eşleşen bir sentetik saldırı** üret (counterfactual çift). Yoksa *"LLM yazımı = masum"* kısayolu doğar (MT hatasının analogu).
-- Augmentasyon (Unicode/homoglyph/Base64/leet/case) **her iki sınıfa eşit** uygulanır.
-
-### 5.4 Türkçe: native-ağırlıklı (MT ≤ %30)
-- v6.2'de tr benign %73 MT idi → tr recall düştü. **Geri al**; `halilneed` doğal hard-neg korunur.
+### 5.4 Üretici-stili kısayolunu önle (counterfactual) — ZORUNLU
+- Sentetik/LLM hard-neg için **aynı üretici/şablonla eşleşen sentetik saldırı** üret; augmentasyon **her iki sınıfa eşit**.
 
 ### 5.5 Kontrollü ablasyon (tek seferde çok değişken değiştirme)
 - **Aşama A:** Yalnızca **veri** değişsin → mmBERT eğit.
@@ -214,7 +228,7 @@ Her metrik **aynı final testte**, aynı kalibrasyon protokolüyle **Patronus'a 
 | 4 | Eşleşmeli hard-neg + counterfactual + Arapça native | ~1,5 saat |
 | 5 | **Aşama A:** mmBERT, yalnızca veri | ~30 dk |
 | 6 | **Aşama B:** mmBERT + contrastive/FreeLB | **~1,5–2 saat** (FreeLB 3–4× yavaşlatır) |
-| 7 | **Aşama C (KOŞULLU):** hata analizinin gösterdiği açığa göre veri ekleme (uzun EN jailbreak / Arapça native / yeni insan-yazımı kaynak) | +2–3 saat |
+| 7 | **Aşama C (KOŞULLU):** hata analizine göre açık kalan yere veri (kısa benign / tr-ar-ko native / insan-yazımı kaynak) | +2–3 saat |
 | 8 | (koşullu) mmBERT yeniden eğitim | +~30 dk |
 
 **Gerçekçi toplam: ~5–6 saat (A+B); Aşama C yalnızca A/B hedefi tutmazsa.** Önceki "30 dk" tahmini geçersiz.
@@ -237,7 +251,7 @@ Her metrik **aynı final testte**, aynı kalibrasyon protokolüyle **Patronus'a 
 ---
 
 ## 10. Tek Cümlelik Özet (diğer ajan için)
-> v6.3: **önce hata analizi** (uzunluk + ru/tr etiket gürültüsü + **MT-tohum çeşitliliği** + sızıntı), sonra **küme-bazlı bölünmüş genişletilmiş dev** ve **≥300 saldırı/≥1.000 masum + zor-benign içeren dokunulmaz final test**; ru/tr tam Qwen denetimi; Arapça native (her iki sınıf aynı origin), counterfactual-eşleşmeli hedefli hard-neg, tr native-ağırlıklı; **Aşama A yalnız veri → Aşama B +contrastive/FreeLB → (koşullu) Aşama C**; **ön-kayıtlı durma kuralı** (Recall@FP=1% + AUC + bootstrap CI; "Patronus'a CI içinde denk veya üstün"). Hold-out kriteri kaldırıldı. Mevcut: mmBERT adil F1 84.8 / AUC 0.949; Patronus 84.2 / 0.977 (kontamine 86.9 sızıntıydı).
+> v6.3 hata analizi **yürütüldü**: **sızıntı %0.1 (temiz)**, **uzunluk hipotezi elendi**, **FP'nin %98'i <150 char kısa benign**, **zayıf diller tr46/ko60/ar65 (dil yeteneği)**, MT çeşitliliği yüksek. → **Aşama A:** (1) kısa benign hard-neg, (2) tr/ar/ko native + tr native-ağırlıklı, (3) EN hedefli hard-neg → mmBERT. **Aşama B:** +contrastive/FreeLB. **Aşama C:** yalnızca gerekirse. Başarı: **Recall@FP=1% + AUC + küme-bootstrap CI** ile üstün/denk; **native alt küme** (tr/ar/de/ru) zorunlu. Uzun-jailbreak ve benchmark-yeniden-kur **kaldırıldı** (veri desteklemedi).
 >
 > **Makale konumlandırması (öneri):** "her metrikte geçtik" değil; **çok dilli dayanıklılık** (de +20, ja +21.7, zh +15.8 — CI dışı), **benchmark sızıntısı bulgusu**, **adil kaynak-ayrık değerlendirme**, **8 ms CPU gecikmesi**, **kontrollü ablasyonlar**.
 >
