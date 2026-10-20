@@ -316,7 +316,7 @@ Per-dil **AUC**, Patronus'un çoğu dilde önde olduğunu gösterir (tr 0.970 vs
 - **Bulgu:** MT benchmark'ta tr'de Patronus öndeydi (51.7 vs 46.7); **native tr'de v6.2 açık önde (79.4 vs 45.0)** → **MT benchmark bizim recall'umuzu gizlemiş.**
 - **Ama AUC'de Patronus önde** (0.972 vs 0.952) → sıralama kalitesi onların. **Bulgu threshold-bağımlı.**
 
-**ru (n=16636):** label eşlemesi tutmadı (recall NaN, tüm label=0) → **geçersiz**, düzeltiliyor (kaynak **FaustSS**, `dmtrdr` DEĞİL — o eğitim kaynağı). **ar/de:** native veri yok → **sınırlama**.
+**ru (n=16636):** Karışık kaynak — **16.112 attack (FaustSS) + 524 benign (darkknight25)** → **dengesiz/heterojen set**. v6.2: rec 91.4 / FP 69.8 / AUC 0.890; Patronus: 57.9 / 26.9 / 0.631. v6.2 recall+AUC'de önde ama **FP yüksek**; **dağılım uyumsuzluğu** nedeniyle temkinli yorumlanmalı (**sınırlama**). **ar/de:** aday setler gated/veri yok → **sınırlama**.
 
 ### 13.3 Revize nihai iddialar
 - ✅ **F1'de Patronus'la denk** (CI kanıtlı).
