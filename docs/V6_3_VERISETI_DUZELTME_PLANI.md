@@ -292,3 +292,35 @@ Per-dil **AUC**, Patronus'un çoğu dilde önde olduğunu gösterir (tr 0.970 vs
 ## 12. Kalan Doğrulamalar
 - **Doğrulama-3 (Native alt küme):** tr/ar/de/ru × 50–100 native. Amaç artık "üstünlük kanıtı" değil, **MT vs native farkını ölçmek**. Kaynak bulunamazsa sınırlama yazılır.
 - **Doğrulama-4 (8 ms ONNX):** v6.2 backup checkpoint'ten ONNX INT8 **yeniden export + CPU gecikme ölçümü** (v6.3 koşusu artifact'i üzerine yazmış olabilir).
+
+---
+
+## 13. Doğrulama-4 (ONNX) ve Doğrulama-Native Sonuçları
+
+### 13.1 CPU Gecikme — mmBERT v6.2 INT8 (Colab 2-vCPU, 23 token)
+| Mod | Median | P95 | INT8 boyut |
+|---|---|---|---|
+| sdpa | **61.92 ms** | 210.65 ms | 294.3 MB |
+| eager | 66.14 ms | 191.48 ms | 294.2 MB |
+
+- **Düzeltme:** "8 ms" iddiası **mmBERT için geçersiz** (o **XLM-R**'e aitti). mmBERT gerçek: **~62 ms medyan** (Colab 2-vCPU), **P95 ~190–210 ms**.
+- `threads=2` ile 194→62 ms. Gerçek sunucu CPU'sunda daha hızlı olabilir; **ortam rapora yazılmalı**.
+
+### 13.2 Native Alt Küme (held-out)
+**tr (n=1077, native, held-out):**
+| Model | recall@0.7 | FP@0.7 | AUC |
+|---|---|---|---|
+| **v6.2** | **79.4** | 3.3 | 0.952 |
+| Patronus | 45.0 | 0.2 | **0.972** |
+
+- **Bulgu:** MT benchmark'ta tr'de Patronus öndeydi (51.7 vs 46.7); **native tr'de v6.2 açık önde (79.4 vs 45.0)** → **MT benchmark bizim recall'umuzu gizlemiş.**
+- **Ama AUC'de Patronus önde** (0.972 vs 0.952) → sıralama kalitesi onların. **Bulgu threshold-bağımlı.**
+
+**ru (n=16636):** label eşlemesi tutmadı (recall NaN, tüm label=0) → **geçersiz**, düzeltiliyor (kaynak **FaustSS**, `dmtrdr` DEĞİL — o eğitim kaynağı). **ar/de:** native veri yok → **sınırlama**.
+
+### 13.3 Revize nihai iddialar
+- ✅ **F1'de Patronus'la denk** (CI kanıtlı).
+- ✅ **Native tr'de recall@0.7 üstün** (79.4 vs 45.0); **AUC'de geride** (0.952 vs 0.972).
+- ✅ Benchmark sızıntısı, adil 12-dil eval, EVREN CoT sızıntısı, negatif ablasyonlar.
+- ⚠️ **AUC ve Recall@FP=1%'de Patronus önde**; 2048 bağlam test edilemedi; ru/ar/de native ya geçersiz ya yok.
+- ⚠️ **Gecikme:** mmBERT ~62 ms (CPU, Colab 2-vCPU); "8 ms" yalnızca **XLM-R** için söylenebilir.
