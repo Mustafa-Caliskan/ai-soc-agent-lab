@@ -45,6 +45,12 @@ Bu çalışma üç soruya odaklanır:
 | **L3 DLP** | Parola/API anahtarı/kişisel veri maskesi (12 dil) |
 | **Karar** | **OR-Gate:** `hard_stego ∨ regex≥60 ∨ ml_risk≥70 ∨ (regex_triggered ∧ ml=Malicious)` |
 
+**L0 (normalizasyon/deobfuskasyon):** NFKC; **Unicode-Tag (U+E0000–U+E007F)** steganografi ayıklama; sıfır-genişlik karakter temizliği; homoglyph (Kiril/Yunan benzeri) katlama; **özyinelemeli** Base64/Base32/Hex/ROT13/ters çevirme/leetspeak çözümü; çözülen katman `extended_text` ile L1/L2'ye iletilir. URL yüzdesel kodlamalar tek başına "hard stego" sayılmaz (FP önleme) ama deşifre içerik yine taranır.
+**L1 (regex):** Dil-özel enjeksiyon, talimat iptali, persona/DAN, sistem-prompt sızdırma ve şifre/anahtar isteme kalıpları (TR/EN + çok dilli); skor 0–100, ≥60 blok.
+**L2 (ML):** Çok dilli transformer; kalibre olasılık; eşik 0.70.
+**L3 (DLP):** Parola/API anahtarı/kredi kartı (Luhn)/TCKN (checksum) maskesi ve canary/secret desenleri.
+**OR-Gate:** tek katmanın aşırı-tetiklemesini diğerleriyle dengeler; hiçbir katman tek başına yeterli değildir.
+
 ---
 
 ## 4. Veri Kümesi (v6.2)
@@ -110,7 +116,7 @@ Bu çalışma üç soruya odaklanır:
 
 > MT benchmark'ta (tr) Patronus öndeydi (51.7 vs 46.7); **native Türkçe'de v6.2 açık önde (79.4 vs 45.0)**. AUC'de Patronus önde.
 
-**Rusça (n=16.636; karışık/dengesiz — 16.112 FaustSS attack + 524 darkknight benign):** v6.2 rec 91.4 / FP 69.8 / AUC 0.890; Patronus 57.9 / 26.9 / 0.631. *(Dağılım uyumsuzluğu nedeniyle temkinli; sınırlama.)*
+**Rusça (n=16.636; karışık/dengesiz — 16.112 FaustSS attack + 524 darkknight benign):** v6.2 rec 91.4 / FP 69.8 / AUC 0.890; Patronus 57.9 / 26.9 / 0.631. *(Dağılım uyumsuzluğu nedeniyle temkinli; sınırlama.)* Heterojenliğe rağmen, **Kiril alfabeli yerel saldırılarda Patronus'un sıralaması AUC 0.631'e (rastgeleye yakın) düşerken, mmBERT AUC 0.890 ile sıralamayı korumuştur.**
 
 ### 6.5 CPU Dağıtım Gecikmesi (mmBERT INT8 ONNX)
 | Ortam | Median | P95 | Boyut |
@@ -119,6 +125,16 @@ Bu çalışma üç soruya odaklanır:
 | (XLM-R referansı) | ~8 ms | — | ~266 MB |
 
 > "8 ms" yalnızca **XLM-R** içindir; **mmBERT ~62 ms** (donanıma bağlı).
+
+### 6.6 Kaynak Tüketimi ve Dağıtım (düzeltilmiş)
+| | NeuralShield (mmBERT) | Patronus Wolf Defender |
+|---|---|---|
+| Omurga | mmBERT-base 307M | **mmBERT-base 307M** |
+| Bağlam | 512 | 2048 |
+| ONNX boyut | INT8 **294 MB** | FP32 1.23 GB / FP16 615 MB / INT8+INT4 **218 MB** |
+| CPU gecikme | ~62 ms (Colab 2-vCPU, 23 token) | bu çalışmada ölçülmedi |
+
+> **Not:** İlk taslaktaki "Patronus = 8B Llama-3 / 16–24 GB VRAM / vLLM" iddiası **yanlıştır**; Patronus da **mmBERT-base (307M)** tabanlıdır (model kartı). Adil karşılaştırmada iki model aynı sınıftadır; temel fark **bağlam (2048 vs 512)** ve **eğitim verisidir**. Bu nedenle "ucuz vs pahalı GPU" anlatısı **kullanılmamalıdır.**
 
 ---
 
@@ -143,6 +159,17 @@ Bu çalışma üç soruya odaklanır:
 - MT'de per-dil AUC'de Patronus çoğu dilde önde (tr, ar, ja, zh, ko).
 - **Ancak native Türkçe'de v6.2 recall'u belirgin üstün** → MT benchmark'ın recall'u gizlediği gösterildi.
 - de/it'te v6.2 AUC hafif önde; diğerlerinde Patronus.
+
+### 7.5 LLM İç Muhakeme (CoT) Sızıntısı ve Sorumlu Bildirim
+Ayrı bir deneysel çalışmada (EVREN H200), modellerin **`reasoning`/CoT alanının filtrelenmeden iletilebildiğini** gözlemledik: model `content` alanında reddetse bile **`reasoning` alanında hassas bilgiyi (ör. parola/token) açık metin** olarak dökebilmektedir.
+
+| Model (EVREN H200) | CoT sızıntısı |
+|---|---|
+| `gemma-4-31b` | **%65.0** |
+| `qwen-3.8-flash-next` | **%30.0** |
+
+**Savunma çıkarımı:** İngress'te (NeuralShield L0–L4) istem engellendiğinde model **çağrılmadığı** için CoT sızıntısı **%0'a** iner; yani savunma modelin kendi çıktı filtresine bırakılamaz.
+**Sorumlu bildirim:** Bulgu EVREN/SSYZ ekibine iletilmiş; ekip bulguyu **kabul etmiş**, **dokümantasyon güvenlik notu** ve **model geliştiricisine eskalasyon** başlatmış, katkı için **5.000 CR** vermiştir. *(Ham istek/yanıt kanıtı ayrı deney klasöründedir; yayında anonimleştirilecektir.)*
 
 ---
 
