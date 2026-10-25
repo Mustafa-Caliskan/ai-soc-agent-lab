@@ -90,9 +90,13 @@ class MLSecurityModel:
                         if os.path.exists(alt_root_v3):
                             target_path = alt_root_v3
 
-            onnx_file = os.path.join(target_path, "model_quantized_int8.onnx")
+            preferred_name = CONFIG.get("ml_onnx_file")
+            if preferred_name and os.path.exists(os.path.join(target_path, preferred_name)):
+                onnx_file = os.path.join(target_path, preferred_name)
+            else:
+                onnx_file = os.path.join(target_path, "model_quantized_int8.onnx")
             if not os.path.exists(onnx_file):
-                # Fallback to model.onnx if quantized not found
+                # Fallback to model.onnx if preferred/quantized not found
                 alt_onnx = os.path.join(target_path, "model.onnx")
                 if os.path.exists(alt_onnx):
                     onnx_file = alt_onnx
@@ -104,7 +108,7 @@ class MLSecurityModel:
             logger.info(f"Loading XLM-RoBERTa Tokenizer from: {target_path}")
             self.tokenizer = AutoTokenizer.from_pretrained(target_path)
 
-            logger.info(f"Loading ONNX INT8 Engine from: {onnx_file}")
+            logger.info(f"Loading ONNX Engine from: {onnx_file}")
             sess_options = ort.SessionOptions()
             sess_options.intra_op_num_threads = 4
             sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
