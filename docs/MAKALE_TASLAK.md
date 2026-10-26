@@ -141,7 +141,10 @@ Bu çalışma üç soruya odaklanır:
 | Varyant | Recall@0.7 | FP@0.7 | Macro-F1 | ROC-AUC |
 |---|---|---|---|---|
 | **FP32 (makale/dağıtım)** | **74.10** | 3.83 | **84.86** | **0.9494** |
-| INT8 (dinamik) | 53.3 | 3.4 | 73.6 | 0.8908 |
+| INT8 (dinamik), **ham metin** | 49.03 | 3.05 | 64.50 | — |
+| INT8 (dinamik) + L0 | 53.3 | 3.4 | 73.6 | 0.8908 |
+
+> **Etiket düzeltmesi:** Önceki taslakta "INT8 53.3" **L0+INT8**'e aitti; saf INT8 (ham metin) **49.03**'tür. Ayrıntı: `data/quantization_table_fair.json`, `data/int8_fair_raw_vs_l0.json`.
 
 > **Dağıtım kararı:** Makaledeki tüm sonuçlar **FP32** ile üretilmiştir; sistem yapılandırması da FP32'ye (`ml_onnx_file="model.onnx"`) hizalanmıştır. INT8, bellek/gecikme kazancı (~4× küçük, ~2× hızlı) karşılığında OOD recall'unda ~21 puan kayıp verdiğinden **şampiyon konfigürasyon olarak kullanılmamıştır**.
 
@@ -210,6 +213,24 @@ Projenin temel tezi şudur: Açık kaynak ve yerel LLM'ler sistem promptuna göm
 - **Sıcaklık kontrolü ($n=20$):** Greedy (%35.0) vs $T=0.7$ (%35.0) sızıntı oranı farkı **0.0 puan** bulunmuştur; açgözlü aramanın deterministik temsiliyeti doğrulanmıştır.
 - **Etkili Alt Küme ($n=35$):** 101 saldırının 35'i (%34.7) en az bir modelde sızıntı yaratmıştır. Bu etkili kümede `Qwen2.5-3B` zafiyeti **%74.3**, `Llama-3.2-3B` zafiyeti **%40.0** seviyesindedir; kalkan bunu **%0.0'a** indirmiştir (-74.3 / -40.0 puan risk düşüşü).
 - **Saldırı sınıfı zafiyet profili:** En savunmasız alan doğrudan enjeksiyon (`direct`: Qwen %50.0, Llama %25.0) ve gizli belge enjeksiyonudur (`indirect`: Qwen %42.3, Llama %26.9).
+
+### 6.10 Düşünme (CoT) kanalında sızıntı — açık ağırlıklı modeller
+
+Muhakeme modelleri nihai yanıtı sansürleyip sırrı **düşünme metninde** dökebilir. 24 saldırı + 12 benign
+üzerinde `reasoning` ve `final` **ayrı ayrı** tarandı (768 token; iki aşamalı canary eşleşmesi).
+
+| Model | n | CoT sızıntı % | final sızıntı % | **SADECE CoT %** | ort. CoT (karakter) |
+|---|---|---|---|---|---|
+| **Qwen3-4B-Thinking** | 24 | **50.0** | 8.3 | **45.8** | ~2.988 |
+| R1-Distill-Qwen-1.5B | 24 | 16.7 | 12.5 | 4.2 | ~2.038 |
+
+> **Bulgu:** Qwen3-4B-Thinking'de 24 saldırının **%45.8'inde sızıntı yalnızca düşünme metninde** oluştu;
+> nihai yanıt temizdi. Yani **çıktı filtresi kullanan sistemler bu sızıntıyı hiç görmez.** Bu,
+> EVREN H200'deki ticari-model bulgusunun (§7.5) **açık ağırlıklı modellerde bağımsız tekrarıdır**.
+>
+> **Sınırlama:** ON modda 24 saldırının **hiçbiri** geçide takılmadan geçemedi (0 örnek); bu nedenle
+> "kalkan açıkken CoT sızıntısı" ölçülemedi. Bu, savunmanın tam blokajının sonucudur ve ayrı bir başarı
+> olarak raporlanmamalıdır.
 
 ---
 
@@ -282,6 +303,9 @@ Hakemsel bir itiraz şudur: "Kalkan ON iken saldırı girişte durdurulduğu iç
 8. **L0/L1 katkısı sınırlı örneklemde görünmez:** E2E'de blokların ~%99'u L2'den gelir; obfuskasyon ağırlıklı bir test setiyle ayrıca doğrulanmalıdır (§6.7). Küratörlü red-team setinde ise L0/L1'in değeri nicemlenmiş (INT8) dağıtımda ve model-bağımsız hızlı yolda ölçülür (§6.8).
 9. **Alt sınıf örneklemleri küçük:** `direct` n=16 (Wilson GA ~[50.5, 89.8]); bu tür alt-sınıf yüzdeleri **yalnızca keşifsel**dir, genelleme iddiası taşımaz. Ana iddialar N=101 havuzuna ve adil benchmark'ın N=2.849'una dayandırılmıştır.
 10. **Red-team seti in-domain'dir:** Küratörlü 161 kayıt, eğitim dağılımına yakın ailelerden gelir; %100 yakalama **OOD başarısı olarak yorumlanmamalıdır** (OOD için §6.2: recall 74.1). İki sayı ayrı raporlanır.
+12. **Modeller 4-bit NF4 ile yüklendi:** nicemleme güvenlik hizalamasını zayıflatabilir; FP16 kontrolü yapılmadı (P1). ASR mutlak değerleri üst sınır olarak okunmalıdır.
+13. **CoT ON modu boş:** 24 saldırının hiçbiri geçide takılmadan geçemedi (0 örnek) → "kalkan açıkken CoT sızıntısı" ölçülemedi.
+14. **Red-team seti TR/EN ve in-domain:** 12 dile yayılmadı (P2).
 11. **Kalkan ON karşılaştırmasının asimetrisi kabul edilir:** Bloklanan istem model çağrılmaz (bu tasarım gereğidir); bu nedenle §7.6'da L3 çıktı DLP'si **bağımsız** olarak da ölçülmüştür.
 
 ---

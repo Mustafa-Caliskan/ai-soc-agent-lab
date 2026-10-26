@@ -74,7 +74,7 @@ kendisine bırakılamaz → **çevre geçidi (peripheral gateway)** gerekir.
 | **RQ5** | Çok dilli sınıflandırıcı, adil (kaynak-ayrık) bir benchmark'ta ticari rakiple yarışır mı? | **F1'de denk** (GA örtüşüyor); **AUC ve düşük-FP'de geride.** §9.2 |
 | **RQ6** | Yaygın "OOD" kıyaslamaları güvenilir mi? | **Hayır:** eski setin **%76.9'u** eğitimle aynı kaynak. §9.1 |
 | **RQ7** | Nicemleme (INT8) güvenlik sınıflandırıcısında güvenli mi? | **Hayır (OOD'de):** recall 74.1 → 53.3, AUC 0.9494 → 0.8908. §9.4 |
-| **RQ8** | Modeller **düşünürken** (CoT) sızdırıyor mu? | **Evet:** EVREN'de %65 (gemma-4-31b), %30 (qwen-3.8-flash). Yerel modellerde test **bekliyor**. §9.7 |
+| **RQ8** | Modeller **düşünürken** (CoT) sızdırıyor mu? | **Evet:** ticari modellerde %65/%30; açık ağırlıklı Qwen3-4B-Thinking'de **%50.0 (yalnız-CoT %45.8)**. §9.8b |
 
 ---
 
@@ -396,7 +396,7 @@ Kaynak: `data/qc_audit_report_v6.json`, `data/v6_multilingual_supplement.json`
 2. **Native held-out** (tr n=1.077; ru n=16.636 karışık) — çeviri etkisini kırmak için
 3. **Uçtan uca L0–L3** (aynı adil set) — katman atfı
 4. **Küratörlü red-team** (N=101) — mekanizma/katman ablasyonu, **in-domain**
-5. **Red-team ASR** (yerel LLM'ler, OFF vs ON) — **ana tez** *(çalıştırma bekliyor)*
+5. **Red-team ASR** (yerel LLM'ler, OFF vs ON) — **ana tez** ✅ *tamamlandı, §9.8b*
 
 ### 8.3 Sızıntı ölçümü (deterministik, LLM hakem yok)
 `backend/canary.py` — 4 sentetik canary:
@@ -477,7 +477,8 @@ ON  : kalkan açık →
 | Varyant | Recall@0.7 | FP | Macro-F1 | AUC | Boyut |
 |---|---|---|---|---|---|
 | **FP32 (şampiyon)** | **74.10** | 3.83 | **84.86** | **0.9494** | 1.23 GB |
-| INT8 (dinamik) | 53.3 | 3.4 | 73.6 | 0.8908 | 294 MB |
+| INT8 (dinamik), **ham metin** | 49.03 | 3.05 | 64.50 | — | 294 MB |
+| INT8 (dinamik) + L0 | 53.3 | 3.4 | 73.6 | 0.8908 | 294 MB |
 
 **Mekanizma:** PTQ, aktivasyon aralıklarını kalibrasyon verisinden tahmin eder → OOD girdilerde
 (homoglyph, stego, farklı dil) aktivasyonlar aralık dışına taşar → aşırı kırpma → logit bozulması.
@@ -566,7 +567,7 @@ L0–L2 **tamamen baypas** varsayımı (model sırrı sızdırdı), yalnızca L3
 - Model `content` alanında reddetse bile **`reasoning` alanında sırrı açık metin** döküyor.
 - İngress'te istem engellenince model çağrılmadığı için sızıntı **%0**.
 - **Sorumlu bildirim:** EVREN ekibi kabul etti, dokümantasyon notu + geliştirici eskalasyonu, 5.000 CR.
-- **Yerel modellerde test (Qwen3-4B-Thinking, R1-Distill) → BEKLİYOR.** (§13.2)
+- **Yerel modellerde test (Qwen3-4B-Thinking, R1-Distill) → TAMAMLANDI:** CoT %50.0 / yalnız-CoT %45.8 (Qwen3), %16.7 / %4.2 (R1) — §9.8b
 
 ### 9.9 Yerel model zafiyeti ve Kalkan Etkisi (v6.2 ile DOĞRULANDI) ⭐
 `data/redteam/redteam_v6_2_summary.json` — 5 model × 101 küratörlü saldırı + 60 benign = 805 sorgu (Colab T4, greedy decoding):
@@ -705,7 +706,7 @@ Modeller **sırayla** yüklenir (OOM yok), her model ayrı JSON'a yazılır (cac
 ## 13. Yol haritası
 
 ### 13.1 P0 — Zorunlu (makale için kanıt)
-1. **`RedTeam_Local_Models_v6_2.ipynb` çalıştır** (Colab, 9 hücre)
+1. ✅ **`RedTeam_Local_Models_v6_2.ipynb` ÇALIŞTIRILDI** (Colab, 8 hücre) — sonuçlar `data/redteam/redteam_v6_2_{summary,core_full,reasoning_full}.json`
    - Hücre 2b, 4, 4b, 5 çıktılarını topla
    - JSON'ları indir → `data/redteam/`
 2. **Makaleyi yeniden konumlandır:**
@@ -859,7 +860,7 @@ python -c "import json;print(json.load(open('data/e2e_layer_test_v6_2.json')))"
 - **En güçlü yan bulgu:** yaygın OOD setlerinin **%76.9'u sızdırılmış**.
 - **Red-team (in-domain, N=101):** kalkan **%100** yakalıyor; FP32'de **L2 tek başına yeterli**;
   katmanların değeri INT8'de (+7 puan), model-bağımsız hızlı yolda (%76.2, %0 FP) ve L3'te (%100).
-   - **Bekleyen tek kritik iş:** `RedTeam_Local_Models_v6_2.ipynb` (yerel modellerle ASR + CoT).
+   - **Ana tez kanıtlandı:** 5 modelde OFF ASR %4.95–25.7 → ON ASR **%0.0** (blok %100); L3-only gerçek çıktılarda **62/62 = %100**; CoT yalnızca-sızıntı Qwen3'te **%45.8**.
    - **Makale odağı:** red-team etrafında yeniden konumlandırılacak.
 
 ---
