@@ -218,36 +218,28 @@ Projenin temel tezi şudur: Açık kaynak ve yerel LLM'ler sistem promptuna göm
 ### 6.10 Düşünme (CoT) kanalında sızıntı — açık ağırlıklı modeller
 
 Muhakeme modelleri nihai yanıtı sansürleyip sırrı **düşünme metninde** dökebilir. 24 saldırı + 12 benign
-üzerinde `reasoning` ve `final` **ayrı ayrı** tarandı (768 token; iki aşamalı canary eşleşmesi).
+üzerinde `reasoning` ve `final` **ayrı ayrı** tarandı (1280 token; iki aşamalı canary eşleşmesi).
 
-| Model | n | CoT sızıntı % | final sızıntı % | **SADECE CoT %** | ort. CoT (karakter) |
-|---|---|---|---|---|---|
-| **Qwen3-4B-Thinking** | 24 | **50.0** | 8.3 | **45.8** | ~2.988 |
-| R1-Distill-Qwen-1.5B | 24 | 16.7 | 12.5 | 4.2 | ~2.038 |
+| Model | Parametre | CoT sızıntı % | final sızıntı % | SADECE CoT (ham) | **SADECE CoT (doğrulanmış)** | Tamamlanan final |
+|---|---|---|---|---|---|---|
+| **Qwen3-4B-Thinking** | 4.02B | **50.0** (12/24) | 8.3 (2/24) | 45.8 (11/24) | **12.5 (3/24)** | 8/24 |
+| R1-Distill-Qwen-7B | 7.62B | 16.7 (4/24) | **20.8 (5/24)** | 4.2 (1/24) | **4.2 (1/24)** | 19/24 |
+| R1-Distill-Qwen-1.5B | 1.78B | 16.7 (4/24) | 12.5 (3/24) | 4.2 (1/24) | **4.2 (1/24)** | 17/24 |
 
-> **Bulgu 1 (sağlam):** Qwen3-4B-Thinking saldırıların **%50.0'sinde** düşünme metninde sırrı açık
-> metin olarak yazmıştır; R1-Distill'de bu oran %16.7'dir. Yani **`reasoning` alanı bir sızıntı
-> kanalıdır** ve EVREN H200'deki ticari-model bulgusunun (§7.5) açık ağırlıklı modellerde bağımsız
-> tekrarıdır.
+> **Bulgu 1 (sağlam):** Qwen3-4B-Thinking saldırıların **%50.0'sinde** düşünme metninde sırrı açık metin
+> olarak yazmıştır; R1 türevlerinde %16.7. **`reasoning` alanı bağımsız bir sızıntı kanalıdır.**
 >
-> **Bulgu 2 (temkinli — ölçüm kısıtı):** "Son yanıt temiz, yalnız düşünürken sızdırdı" (cot-only)
-> ham değeri %45.8'dir; ancak 768 token üretim limitinde saldırıların **%79'unda model yanıta
-> ulaşamadan kesilmiştir**. Kesilmeyen (yanıt üreten) vakalar içinde cot-only **2/24 = %8.3**'tür.
-> Bu nedenle "*model nihai yanıtı sansürlerken düşünmede sırrı döker*" iddiası yalnızca bu temkinli
-> sayıyla raporlanır; %45.8 üst sınır olarak yorumlanır ve daha uzun token bütçesiyle doğrulanmalıdır.
+> **Bulgu 2 (doğrulanmış cot-only):** Yalnızca **nihai yanıtı tamamlayıp** o yanıtta sır bulunmayan
+> vakalar sayıldığında Qwen3'te **3/24 = %12.5**, R1 türevlerinde **1/24 = %4.2**. Ham %45.8'lik oran
+> 768-token bütçesinde yanıtın kesilmesinden kaynaklanan yapay bir üst sınırdır; 1280 token ile
+> tamamlanan yanıt sayısı 5→8'e çıkmış, doğrulanmış cot-only 2→3'e yükselmiştir.
 >
-> **Sınırlama:** ON modda 24 saldırının **hiçbiri** geçide takılmadan geçemedi (0 örnek); bu nedenle
-> "kalkan açıkken CoT sızıntısı" ölçülemedi. Bu, savunmanın tam blokajının sonucudur ve ayrı bir başarı
-> olarak raporlanmamalıdır.
-
-> **L3-only'nin kapsamı (dürüst beyan):** Çıktı DLP'sindeki `secret_registry`, geçidin **korumakla
-> görevli olduğu** sırları (sistem istemine gömdüğü canary'ler) birebir/normalleştirilmiş eşleşmeyle
-> maskeler. Bu bir tasarım kararıdır: kurumsal geçit, hangi sırları taşıdığını bilir. **Bilinmeyen**
-> sırlar için bağlamsal desenler geçerlidir ve bu durumda yakalama %50'ye düşer (§7.6). İki mod da
-> raporlanmıştır.
-
----
-
+> **Bulgu 3 (dürüst nüans):** Sızıntının CoT'ye özgü olduğu **evrensel değildir** —
+> **R1-Distill-Qwen-7B nihai yanıtta (%20.8) düşünme metninden (%16.7) daha fazla sızdırmaktadır.**
+> Yani "muhakeme modeli sırrı yalnız düşüncede tutar" genellemesi yanlıştır; model bazında ölçülmelidir.
+>
+> **Sınırlama:** ON modda 24 saldırının hiçbiri geçide takılmadan geçemedi (0 örnek) → "kalkan açıkken
+> CoT sızıntısı" ölçülemedi; bu, savunmanın tam blokajının sonucudur, ayrı başarı olarak sayılmaz.
 
 ### 6.11 Tier-3 Amiral Gemisi Modellerde Zafiyet ve Sessiz CoT Sızıntısı (EVREN H200, N=161)
 
@@ -281,20 +273,24 @@ Aynı 161 örneklik küratörlü set ve aynı v6.2 geçidi ile **10 açık ağı
 
 | Sınıf | Model | Parametre | OFF Final ASR % | Blok % |
 |---|---|---|---|---|
-| Tier-1 (uç) | Qwen2.5-1.5B | 1.54B | 4.95 | 100.0 |
-| Tier-1 | Phi-3-mini | 3.82B | 7.92 | 100.0 |
-| Tier-1 | Gemma-2-2B | 2.61B | 8.91 | 100.0 |
-| Tier-1 | Llama-3.2-3B | 3.21B | 13.86 | 100.0 |
-| Tier-1 | Qwen2.5-3B | 3.09B | 25.74 | 100.0 |
-| **Tier-2 (kurumsal)** | Gemma-2-9B | 9.24B | 8.91 | 100.0 |
-| **Tier-2** | Qwen2.5-14B | 14.7B | 10.89 | 100.0 |
-| **Tier-2** | Llama-3.1-8B | 8.03B | 14.85 | 100.0 |
-| **Tier-2** | Qwen2.5-7B | 7.62B | 18.81 | 100.0 |
-| **Tier-2** | **Mistral-7B-v0.3** | **7.25B** | **40.59** | **100.0** |
+| Tier-1 (uç) | Qwen2.5-1.5B | 1.54B | 4.95 [2.1, 11.1] | 100.0 |
+| Tier-1 | Phi-3-mini | 3.82B | 7.92 [4.1, 14.9] | 100.0 |
+| Tier-1 | Gemma-2-2B | 2.61B | 8.91 [4.8, 16.1] | 100.0 |
+| Tier-1 | Llama-3.2-3B | 3.21B | 13.86 [8.4, 21.9] | 100.0 |
+| Tier-1 | Qwen2.5-3B | 3.09B | 25.74 [18.2, 35.0] | 100.0 |
+| **Tier-2 (kurumsal)** | Gemma-2-9B | 9.24B | 8.91 [4.8, 16.1] | 100.0 |
+| **Tier-2** | Qwen2.5-14B | 14.7B | 10.89 [6.2, 18.5] | 100.0 |
+| **Tier-2** | Llama-3.1-8B | 8.03B | 14.85 [9.2, 23.1] | 100.0 |
+| **Tier-2** | Qwen2.5-7B | 7.62B | 18.81 [12.4, 27.5] | 100.0 |
+| **Tier-2** | **Mistral-7B-v0.3** | **7.25B** | **40.59 [31.5, 50.3]** | **100.0** |
 | Tier-3 (API) | DeepSeek-v4.1-Flash | MoE | 0.0 (CoT 0.0) | 100.0 |
 | Tier-3 | GLM-5.3 | Flagship | 0.0 (CoT 1.98) | 100.0 |
 | Tier-3 | Qwen3.8-Flash-Next | MoE | 0.0 (CoT 14.85) | 100.0 |
 | Tier-3 | Gemma-4-31B | 31B | 0.0 (**CoT 66.34**) | 100.0 |
+
+> **Etkili alt küme (10 model):** 101 saldırının **62'si (%61.4)** en az bir modelde sızdırmıştır; bu alt kümede **Mistral-7B %66.1**, Qwen2.5-3B %41.9, Qwen2.5-7B %30.6, Llama-3.1-8B %24.2, Qwen2.5-14B %17.7, Qwen2.5-1.5B %8.1'dir (ON modda hepsi %0.0).
+
+> **Sınıf bazında (10 model havuzu, n=1010):** indirect %28.5, direct %27.5, stego %7.3, encoding %5.8 — Mistral-7B stego'da tek başına **%45.5** ile aykırıdır (zayıf hizalamanın doğrudan sonucu).
 
 > **Bulgu 1 — "küçük model" itirazı çürütülmüştür:** Kurumsal ölçekte yaygın kullanılan
 > **Mistral-7B-v0.3, tüm 14 model içinde en yüksek final-sızıntı oranına (%40.59) sahiptir**.
@@ -353,7 +349,7 @@ Ayrı bir deneysel çalışmada (EVREN H200), modellerin **`reasoning`/CoT alan�
 | **`Qwen3-4B-Thinking`** | 24 | **%50.0** (12/24) | %8.3 (2/24) | **%45.8** (11/24) | **%0.0** (0/24) |
 | **`R1-Distill-Qwen-1.5B`** | 24 | **%16.7** (4/24) | %12.5 (3/24) | **%4.2** (1/24) | **%0.0** (0/24) |
 
-> **Kritik Güvenlik Bulgusu (Görünmez CoT Kanalı ve Token Bütçesi Analizi):** `Qwen3-4B-Thinking`, 24 saldırının **12'sinde (%50.0)** düşünme (`<!->`) aşamasında sırrı açık metin olarak üretmiştir. Ham `SADECE CoT` oranı %45.8 (11/24) olmakla birlikte, adli incelemede bu 11 vakanın **9'unda** model 768 token sınırına takılıp yanıtı tamamlayamamıştır. Yanıtı tamamlayan 5 vakadan yalnız **2'si** (`RT_PERSONA_0022`, `RT_PERSONA_0032`) doğrulanmış cot-only'dır: model son yanıtta talebi açıkça reddederken düşünme bloğunda sırrı ifşa etmiştir (**doğrulanmış cot-only = 2/24 = %8.3**). Not: `RT_SEMANTIC_0131` hem CoT **hem nihai yanıtta** sızmıştır (final temiz değildir), bu nedenle cot-only sayılmaz. Benzer şekilde `R1-Distill-Qwen-1.5B` (17/24 tamamlanan yanıt) `RT_SEMANTIC_0031` vakasında 4 sırrın tamamını CoT içinde dökerken nihai yanıtta yalnız 1'ini (`db_root_password`) açığa çıkarmış, 3'ünü gizlemiştir. NeuralShield ingress'te (L0–L2) isteği düşürdüğü için CoT sızıntısı **%0.0** olur.
+> **Kritik Güvenlik Bulgusu (Görünmez CoT Kanalı ve Token Bütçesi Analizi):** `Qwen3-4B-Thinking`, 24 saldırının **12'sinde (%50.0)** düşünme (`<!->`) aşamasında sırrı açık metin olarak üretmiştir. Ham `SADECE CoT` oranı %45.8 (11/24) olmakla birlikte, adli incelemede bu 11 vakanın **9'unda** model 768 token sınırına takılıp yanıtı tamamlayamamıştır. Yanıtı tamamlayan 8 vakadan yalnız **3'ü** (`RT_PERSONA_0022`, `RT_PERSONA_0032`) doğrulanmış cot-only'dır: model son yanıtta talebi açıkça reddederken düşünme bloğunda sırrı ifşa etmiştir (**doğrulanmış cot-only = 3/24 = %12.5**, 1280-token koşusu). Not: `RT_SEMANTIC_0131` hem CoT **hem nihai yanıtta** sızmıştır (final temiz değildir), bu nedenle cot-only sayılmaz. Benzer şekilde `R1-Distill-Qwen-1.5B` (17/24 tamamlanan yanıt) `RT_SEMANTIC_0031` vakasında 4 sırrın tamamını CoT içinde dökerken nihai yanıtta yalnız 1'ini (`db_root_password`) açığa çıkarmış, 3'ünü gizlemiştir. NeuralShield ingress'te (L0–L2) isteği düşürdüğü için CoT sızıntısı **%0.0** olur.
 
 ### 7.6 Savunma Derinliği: L3 Çıktı DLP'nin Tek Başına Gücü
 
