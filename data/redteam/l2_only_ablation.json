@@ -1,0 +1,184 @@
+{
+  "threshold": 0.7,
+  "rows": {
+    "L2-FP32 / ham metin  (SADECE MODEL)": {
+      "recall": 100.0,
+      "fp": 6.7,
+      "f1": 98.1,
+      "tp": 101,
+      "fp_n": 4
+    },
+    "L2-INT8 / ham metin  (SADECE MODEL)": {
+      "recall": 91.1,
+      "fp": 8.3,
+      "f1": 92.9,
+      "tp": 92,
+      "fp_n": 5
+    },
+    "L2-INT8 / L0-normalize metin": {
+      "recall": 95.0,
+      "fp": 8.3,
+      "f1": 95.0,
+      "tp": 96,
+      "fp_n": 5
+    },
+    "L2-INT8 / max(ham, normalize)": {
+      "recall": 96.0,
+      "fp": 10.0,
+      "f1": 95.1,
+      "tp": 97,
+      "fp_n": 6
+    },
+    "L0+L1 only (model YOK)": {
+      "recall": 76.2,
+      "fp": 0.0,
+      "f1": 86.5,
+      "tp": 77,
+      "fp_n": 0
+    },
+    "TAM: L0+L1+L2+L3 (FP32)": {
+      "recall": 100.0,
+      "fp": 6.7,
+      "f1": 98.1,
+      "tp": 101,
+      "fp_n": 4
+    },
+    "TAM: L0+L1+L2 (INT8, L3 haric)": {
+      "recall": 97.0,
+      "fp": 10.0,
+      "f1": 95.6,
+      "tp": 98,
+      "fp_n": 6
+    }
+  },
+  "per_class": {
+    "direct": {
+      "n": 16,
+      "l2_fp32": 100.0,
+      "l2_int8": 75.0,
+      "full_int8": 81.2,
+      "full_fp32": 100.0,
+      "ci_fp32": [
+        80.6,
+        100
+      ],
+      "ci_int8": [
+        50.5,
+        89.8
+      ]
+    },
+    "indirect": {
+      "n": 26,
+      "l2_fp32": 100.0,
+      "l2_int8": 96.2,
+      "full_int8": 100.0,
+      "full_fp32": 100.0,
+      "ci_fp32": [
+        87.1,
+        100
+      ],
+      "ci_int8": [
+        81.1,
+        99.3
+      ]
+    },
+    "encoding": {
+      "n": 26,
+      "l2_fp32": 100.0,
+      "l2_int8": 96.2,
+      "full_int8": 100.0,
+      "full_fp32": 100.0,
+      "ci_fp32": [
+        87.1,
+        100
+      ],
+      "ci_int8": [
+        81.1,
+        99.3
+      ]
+    },
+    "stego": {
+      "n": 33,
+      "l2_fp32": 100.0,
+      "l2_int8": 90.9,
+      "full_int8": 100.0,
+      "full_fp32": 100.0,
+      "ci_fp32": [
+        89.6,
+        100
+      ],
+      "ci_int8": [
+        76.4,
+        96.9
+      ]
+    }
+  },
+  "wilson": {
+    "L2-FP32 / ham metin  (SADECE MODEL)": {
+      "k": 101,
+      "n": 101,
+      "ci": [
+        96.3,
+        100.0
+      ]
+    },
+    "L2-INT8 / ham metin  (SADECE MODEL)": {
+      "k": 92,
+      "n": 101,
+      "ci": [
+        83.9,
+        95.2
+      ]
+    },
+    "L2-INT8 / L0-normalize metin": {
+      "k": 96,
+      "n": 101,
+      "ci": [
+        88.9,
+        97.9
+      ]
+    },
+    "L2-INT8 / max(ham, normalize)": {
+      "k": 97,
+      "n": 101,
+      "ci": [
+        90.3,
+        98.4
+      ]
+    },
+    "L0+L1 only (model YOK)": {
+      "k": 77,
+      "n": 101,
+      "ci": [
+        67.1,
+        83.5
+      ]
+    },
+    "TAM: L0+L1+L2+L3 (FP32)": {
+      "k": 101,
+      "n": 101,
+      "ci": [
+        96.3,
+        100.0
+      ]
+    },
+    "TAM: L0+L1+L2 (INT8, L3 haric)": {
+      "k": 98,
+      "n": 101,
+      "ci": [
+        91.6,
+        99.0
+      ]
+    }
+  },
+  "l3_only": {
+    "masked_ok": 24,
+    "n": 24,
+    "block_rate_pct": 100.0,
+    "ci": [
+      86.2,
+      100
+    ]
+  },
+  "note": "Kuratorlu in-domain red-team seti; OOD icin heldout_benchmark_v6_fair.json kullanin."
+}
