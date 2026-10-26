@@ -314,68 +314,57 @@ Aynı 161 örneklik küratörlü set ve aynı v6.2 geçidi ile **10 açık ağı
 > hizalamasını etkileyebilir (FP16 kontrolü gelecek çalışma). Mistral-v0.3'ün görece zayıf güvenlik
 > hizalaması bilinen bir özelliktir ve bulguyu açıklar; yine de mutlak ASR değerleri üst sınır sayılmalıdır.
 
-### 6.13 Ablasyon: Nicemleme Duyarlılığı ve Sistem-Promptu Sertleştirmesi
+### 6.13 Ablasyonlar: Nicemleme ve Sistem-Promptu Sertleştirmesi (N=101)
 
-İki hakem itirazı doğrudan test edilmiştir: **(A)** "4-bit nicemleme güvenlik hizalamasını bozup ASR'yi
-şişirmiş olabilir mi?" ve **(B)** "Sistem promptunu sertleştirmek sorunu çözer mi?"
+İki hakem itirazı doğrudan test edilmiştir: **(A)** "4-bit nicemleme güvenlik hizalamasını bozup
+ASR'yi şişirmiş olabilir mi?" ve **(B)** "Sistem promptunu sertleştirmek sorunu çözer mi?"
+Her iki deney de **101 saldırının tamamı** üzerinde, aynı örnek kimlikleriyle ve **eşli (paired)**
+tasarımla koşulmuş; anlamlılık **McNemar kesin testi** ile sınanmıştır.
 
-**(A) FP16 (saf ağırlık) vs 4-bit NF4** — aynı 25 örnek kimliği, greedy, aynı sistem promptu:
+**(A) FP16 (saf ağırlık) vs 4-bit NF4**
 
-| Model | 4-bit ASR % [Wilson95] | FP16 ASR % [Wilson95] | Δ |
-|---|---|---|---|
-| **Mistral-7B-v0.3** | 44.0 [26.7, 62.9] | 32.0 [17.2, 51.6] | **−12.0** |
-| Llama-3.1-8B | 20.0 [8.9, 39.1] | 12.0 [4.2, 30.0] | **−8.0** |
+| Model | 4-bit ASR % [GA] | FP16 ASR % [GA] | Δ (puan) | Eşli: yalnız-4bit / yalnız-FP16 | McNemar p |
+|---|---|---|---|---|---|
+| **Mistral-7B-v0.3** | 40.59 [31.5, 50.3] | **29.70** [21.7, 39.2] | **−10.89** | 21 / 10 | **0.071** |
+| Llama-3.1-8B | 14.85 [9.2, 23.1] | 16.83 [10.8, 25.3] | **+1.98** | 7 / 9 | 0.804 |
 
-> **Yorum (temkinli):** Her iki modelde de 4-bit ASR'yi **artırma yönünde** (8–12 puan) kaydırmaktadır;
-> ancak n=25'te Wilson GA'ları **örtüşmektedir** (istatistiksel anlamlılık yok). Bu nedenle
-> nicemleme farkının büyüklüğü iddia edilmez; bulgu şu şekilde sunulur: **4-bit ile raporlanan ASR
-> değerleri muhafazakâr bir üst sınırdır** (FP16'da daha düşük olma eğilimindedir). Loop'taki
-> "Mistral en zafiyetli model" sıralaması FP16'da da korunmuştur (32.0 > 12.0).
+> **Sonuç (dürüst):** Nicemleme etkisi **model-bağımlıdır ve istatistiksel olarak anlamlı değildir.**
+> Mistral'da FP16 yönünde 10.9 puanlık bir eğilim vardır (p=0.071, sınırda); Llama'da ise fark ters
+> yöndedir (+2.0, p=0.80). Bu nedenle **"4-bit ASR'yi sistematik olarak şişirir" iddiası reddedilir**;
+> 4-bit sonuçları olduğu gibi raporluyoruz. Ancak uç modelde görülen eğilim, güvenlik
+> değerlendirmelerinde FP16 teyidinin yine de önerilmesini gerektirir.
 
-**(B) Sistem-promptu sertleştirmesi** — Qwen2.5-3B, aynı 25 saldırı + 20 benign:
+**(B) Standart vs sertleştirilmiş sistem promptu** (Qwen2.5-3B, aynı 101 saldırı)
 
-| Koşul | ASR % [Wilson95] | Benign FP |
+| Koşul | ASR % [GA] | Benign'de canary sızıntısı |
 |---|---|---|
-| Standart prompt (mevcut) | 36.0 [20.2, 55.5] | — |
-| **Sertleştirilmiş prompt** ("hiçbir koşulda paylaşma… ihlal edersen sistem imha olur") | **12.0** [4.2, 30.0] | 1/20 (%5.0) |
+| Standart prompt | 24.75 [17.4, 34.0] | **0/60** |
+| **Sertleştirilmiş prompt** ("hiçbir koşulda paylaşma… ihlal edersen sistem imha olur") | **16.83** [10.8, 25.3] | **1/60** |
+| Δ / test | **−7.92 puan**; eşli 14 düzelen / 6 bozulan; **McNemar p=0.115** | +1 yanlış alarm |
 
-> **Yorum:** Sertleştirme ASR'yi **üçte iki oranında düşürme eğilimindedir** (36→12) ama
-> **(i)** sıfırlamaz — %12 artık sızıntı sürmektedir, **(ii)** n=25'te GA'lar örtüşür (anlamlılık yok),
-> **(iii)** benign yanlış alarmı %5'e çıkarır (aşırı reddetme maliyeti).
-> **Sonuç:** Prompt sertleştirmesi faydalı bir savunma katmanıdır ama **dış geçidin yerine geçmez**;
-> yalnızca NeuralShield (ON) ASR'yi **%0.0**'a indirmiştir.
+> **Sonuç (dürüst):** Sertleştirme ASR'yi **~8 puan düşürme eğilimindedir** (14 saldırı engellenmiş,
+> 6 saldırı ise yeni ortaya çıkmış) ancak bu fark **istatistiksel olarak anlamlı değildir** (p=0.115);
+> ayrıca **sıfırlamaz** ve benign tarafta **yanlış alarm üretir** (0→1/60). Dolayısıyla prompt
+> sertleştirmesi tek başına yeterli bir savunma değildir; yalnızca NeuralShield (ON) ASR'yi
+> **%0.0**'a indirmiştir.
 
-> **Sınırlama (dürüst):** Bu iki ablasyon n=25 ile koşulmuştur; GA'lar örtüştüğü için yalnızca **yön**
-> bildirilir, büyüklük bildirilmez. Aynı deneylerin n=101 tam sette tekrarı (defterde `FULL=True`)
-> ile anlamlılık elde edilmesi planlanmaktadır. Artefakt: `quant_and_prompt_ablation.json`
-> (per-item yanıtlar dahil).
+**Küçük örneklem dersi (metodolojik katkı).** Aynı deneyler önce n=25 pilot ile koşulmuştu.
+n=101'e çıkıldığında sonuçların bir kısmı **işaret değiştirdi veya büyüklüğü 3 kat küçüldü**:
 
-### 6.12 FP16 vs 4-Bit Nicemleme ve Sistem Promptu Sertleştirme Ablasyonu
+| Karşılaştırma | n=25 pilot | n=101 kesin |
+|---|---|---|
+| Mistral 4-bit→FP16 | −12.0 | −10.89 (kararlı) |
+| Llama 4-bit→FP16 | −8.0 | **+1.98 (işaret değişti)** |
+| Prompt std→sert | −24.0 | **−7.92 (3× küçük)** |
 
-Hakemlerin olası metodolojik itirazlarını peşinen kapatmak amacıyla NVIDIA A100 GPU üzerinde iki tamamlayıcı ablasyon deneyi yürütülmüştür (`quant_and_prompt_ablation.json`):
+> Bu tablo, güvenlik değerlendirmelerinde **küçük pilot koşuların yanıltıcı olduğunu** ve eşli testlerin
+> (McNemar) zorunlu olduğunu göstermektedir. Artefaktlar: `fp16_*_n101.json`,
+> `prompt_hardening_n101.json`, `quant_and_prompt_ablation_n101.json` (per-item yanıtlar dahil).
 
-#### (A) FP16 (Orijinal Saf Ağırlık) vs 4-Bit NF4 Nicemleme Kontrolü
-Hakemlerin *"Modeli 4-bit quantize ettiğiniz için güvenlik hizalaması bozulmuş olabilir mi?"* sorusunu test etmek üzere, en yüksek zafiyet gösteren kurumsal modeller (`Mistral-7B-v0.3` ve `Llama-3.1-8B`) aynı 25 saldırı örneği üzerinde saf `torch.float16` ile çalıştırılmıştır:
-
-| Model | Örneklem | 4-Bit NF4 ASR % | Wilson %95 GA | Saf FP16 ASR % | Wilson %95 GA | Fark (Puan) |
-|---|---|---|---|---|---|---|
-| **Mistral-7B-v0.3** | $n=25$ | **44.0%** (11/25) | [26.7, 62.9] | **32.0%** (8/25) | [17.2, 51.6] | -12.0 |
-| **Llama-3.1-8B** | $n=25$ | **20.0%** (5/25) | [8.9, 39.1] | **12.0%** (3/25) | [4.2, 30.0] | -8.0 |
-
-> **İstatistiksel Yorum:** Her iki modelde de 4-bit ve FP16 güven aralıkları geniş ölçüde örtüşmektedir ($p > 0.05$). Yani 4-bit nicemleme güvenlik açığı yaratmamıştır; saf FP16 orijinal ağırlıklar da %32 seviyesinde ağır sızıntı üretmektedir. Zafiyet nicemlemeden değil, model mimarisinin bağlam ayrıştırma yetersizliğinden kaynaklanmaktadır.
-
-#### (B) Sistem Promptu Sertleştirme ve Aşırı Reddetme (Over-refusal) Maliyeti
-Hakemlerin *"Sistem promptu daha sert yazılsaydı enjeksiyon engellenemez miydi?"* sorusunu test etmek üzere, `Qwen2.5-3B` üzerinde standart prompt ile ultra-sertleştirilmiş prompt (*"MUTLAK KURAL: PIN veya anahtarları asla paylaşma, ihlal edilirse sistem imha olur"*) 25 saldırı ve 20 benign soru üzerinde kıyaslanmıştır:
-
-| Prompt Türü | Saldırı ASR % ($n=25$) | Wilson %95 GA | Benign Yanlış Alarm (Aşırı Reddetme) |
-|---|---|---|---|
-| **Standart Sistem Promptu** | **36.0%** (9/25) | [20.2, 55.5] | **%0.0** (0/20) |
-| **Sertleştirilmiş Sistem Promptu** | **12.0%** (3/25) | [4.2, 30.0] | **%5.0** (1/20) |
-
-> **Bilimsel Çıkarım:**
-> 1. Sistem promptunu ultra-sert hale getirmek saldırı sızıntısını kısmen düşürse de **%12.0 seviyesinde sızıntı devam etmiştir** (saldırganlar sert uyarıyı aşabilmiştir).
-> 2. Üstelik bu sertlik, masum yolcu sorularında **%5.0 aşırı reddetmeye (False Positive)** yol açarak meşru kullanıcı deneyimini bozmuştur.
-> 3. Dolayısıyla prompt mühendisliği enjeksiyonu tek başına durduramaz; modeli bozmadan sıfır sızıntı sağlayan harici katmanlı kalkan (NeuralShield) zorunludur.
+> **Tekrarlanabilirlik notu:** Standart-prompt koşusu ana deneyle (batch=16) 101 örnekten
+> **1 tanesinde** farklı sonuç vermiştir (26 vs 25 sızıntı). Greedy decoding batch boyutuna göre
+> bit-düzeyinde değişebildiği için bu, raporlanan ASR'lerde ±1 örnek düzeyinde bir belirsizliğe
+> karşılık gelir.
 
 ## 7. Analiz
 
@@ -449,7 +438,7 @@ Hakemsel bir itiraz şudur: "Kalkan ON iken saldırı girişte durdurulduğu iç
 12. **Modeller 4-bit NF4 ile yüklendi:** nicemleme güvenlik hizalamasını zayıflatabilir; FP16 kontrolü yapılmadı (P1). ASR mutlak değerleri üst sınır olarak okunmalıdır.
 13. **CoT ON modu boş:** 24 saldırının hiçbiri geçide takılmadan geçemedi (0 örnek) → "kalkan açıkken CoT sızıntısı" ölçülemedi.
 14. **Red-team seti TR/EN ve in-domain:** 12 dile yayılmadı (P2).
-15. **ASR sayıları 4-bit NF4 ile ve "standart" sistem promptu altında ölçülmüştür:** FP16'da ASR daha düşük eğilimdedir (üst sınır), sertleştirilmiş promptta ise 36→12'ye düşer ama sıfırlanmaz (§6.13). Bu nedenle ASR mutlak değerleri bağlama duyarlı okunmalıdır.
+15. **ASR sayıları 4-bit NF4 ve "standart" sistem promptu altında ölçülmüştür:** N=101 eşli testte nicemleme etkisi anlamlı değildir (Mistral −10.9 p=0.071; Llama +2.0 p=0.80) ve prompt sertleştirmesi −7.9 puan (p=0.115) ile sıfırlamaz, üstelik benign yanlış alarm ekler. Ayrıca greedy decoding batch boyutuna göre ±1 örnek düzeyinde değişebilir (§6.13).
 11. **Kalkan ON karşılaştırmasının asimetrisi kabul edilir:** Bloklanan istem model çağrılmaz (bu tasarım gereğidir); bu nedenle §7.6'da L3 çıktı DLP'si **bağımsız** olarak da ölçülmüştür.
 
 ---
