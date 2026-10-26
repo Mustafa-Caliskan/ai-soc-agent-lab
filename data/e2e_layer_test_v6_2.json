@@ -1,0 +1,55 @@
+{
+  "N": 2849,
+  "attack": 1440,
+  "benign": 1409,
+  "model": "v6.2 mmBERT FP32 ONNX",
+  "precision": "fp32",
+  "thresholds": {
+    "ml": 0.7,
+    "regex": 60,
+    "temperature": 1.0
+  },
+  "shield": {
+    "recall": 75.14,
+    "fp": 3.83,
+    "macro_f1": 85.4,
+    "auc": 0.9413
+  },
+  "ml_only": {
+    "recall": 75.14,
+    "fp": 3.83,
+    "macro_f1": 85.4,
+    "auc": 0.9511
+  },
+  "layer_counts": {
+    "L2": 1136,
+    "L1": 44,
+    "L1+L2": 44,
+    "L0": 4
+  },
+  "per_language": {
+    "en": {"recall": 76.7, "fp": 0.0},
+    "tr": {"recall": 48.3, "fp": 4.2},
+    "de": {"recall": 83.3, "fp": 0.8},
+    "fr": {"recall": 79.2, "fp": 0.0},
+    "es": {"recall": 81.7, "fp": 0.8},
+    "it": {"recall": 82.5, "fp": 0.0},
+    "pt": {"recall": 74.2, "fp": 0.0},
+    "ru": {"recall": 95.0, "fp": 12.5},
+    "ar": {"recall": 64.2, "fp": 7.5},
+    "ja": {"recall": 77.5, "fp": 8.9},
+    "ko": {"recall": 60.8, "fp": 5.9},
+    "zh": {"recall": 78.3, "fp": 6.1}
+  },
+  "latency_fp32": {
+    "tokens": 12,
+    "median_ms": 50.57,
+    "p95_ms": 67.72,
+    "precision": "fp32",
+    "environment": "Colab 2-vCPU"
+  },
+  "quantization_comparison": {
+    "fp32": {"recall": 74.1, "fp": 3.83, "macro_f1": 84.86, "auc": 0.9494},
+    "int8": {"recall": 53.3, "fp": 3.4, "macro_f1": 73.6, "auc": 0.8908}
+  }
+}

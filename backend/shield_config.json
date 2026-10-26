@@ -12,6 +12,8 @@
   "regex_only_floor_score": 65,
   "mask_generic_emails": false,
   "mask_generic_phones": false,
+  "dlp_secret_registry": true,
+  "dlp_extra_secrets": "",
   "ban_window_seconds": 120,
   "ban_penalty_per_violation": 20,
   "ban_max_penalty": 40,

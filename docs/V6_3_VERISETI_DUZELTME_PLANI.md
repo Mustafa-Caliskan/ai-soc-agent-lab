@@ -324,3 +324,30 @@ Per-dil **AUC**, Patronus'un çoğu dilde önde olduğunu gösterir (tr 0.970 vs
 - ✅ Benchmark sızıntısı, adil 12-dil eval, EVREN CoT sızıntısı, negatif ablasyonlar.
 - ⚠️ **AUC ve Recall@FP=1%'de Patronus önde**; 2048 bağlam test edilemedi; ru/ar/de native ya geçersiz ya yok.
 - ⚠️ **Gecikme:** mmBERT ~62 ms (CPU, Colab 2-vCPU); "8 ms" yalnızca **XLM-R** için söylenebilir.
+
+---
+
+## 14. Doğrulama-5 (Uçtan Uca L0–L3) ve KRİTİK Nicemleme Bulgusu
+
+### 14.1 E2E pipeline (adil benchmark, N=2.849; Colab FP32)
+| Yapılandırma | Recall | FP | Macro-F1 | AUC |
+|---|---|---|---|---|
+| **Shield OR-Gate (L0–L3)** | **75.14** | 3.83 | **85.40** | 0.9413 |
+| ML-only (L2 @0.70) | 75.14 | 3.83 | 85.40 | 0.9511 |
+
+Katman atfı: L2=1.136, L1=44, L1+L2=44, L0=4, L3=0 → bloklamanın ~%99'u L2; bu örneklemde L0/L1 ek recall sağlamıyor.
+
+### 14.2 KRİTİK: INT8 nicemleme OOD'de çöküyor
+| Varyant | Recall@0.7 | FP | Macro-F1 | AUC | Boyut |
+|---|---|---|---|---|---|
+| **FP32** | **74.1** | 3.83 | **84.86** | **0.9494** | 1.23 GB |
+| INT8 (dinamik) | 53.3 | 3.4 | 73.6 | 0.8908 | 294 MB |
+
+- Önceki E2E çalıştırması **INT8** ile yapılmıştı → recall %53.5 (yanıltıcı). **Makale sayıları FP32'ye aittir.**
+- **Karar:** dağıtımda `ml_onnx_file="model.onnx"` (FP32), `ml_temperature=1.0`. INT8 opsiyonel (bellek/hız karşılığı doğruluk kaybı).
+- FP32 CPU gecikme (Colab 2-vCPU, 12 token): **medyan 50.57 ms / P95 67.72 ms**.
+
+### 14.3 Doğrulama-5 sonrası nihai durum
+- ✅ v6.2 **FP32** şampiyon; makale/dağıtım/E2E **tutarlı**.
+- ✅ E2E sayıları adil benchmark ile uyumlu (recall 75.1 vs 74.1; fark L1/L0 katkısı + T sabit 1.0).
+- ⚠️ INT8 dağıtımı **önerilmez**; yayın için "nicemleme duyarlılığı" ayrı bulgu olarak raporlanır.

@@ -1,0 +1,112 @@
+{
+  "th": 0.7,
+  "rows": [
+    {
+      "config": "L2-FP32 / raw metin",
+      "recall": 100.0,
+      "fp": 6.7,
+      "f1": 98.1,
+      "tp": 101,
+      "fp_n": 4
+    },
+    {
+      "config": "L2-FP32 / ext metin",
+      "recall": 100.0,
+      "fp": 6.7,
+      "f1": 98.1,
+      "tp": 101,
+      "fp_n": 4
+    },
+    {
+      "config": "L2-FP32 / max(raw,ext)",
+      "recall": 100.0,
+      "fp": 6.7,
+      "f1": 98.1,
+      "tp": 101,
+      "fp_n": 4
+    },
+    {
+      "config": "L2-INT8 / raw metin",
+      "recall": 89.1,
+      "fp": 6.7,
+      "f1": 92.3,
+      "tp": 90,
+      "fp_n": 4
+    },
+    {
+      "config": "L2-INT8 / ext metin",
+      "recall": 93.1,
+      "fp": 6.7,
+      "f1": 94.5,
+      "tp": 94,
+      "fp_n": 4
+    },
+    {
+      "config": "L2-INT8 / max(raw,ext)",
+      "recall": 95.0,
+      "fp": 6.7,
+      "f1": 95.5,
+      "tp": 96,
+      "fp_n": 4
+    },
+    {
+      "config": "L0+L1 only (model yok)",
+      "recall": 76.2,
+      "fp": 0.0,
+      "f1": 86.5,
+      "tp": 77,
+      "fp_n": 0
+    },
+    {
+      "config": "TAM: L0+L1 + L2-FP32 (max)",
+      "recall": 100.0,
+      "fp": 6.7,
+      "f1": 98.1,
+      "tp": 101,
+      "fp_n": 4
+    },
+    {
+      "config": "TAM: L0+L1 + L2-INT8 (max)",
+      "recall": 96.0,
+      "fp": 6.7,
+      "f1": 96.0,
+      "tp": 97,
+      "fp_n": 4
+    }
+  ],
+  "per_class": {
+    "direct": {
+      "n": 16,
+      "fp32_raw": 100.0,
+      "fp32_ext": 100.0,
+      "full_fp32": 100.0,
+      "int8_raw": 75.0,
+      "full_int8": 75.0
+    },
+    "indirect": {
+      "n": 26,
+      "fp32_raw": 100.0,
+      "fp32_ext": 100.0,
+      "full_fp32": 100.0,
+      "int8_raw": 88.5,
+      "full_int8": 100.0
+    },
+    "encoding": {
+      "n": 26,
+      "fp32_raw": 100.0,
+      "fp32_ext": 100.0,
+      "full_fp32": 100.0,
+      "int8_raw": 96.2,
+      "full_int8": 100.0
+    },
+    "stego": {
+      "n": 33,
+      "fp32_raw": 100.0,
+      "fp32_ext": 100.0,
+      "full_fp32": 100.0,
+      "int8_raw": 90.9,
+      "full_int8": 100.0
+    }
+  },
+  "note": "max(raw,ext) = sistem hem ham hem L0-normalize metni puanlar"
+}

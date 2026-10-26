@@ -1,0 +1,73 @@
+{
+  "version": "v6.2-curated-1",
+  "source_files": [
+    "data/redteam/redteam_corpus.json",
+    "data/redteam/external_attacks.json"
+  ],
+  "counts": {
+    "attacks": 101,
+    "benign": 60,
+    "total": 161,
+    "by_family": {
+      "external_deepset": 20,
+      "homoglyph": 4,
+      "indirect_doc": 4,
+      "obfuscation_base64": 11,
+      "obfuscation_reverse": 11,
+      "pdf_hidden": 2,
+      "persona": 4,
+      "semantic": 12,
+      "stego_emoji_vs": 11,
+      "stego_unicode_tags": 11,
+      "stego_zerowidth": 11
+    },
+    "by_class": {
+      "direct": 16,
+      "encoding": 26,
+      "indirect": 26,
+      "stego": 33
+    },
+    "by_class_language": {
+      "direct/en": 7,
+      "direct/tr": 9,
+      "encoding/en": 10,
+      "encoding/tr": 16,
+      "indirect/en": 15,
+      "indirect/tr": 11,
+      "stego/en": 12,
+      "stego/tr": 21
+    },
+    "benign_language": {
+      "tr": 30,
+      "en": 30
+    }
+  },
+  "quality_fixes": {
+    "Q3_homoglyph_repaired": 15,
+    "Q2_indirect_en_repaired": 7,
+    "Q4_duplicate_dropped": 69
+  },
+  "additional": {
+    "benign_tr_unique": 30,
+    "benign_tr_duplicates_removed": 30,
+    "benign_en_added": 30,
+    "external_selected": 20
+  },
+  "design": {
+    "classes": {
+      "semantic": "direct",
+      "persona": "direct",
+      "indirect_doc": "indirect",
+      "pdf_hidden": "indirect",
+      "external_deepset": "indirect",
+      "homoglyph": "encoding",
+      "obfuscation_base64": "encoding",
+      "obfuscation_reverse": "encoding",
+      "stego_zerowidth": "stego",
+      "stego_unicode_tags": "stego",
+      "stego_emoji_vs": "stego"
+    },
+    "note": "Aileler 4 sinifa gruplandi; sinif basina n daha buyuk oldugu icin ASR guven araliklari aile bazindan daha anlamli.",
+    "channel_document": "pdf_hidden kayitlari belge icerigi olarak enjekte edilmelidir."
+  }
+}

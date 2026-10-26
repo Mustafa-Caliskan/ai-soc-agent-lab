@@ -146,6 +146,64 @@ def _build_optional_patterns() -> List[Tuple[str, "re.Pattern", str, Optional[Ca
     return extra
 
 
+def _tolerant_secret_pattern(secret: str, max_gap: int = 2) -> "re.Pattern":
+    """
+    Sirri, karakterler arasina en fazla `max_gap` adet alfanumerik-olmayan
+    ayrac (bosluk, tire, nokta, iki nokta, alt cizgi...) gelebilecek sekilde
+    esnek bir regex'e cevirir; buyuk/kucuk harf duyarsizdir.
+
+    Ornek: 'ATC-KX9425-PIN' -> 'A[^A-Za-z0-9]{0,2}T[^A-Za-z0-9]{0,2}C...'
+    Boylece 'atc-kx9425-pin', 'A T C - K X 9 4 2 5 - P I N',
+    'ATC KX9425 PIN' gibi varyantlar da yakalanir.
+    """
+    gap = r"[^A-Za-z0-9]{0,%d}" % max_gap
+    body = gap.join(re.escape(ch) for ch in secret)
+    return re.compile(body, re.IGNORECASE)
+
+
+def _build_secret_registry_patterns() -> List[Tuple[str, "re.Pattern", str, Optional[Callable]]]:
+    """
+    Bilinen-sir kayit defteri (exact-match denylist).
+
+    Neden gerekli: Baglamsal desenler ("password: X") yalnizca anahtar kelime
+    varsa maskeler. Model sirri baglamsiz verirse ("Sure, here it is -> X")
+    kacardi. Bu katman, oturuma baglanmis bilinen sirlari (canary) baglamdan
+    BAGIMSIZ olarak maskeler. Yuksek kesinliklidir (lab sirlari), FP riski yok.
+
+    canary.find_leaked() ile SIMETRIK olmasi icin:
+      - hem tam degerler (all_values) hem marker'lar (all_markers) eklenir,
+      - kucuk/buyuk harf duyarsizdir (IGNORECASE),
+      - karakter arasi bosluk/ayrac toleransi vardir (tolerant pattern).
+
+    Ayar: shield_config.json -> "dlp_secret_registry": true (varsayilan true).
+    Ayrica "dlp_extra_secrets" ile elle sirlar eklenebilir (virgulle ayrilmis).
+    """
+    extra: List[Tuple[str, "re.Pattern", str, Optional[Callable]]] = []
+    if not CONFIG.get("dlp_secret_registry", True):
+        return extra
+
+    secrets: List[str] = []
+    try:
+        import canary as _cn
+        secrets.extend(str(v) for v in _cn.all_values() if v)
+        secrets.extend(str(m) for m in _cn.all_markers() if m and len(str(m)) >= 6)
+    except Exception:
+        pass
+
+    raw_extra = CONFIG.get("dlp_extra_secrets") or ""
+    if isinstance(raw_extra, str):
+        secrets.extend(s.strip() for s in raw_extra.split(",") if len(s.strip()) >= 6)
+
+    seen = set()
+    for sec in secrets:
+        key = sec.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        extra.append(("secret_registry", _tolerant_secret_pattern(sec), "[SIR_SANSÜRLENDİ]", None))
+    return extra
+
+
 def scan_and_mask(text: str) -> Tuple[bool, str, List[str]]:
     """
     Scan LLM response for sensitive data and mask it.
@@ -155,7 +213,7 @@ def scan_and_mask(text: str) -> Tuple[bool, str, List[str]]:
     triggered_names: List[str] = []
     result = text
 
-    all_patterns = DLP_PATTERNS + _build_optional_patterns()
+    all_patterns = DLP_PATTERNS + _build_secret_registry_patterns() + _build_optional_patterns()
 
     for name, pattern, replacement, validator in all_patterns:
         if validator is None:

@@ -1,0 +1,111 @@
+{
+  "dataset": {
+    "total": 161,
+    "attacks": 101,
+    "benign": 60
+  },
+  "l2_only_fp32": [
+    {
+      "th": 0.5,
+      "recall": 100.0,
+      "fp": 10.0,
+      "precision": 94.39,
+      "f1": 97.12,
+      "tp": 101,
+      "fp_n": 6,
+      "fn": 0,
+      "tn": 54
+    },
+    {
+      "th": 0.6,
+      "recall": 100.0,
+      "fp": 6.67,
+      "precision": 96.19,
+      "f1": 98.06,
+      "tp": 101,
+      "fp_n": 4,
+      "fn": 0,
+      "tn": 56
+    },
+    {
+      "th": 0.7,
+      "recall": 100.0,
+      "fp": 6.67,
+      "precision": 96.19,
+      "f1": 98.06,
+      "tp": 101,
+      "fp_n": 4,
+      "fn": 0,
+      "tn": 56
+    },
+    {
+      "th": 0.8,
+      "recall": 97.03,
+      "fp": 6.67,
+      "precision": 96.08,
+      "f1": 96.55,
+      "tp": 98,
+      "fp_n": 4,
+      "fn": 3,
+      "tn": 56
+    },
+    {
+      "th": 0.9,
+      "recall": 94.06,
+      "fp": 5.0,
+      "precision": 96.94,
+      "f1": 95.48,
+      "tp": 95,
+      "fp_n": 3,
+      "fn": 6,
+      "tn": 57
+    }
+  ],
+  "l2_only_int8": [
+    {
+      "th": 0.7,
+      "recall": 89.11,
+      "fp": 6.67,
+      "precision": 95.74,
+      "f1": 92.31,
+      "tp": 90,
+      "fp_n": 4,
+      "fn": 11,
+      "tn": 56
+    }
+  ],
+  "auc_fp32": 0.9861,
+  "auc_int8": 0.9873,
+  "per_class_at_070": {
+    "direct": {
+      "n": 16,
+      "recall": 100.0,
+      "mean_p": 0.985,
+      "min_p": 0.81
+    },
+    "indirect": {
+      "n": 26,
+      "recall": 100.0,
+      "mean_p": 0.996,
+      "min_p": 0.952
+    },
+    "encoding": {
+      "n": 26,
+      "recall": 100.0,
+      "mean_p": 0.957,
+      "min_p": 0.732
+    },
+    "stego": {
+      "n": 33,
+      "recall": 100.0,
+      "mean_p": 0.967,
+      "min_p": 0.797
+    }
+  },
+  "missed_at_070": 0,
+  "missed_ids": [],
+  "four_layer": {
+    "attack_block_rate": 100.0,
+    "benign_fp": 6.67
+  }
+}

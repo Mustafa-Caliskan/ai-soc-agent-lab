@@ -9,7 +9,7 @@
 
 LLM uygulamalarına giden istemler; prompt injection, jailbreak, talimat iptali ve sistem-prompt sızdırma gibi saldırılara açıktır. Bu çalışmada, **12 dilli** ve **katmanlı** bir uygulama güvenliği geçidi olan **NeuralShield**'i sunuyoruz: (L0) normalizasyon/deobfuskasyon, (L1) regex kuralları, (L2) çok dilli transformer sınıflandırıcı, (L3) DLP ve bunları **OR-Gate** ile birleştiren karar katmanı. v6.2 veri kümesiyle (~100k, 50k/50k dengeli, 12 dil) üç omurga eğittik (XLM-R-base, mmBERT-base, BGE-M3). 
 
-Katkılarımız: (i) **kaynak-ayrık (source-disjoint) adil bir 12-dil değerlendirme protokolü** ve eski kıyaslamalarda **%76.9 kaynak-çakışması** bulgusu; (ii) **F1'de güçlü bir ticari rakiple (Patronus Wolf Defender) istatistiksel denklik** (küme-bootstrap %95 GA); (iii) **Türkçe native held-out kümede recall üstünlüğü** (79.4 vs 45.0); (iv) **iki ön-kayıtlı negatif ablasyon** (veri ve kayıp değişikliklerinin ölçülebilir katkı sağlamadığı); (v) CPU'da çalışan INT8 ONNX dağıtımı. Ayrıca, LLM'lerin **iç muhakeme (reasoning/CoT) alanında hassas veriyi açık metin olarak sızdırabildiği** bulgusunu raporluyoruz (ilgili platform tarafından kabul edilmiştir).
+Katkılarımız: (i) **kaynak-ayrık (source-disjoint) adil bir 12-dil değerlendirme protokolü** ve eski kıyaslamalarda **%76.9 kaynak-düzeyi çakışması** (birebir metin: %3.8) bulgusu; (ii) **F1'de güçlü bir ticari rakiple (Patronus Wolf Defender) istatistiksel denklik** (küme-bootstrap %95 GA); (iii) **Türkçe native held-out kümede recall üstünlüğü** (79.4 vs 45.0); (iv) **iki ön-kayıtlı negatif ablasyon** (veri ve kayıp değişikliklerinin ölçülebilir katkı sağlamadığı); (v) CPU'da çalışan **FP32 ONNX dağıtımı** ve çok dilli OOD'de **INT8 nicemleme duyarlılığı** bulgusu. Ayrıca, LLM'lerin **iç muhakeme (reasoning/CoT) alanında hassas veriyi açık metin olarak sızdırabildiği** bulgusunu raporluyoruz (ilgili platform tarafından kabul edilmiştir).
 
 **Sınırlamalar:** AUC ve düşük-FP bölgesinde rakip öndedir; 2048-token uzun bağlam bu benchmark'ta test edilememiştir; Arapça/Almanca/Rusça için native doğrulama tamamlanamamıştır.
 
@@ -55,21 +55,27 @@ Bu çalışma üç soruya odaklanır:
 
 ## 4. Veri Kümesi (v6.2)
 
-### 4.1 Eğitim havuzu
-- **~100k**, **12 dil**, **50k saldırı / 50k masum** (deterministik alt-kotalar).
+### 4.1 Eğitim havuzu (parquet denetimli değerler)
+- **98.606** kayıt, **12 dil**, 48.627 saldırı / 49.979 masum (~%49/%51).
 - **Supplement:** 83.611 kayıt — saldırı 34.063; masum 49.548 (25.600 MT + 23.948 native).
 - **Native benign:** oasst2/aya; **MT:** EVREN `gemma-4-31b` (eğitim saldırılarıyla aynı motor — motor simetrisi).
-- **Türkçe:** native-ağırlıklı (MT ≤ ~%30).
-- **Dağılım:** en/tr 15.000; diğer 10 dil ~2.000 (dil başına).
-- **Split (70/15/15):** train 69.015 / val 14.793 / test 14.790.
+- **Dil dağılımı:** en 29.983 (%30.4) · tr 29.011 (%29.4) · diğer 10 dil ~4.000.
+- **MT payı:** genel %56.7; **tr %82.4** (23.913 MT / 5.098 native — halilneed, TFLai, 3nesdeniz, AltaySec, merve); ru %53.2; en %0.
+- **Split (70/15/15):** train 69.021 / val 14.794 / test 14.791.
+
+> **Dürüst not:** Türkçe "native-ağırlıklı" tasarımı yalnızca **v6.3 Aşama A** deneyinde denenmiş ve
+> kazanç sağlamadığı için şampiyon v6.2'ye girmemiştir; v6.2'de tr ağırlıkla MT'dir. Native-tr
+> held-out üstünlüğü (§6.4) bu koşulda elde edilmiştir.
 
 ### 4.2 Kalite kontrol (QC)
 - Bağımsız jüri (ProtectAI/Deepset/Patronus) + **Qwen2.5-7B-Instruct** yargıç.
-- **99 kapsam-dışı** örnek silindi/değiştirildi; **684 etiket-çelişkisi silinmedi** (inceleme için loglandı).
+- **98** kapsam-dışı/yanlış etiketli örnek silindi/değiştirildi; **687 etiket-çelişkisi** loglandı (silinmedi).
 
 ### 4.3 Adil (kaynak-ayrık) benchmark
-- `heldout_benchmark_v6_fair.json`: **N=2.849**; saldırı = Simsonsun + rubend18; masum = dolly. **jackhhao hariç** (Patronus'un eğitim kaynağı).
+- `heldout_benchmark_v6_fair.json`: **N=2.849**; saldırı = Simsonsun + rubend18; masum = dolly-15k. **jackhhao hariç** (Patronus'un eğitim kaynağı; bizim eğitimimizde yoktur).
 - 12 dil; saldırı/masum ~120/120 dil başına.
+
+> **Çeşitlilik kısıtı (dürüst beyan):** Set, **240 benzersiz İngilizce promptun** (119 saldırı + 1 rubend18 + 120 masum) NLLB ile 12 dile çevrilmesinden oluşur. Dolayısıyla (i) etkin benzersiz içerik 240 prompttur, (ii) aynı promptun dil kopyaları koreledir — bu nedenle güven aralıkları **dil-kümesi bazında** bootstrap edilmiştir, (iii) saldırı tarafı tek kaynağa (Simsonsun) dayanır. Bu kısıt, kaynak-ayrıklık iddiasını geçersiz kılmaz (eğitimle kesişim yok) ancak genelleme gücünü sınırlar; genişletme gelecek çalışmadır.
 
 ---
 
@@ -78,7 +84,7 @@ Bu çalışma üç soruya odaklanır:
 - **Omurgalar:** XLM-R-base (278M), mmBERT-base (307M), BGE-M3 (568M).
 - **Eğitim:** 3 epoch, LR 2e-5, CyberFocalLoss (γ=2.0, α=0.65); mmBERT 16×2, BGE 8×4, XLM-R 16×2.
 - **Değerlendirme:** Recall/FP @0.5 ve @0.7; Macro-F1; ROC-AUC; **Recall@FP=1%**; **küme-bootstrap %95 GA** (12 dil kümesi) ve per-dil AUC.
-- **Dağıtım:** ONNX INT8, CPU gecikmesi (Colab 2-vCPU, 23 token, 2 thread).
+- **Dağıtım:** ONNX **FP32** (şampiyon), CPU gecikmesi (Colab 2-vCPU, 12 token); INT8 nicemleme duyarlılığı ayrıca raporlanır (§6.5).
 
 ---
 
@@ -118,23 +124,75 @@ Bu çalışma üç soruya odaklanır:
 
 **Rusça (n=16.636; karışık/dengesiz — 16.112 FaustSS attack + 524 darkknight benign):** v6.2 rec 91.4 / FP 69.8 / AUC 0.890; Patronus 57.9 / 26.9 / 0.631. *(Dağılım uyumsuzluğu nedeniyle temkinli; sınırlama.)* Heterojenliğe rağmen, **Kiril alfabeli yerel saldırılarda Patronus'un sıralaması AUC 0.631'e (rastgeleye yakın) düşerken, mmBERT AUC 0.890 ile sıralamayı korumuştur.**
 
-### 6.5 CPU Dağıtım Gecikmesi (mmBERT INT8 ONNX)
-| Ortam | Median | P95 | Boyut |
-|---|---|---|---|
-| Colab 2-vCPU, 23 token, 2 thread | **61.92 ms** | 210.65 ms | 294.3 MB |
-| (XLM-R referansı) | ~8 ms | — | ~266 MB |
+### 6.5 CPU Dağıtım Gecikmesi ve Nicemleme Duyarlılığı
 
-> "8 ms" yalnızca **XLM-R** içindir; **mmBERT ~62 ms** (donanıma bağlı).
+**Gecikme (mmBERT ONNX, CPU):**
+| Varyant | Ortam | Token | Median | P95 | Boyut |
+|---|---|---|---|---|---|
+| INT8 | Colab 2-vCPU, 2 thread | 23 | 61.92 ms | 210.65 ms | 294 MB |
+| FP32 | Colab 2-vCPU | 12 | **50.57 ms** | 67.72 ms | 1.23 GB |
+| FP32 | yerel CPU, 2 thread | 12 | 32.1 ms | 39.2 ms | 1.23 GB |
+| INT8 | yerel CPU, 2 thread | 12 | 17.3 ms | 22.1 ms | 309 MB |
+
+> **"8 ms" iddiası geri çekilmiştir:** bu değer XLM-R'a (v5, ~266 MB) aittir; **mmBERT için değildir**.
+
+**Nicemleme duyarlılığı (adil benchmark, N=2.849):** INT8 dinamik nicemleme, çok dilli OOD dağılımında belirgin kayıp yaratmaktadır:
+
+| Varyant | Recall@0.7 | FP@0.7 | Macro-F1 | ROC-AUC |
+|---|---|---|---|---|
+| **FP32 (makale/dağıtım)** | **74.10** | 3.83 | **84.86** | **0.9494** |
+| INT8 (dinamik) | 53.3 | 3.4 | 73.6 | 0.8908 |
+
+> **Dağıtım kararı:** Makaledeki tüm sonuçlar **FP32** ile üretilmiştir; sistem yapılandırması da FP32'ye (`ml_onnx_file="model.onnx"`) hizalanmıştır. INT8, bellek/gecikme kazancı (~4× küçük, ~2× hızlı) karşılığında OOD recall'unda ~21 puan kayıp verdiğinden **şampiyon konfigürasyon olarak kullanılmamıştır**.
+
+**Mekanizma:** Dinamik nicemleme (PTQ), aktivasyon aralıklarını kalibrasyon verisinden tahmin eder ve ağırlıkları 8-bit tam sayıya indirger. Eğitim dağılımı içinde (in-distribution hold-out F1 ~96.8) kayıp ihmal edilebilir; ancak **dağılım dışı** girdilerde (homoglyph, steganografi, farklı dil) aktivasyonlar kalibrasyon aralığının dışına taşar, aşırı kırpma (clipping) oluşur ve logitler bozulur. Bu etki sınıf bazında asimetriktir: `direct` sınıfında yakalama **%75.0**'e düşerken (katmanlar bu semantik kaçışları kurtaramaz), `indirect`/`encoding`/`stego` sınıflarında deterministik L0/L1 katmanları kaybı telafi eder (bkz. §7.6). Bu nedenle **güvenlik sınıflandırıcılarında INT8, OOD doğrulaması yapılmadan dağıtılmamalıdır**; nicemleme-farkında eğitim (QAT) gelecek çalışmadır.
 
 ### 6.6 Kaynak Tüketimi ve Dağıtım (düzeltilmiş)
 | | NeuralShield (mmBERT) | Patronus Wolf Defender |
 |---|---|---|
 | Omurga | mmBERT-base 307M | **mmBERT-base 307M** |
 | Bağlam | 512 | 2048 |
-| ONNX boyut | INT8 **294 MB** | FP32 1.23 GB / FP16 615 MB / INT8+INT4 **218 MB** |
-| CPU gecikme | ~62 ms (Colab 2-vCPU, 23 token) | bu çalışmada ölçülmedi |
+| ONNX boyut | FP32 **1.23 GB** (INT8 294 MB) | FP32 1.23 GB / FP16 615 MB / INT8+INT4 **218 MB** |
+| CPU gecikme | ~51 ms FP32 (Colab 2-vCPU, 12 token) | bu çalışmada ölçülmedi |
 
 > **Not:** İlk taslaktaki "Patronus = 8B Llama-3 / 16–24 GB VRAM / vLLM" iddiası **yanlıştır**; Patronus da **mmBERT-base (307M)** tabanlıdır (model kartı). Adil karşılaştırmada iki model aynı sınıftadır; temel fark **bağlam (2048 vs 512)** ve **eğitim verisidir**. Bu nedenle "ucuz vs pahalı GPU" anlatısı **kullanılmamalıdır.**
+
+### 6.7 Uçtan Uca (L0–L3) Katman Doğrulaması
+
+Eğitilmiş v6.2 mmBERT FP32 modeli, **tam pipeline** içinde (L0 deobfuskasyon → L1 regex → L2 transformer → L3 DLP → OR-Gate) adil benchmark (N=2.849; 1.440 saldırı / 1.409 masum) üzerinde koşturulmuştur:
+
+| Yapılandırma | Recall | FP | Macro-F1 | AUC |
+|---|---|---|---|---|
+| **Shield OR-Gate (L0–L3)** | **75.14** | 3.83 | **85.40** | 0.9413 |
+| L2 ham metin (katmansız) | 74.10 | 3.83 | 84.86 | 0.9494 |
+| L0+L2 (normalize) | 75.14 | 3.83 | 85.40 | 0.9511 |
+
+**L0 katkısı (adil OOD, N=2.849):** ham → normalize geçişi **+1.04 puan recall** (17 saldırı kurtarıldı, 2 bozuldu → net 15), Macro-F1 +0.68, AUC +0.0017 (`data/l0_contribution_fair.json`). Yani **L0 deobfuskasyon OOD'de ölçülebilir katkı sağlar**; L1'in katkısı bu sette görünmez.
+
+**Katman atfı (blok sayıları):** L2 = 1.136, L1 = 44, L1+L2 = 44, L0 = 4, L3 = 0; toplam blok = 1.136.
+
+> **Yorum:** Bloklamanın **tamamına yakını L2 (semantik transformer)** tarafından yapılmaktadır. Ancak L0, L2'nin girdisini normalize ederek **+1.04 puan recall** kazandırır (yukarıdaki tablo); L1'in katkısı bu sette görünmez (obfuskasyonlu saldırı az). L3 DLP masum metinlerde tetiklenmemek üzere tasarlanmıştır. OR-Gate'in FP'yi artırmaması, katmanların **örtüşen ama tutarlı** çalıştığını gösterir. Per-dil E2E recall/FP: en 76.7/0.0, tr 48.3/4.2, de 83.3/0.8, fr 79.2/0.0, es 81.7/0.8, it 82.5/0.0, pt 74.2/0.0, ru 95.0/12.5, ar 64.2/7.5, ja 77.5/8.9, ko 60.8/5.9, zh 78.3/6.1.
+
+> **Not:** Bu sonuçlar `data/e2e_layer_test_v6_2.json` dosyasında saklanmıştır (Colab FP32, 2-vCPU).
+
+### 6.8 Küratörlü Red-Team Seti ve Katman Ablasyonu
+
+Genel benchmark, saldırı **mekanizmasını** ayırt etmez. Bu nedenle 4 katmanın rolünü ölçmek için küratörlü bir red-team seti kuruldu (`data/redteam/curated_redteam_v6_2.json`): **101 saldırı + 60 benign**, 4 analitik sınıf — `direct` 16, `indirect` 26, `encoding` 26, `stego` 33 (dil: TR/EN; kanal: kullanıcı mesajı / gizli belge metni). Ham korusdaki kalite sorunları (birebir kopyalar, bozuk homoglyph, Türkçe-İngilizce karışık şablon, EN benign eksikliği) düzeltildi; ayrıntı `curated_redteam_v6_2_manifest.json`.
+
+| Yapılandırma | Yakalama | FP | F1 | Wilson %95 GA (yakalama) |
+|---|---|---|---|---|
+| **L2-FP32 tek başına (katmansız)** | **100.0** | 6.7 | **98.1** | [96.3, 100.0] |
+| L2-INT8 tek başına | 89.1 | 6.7 | 92.3 | [81.5, 93.8] |
+| L2-INT8 + L0 normalize | 95.0 | 6.7 | 95.5 | — |
+| L0+L1 (model yok) | 76.2 | **0.0** | 86.5 | [67.1, 83.5] |
+| **Tam 4 katman (FP32)** | **100.0** | 6.7 | **98.1** | [96.3, 100.0] |
+| Tam (INT8 + L0/L1) | 96.0 | 6.7 | 96.0 | — |
+
+**Sınıf bazında yakalama (FP32 / INT8 / INT8+tam):** `direct` 100.0 / 75.0 / 75.0; `indirect` 100.0 / 88.5 / 100.0; `encoding` 100.0 / 96.2 / 100.0; `stego` 100.0 / 90.9 / 100.0.
+
+> **Dürüst yorum:** FP32'de **L2 tek başına bu sette tüm saldırıları yakalar**; katmanlar ek recall sağlamaz. Katmanların ölçülebilir değeri üç yerdedir: **(i) nicemleme kurtarması** (INT8'de %89→%96; `indirect`/`encoding`/`stego` sınıflarında %100'e tamamlar), **(ii) deterministik hızlı yol** (L0+L1 model çağrısı olmadan %76.2 yakalama, **%0 FP**, <1 ms), **(iii) çıktı tarafı DLP** (§7.6). `direct` sınıfı INT8'de %75'te kalır — katmanlar semantik kaçışı kurtaramaz; bu sınıf n=16 olduğu için **yalnızca keşifsel (exploratory)** raporlanır.
+
+> **Kalibrasyon açığı:** FP %6.7 (4/60) tamamen L2 kaynaklıdır ve kısa/alan-dışı benign sorgularda yoğunlaşır ("SkyLounge nerede?" p=0.91; "Uçuş bilgisi ekranları nerede?" p=0.99; "Check-in kontuarı nerede?" p=0.85; "What is the Wi-Fi password?" p=0.99). L1 bu örneklerde tetiklenmez. Test seti bu bulgudan sonra **ayarlanmamıştır**.
 
 ---
 
@@ -171,6 +229,21 @@ Ayrı bir deneysel çalışmada (EVREN H200), modellerin **`reasoning`/CoT alan�
 **Savunma çıkarımı:** İngress'te (NeuralShield L0–L4) istem engellendiğinde model **çağrılmadığı** için CoT sızıntısı **%0'a** iner; yani savunma modelin kendi çıktı filtresine bırakılamaz.
 **Sorumlu bildirim:** Bulgu EVREN/SSYZ ekibine iletilmiş; ekip bulguyu **kabul etmiş**, **dokümantasyon güvenlik notu** ve **model geliştiricisine eskalasyon** başlatmış, katkı için **5.000 CR** vermiştir. *(Ham istek/yanıt kanıtı ayrı deney klasöründedir; yayında anonimleştirilecektir.)*
 
+> **Yerel model doğrulaması (protokol, çalıştırma bekliyor):** Aynı ölçüm zayıf/açık ağırlıklı modeller için de tanımlanmıştır (`notebooks/RedTeam_Local_Models_v6_2.ipynb`, Hücre 5): Qwen3-4B-Thinking ve R1-Distill-Qwen-1.5B üzerinde `reasoning` ve `final` **ayrı ayrı** taranır; `leak_in_cot_only` metriği ("son yanıt temiz, düşünürken sızdırdı") ayrıca raporlanır. Bu, çıktı filtresi uygulayan sistemlerde **görünmez sızıntı kanalını** ölçer.
+
+### 7.6 Savunma Derinliği: L3 Çıktı DLP'nin Tek Başına Gücü
+
+Hakemsel bir itiraz şudur: "Kalkan ON iken saldırı girişte durdurulduğu için model hiç çağrılmıyor; bu bir LLM savunması değil, giriş filtresi başarısıdır." Bu itirazı doğrudan test ettik: **L0–L2 tamamen baypas edildi**, modelin sırrı sızdırdığı varsayıldı ve yalnızca **L3 (çıktı DLP)** uygulandı.
+
+| Tasarım | Sızıntı engelleme | Not |
+|---|---|---|
+| Yalnızca bağlamsal DLP (ilk sürüm) | %50.0 | anahtar kelime yoksa kaçıyordu |
+| **+ `secret_registry` (exact-match denylist)** | **%100.0** (40/40) | bağlamdan bağımsız |
+
+**Bulgu:** Bağlamsal desenler ("password: X", "API key = X") yalnızca **anahtar kelime varsa** maskeler; model sırrı bağlamsız verirse ("Sure, here it is → X") kaçar. Bu nedenle DLP'ye oturuma bağlı **bilinen-sır kayıt defteri** (exact-match denylist, yüksek kesinlik, FP riski yok) eklendi; benign test setinde **0/60 tetiklenme** doğrulandı. Sonuç: iki **bağımsız** savunma hattı — giriş filtresi (L0–L2) ve çıktı DLP (L3) — biri atlatıldığında diğeri devrededir.
+
+**Canary tespitinin sağlamlaştırılması:** Sızıntı ölçümü iki aşamalıdır: (i) katı eşleşme, (ii) **normalleştirilmiş eşleşme** (boşluk/ayraç/Unicode hilesiyle bölünmüş sırlar; ör. `A T C - K X 9 4 2 5`). Bu olmadan, modelin sırrı harf harf yazması **OFF-ASR'yi olduğundan düşük** gösterirdi. Birim testleri: 11/11 (katı, ayraçlı, harf-harf ve benign negatifler).
+
 ---
 
 ## 8. Sınırlamalar (dürüst)
@@ -181,6 +254,11 @@ Ayrı bir deneysel çalışmada (EVREN H200), modellerin **`reasoning`/CoT alan�
 4. **Translationese riski:** eğitim (EVREN-MT) ve benchmark (NLLB) çeviri metin içerir.
 5. **CPU gecikmesi dağıtım donanımına bağlı** (Colab 2-vCPU); üretim CPU'sunda farklı olabilir.
 6. **Patronus adilliği:** 2048 token + kendi eşiği; eğitim verisi kesin bilinmiyor (kaynak-ayrık olduğu garanti değil).
+7. **INT8 nicemleme OOD'de kayıp veriyor** (~21 puan recall); bu nedenle FP32 dağıtılır ve bellek/gecikme maliyeti daha yüksektir (§6.5). Nicemleme-farkında eğitim (QAT) gelecek çalışmadır.
+8. **L0/L1 katkısı sınırlı örneklemde görünmez:** E2E'de blokların ~%99'u L2'den gelir; obfuskasyon ağırlıklı bir test setiyle ayrıca doğrulanmalıdır (§6.7). Küratörlü red-team setinde ise L0/L1'in değeri nicemlenmiş (INT8) dağıtımda ve model-bağımsız hızlı yolda ölçülür (§6.8).
+9. **Alt sınıf örneklemleri küçük:** `direct` n=16 (Wilson GA ~[50.5, 89.8]); bu tür alt-sınıf yüzdeleri **yalnızca keşifsel**dir, genelleme iddiası taşımaz. Ana iddialar N=101 havuzuna ve adil benchmark'ın N=2.849'una dayandırılmıştır.
+10. **Red-team seti in-domain'dir:** Küratörlü 161 kayıt, eğitim dağılımına yakın ailelerden gelir; %100 yakalama **OOD başarısı olarak yorumlanmamalıdır** (OOD için §6.2: recall 74.1). İki sayı ayrı raporlanır.
+11. **Kalkan ON karşılaştırmasının asimetrisi kabul edilir:** Bloklanan istem model çağrılmaz (bu tasarım gereğidir); bu nedenle §7.6'da L3 çıktı DLP'si **bağımsız** olarak da ölçülmüştür.
 
 ---
 
@@ -192,9 +270,13 @@ NeuralShield, 12 dilli, katmanlı ve CPU'da çalıştırılabilir bir AppSec ge�
 
 ## 10. Tekrarlanabilirlik ve Eserler
 
-- Veri: `data/v6_multilingual_supplement.json`, `data/heldout_benchmark_v6_fair.json`.
+- Veri: `data/v6_multilingual_supplement.json`, `data/heldout_benchmark_v6_fair.json`, `data/qc_audit_report_v6.json`.
 - Eğitim: `notebooks/Train_{mmBERT,BGE_M3,XLM_RoBERTa}_v6.ipynb`.
-- Doğrulama: `notebooks/Validation_CI_v6.ipynb`, `Validation_Native_v6.ipynb`, `Validation_ONNX_v6.ipynb`.
+- Doğrulama: `notebooks/Validation_CI_v6.ipynb`, `Validation_Native_v6.ipynb`, `Validation_ONNX_v6.ipynb`, `E2E_Shield_v6_2.ipynb`.
+- Ölçüm çıktıları: `data/e2e_layer_test_v6_2.json`, `data/validation_ci_v6.json`, `data/native_eval_v6.json`, `data/native_subset_v6.json`.
+- Red-team: `data/redteam/curated_redteam_v6_2.json` (+ `_manifest.json`), `data/redteam/layer_ablation_clean.json`, `data/redteam/l3_only_ablation.json`, `data/redteam/l2_only_ablation_v6_2.json`, `notebooks/RedTeam_Local_Models_v6_2.ipynb`; kürasyon betiği `scripts/build_curated_redteam.py`.
+- Canary/DLP: `backend/canary.py` (katı + normalleştirilmiş eşleşme), `backend/dlp.py` (bağlamsal desenler + `secret_registry`).
+- Model: `backend/models/neuralshield_v6_mmbert/` (FP32 `model.onnx` + tokenizer; INT8 alternatif).
 - Plan/gerekçe: `docs/V6_3_VERISETI_DUZELTME_PLANI.md` (pre-reg: `prereg-v6.3`).
 - Rakipler: `notebooks/Guardrail_Rivals_Colab.ipynb`.
 

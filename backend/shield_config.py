@@ -37,6 +37,8 @@ _DEFAULTS: Dict[str, Any] = {
     "regex_only_floor_score": 65,
     "mask_generic_emails": False,
     "mask_generic_phones": False,
+    "dlp_secret_registry": True,
+    "dlp_extra_secrets": "",
     "ban_window_seconds": 120,
     "ban_penalty_per_violation": 20,
     "ban_max_penalty": 40,
