@@ -74,7 +74,7 @@ kendisine bırakılamaz → **çevre geçidi (peripheral gateway)** gerekir.
 | **RQ5** | Çok dilli sınıflandırıcı, adil (kaynak-ayrık) bir benchmark'ta ticari rakiple yarışır mı? | **F1'de denk** (GA örtüşüyor); **AUC ve düşük-FP'de geride.** §9.2 |
 | **RQ6** | Yaygın "OOD" kıyaslamaları güvenilir mi? | **Hayır:** eski setin **%76.9'u** eğitimle aynı kaynak. §9.1 |
 | **RQ7** | Nicemleme (INT8) güvenlik sınıflandırıcısında güvenli mi? | **Hayır (OOD'de):** recall 74.1 → 53.3, AUC 0.9494 → 0.8908. §9.4 |
-| **RQ8** | Modeller **düşünürken** (CoT) sızdırıyor mu? | **Evet:** ticari modellerde %65/%30; açık ağırlıklı Qwen3-4B-Thinking'de **%50.0 (yalnız-CoT %45.8)**. §9.8b |
+| **RQ8** | Modeller **düşünürken** (CoT) sızdırıyor mu? | **Evet:** ticari modellerde %65/%30; açık ağırlıklı Qwen3-4B-Thinking'de **%50.0** (doğrulanmış yalnız-CoT %8.3; ham %45.8 kesilme şüpheli). §9.8b |
 
 ---
 
