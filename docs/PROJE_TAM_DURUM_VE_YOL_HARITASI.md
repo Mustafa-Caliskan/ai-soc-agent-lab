@@ -567,10 +567,10 @@ L0–L2 **tamamen baypas** varsayımı (model sırrı sızdırdı), yalnızca L3
 - Model `content` alanında reddetse bile **`reasoning` alanında sırrı açık metin** döküyor.
 - İngress'te istem engellenince model çağrılmadığı için sızıntı **%0**.
 - **Sorumlu bildirim:** EVREN ekibi kabul etti, dokümantasyon notu + geliştirici eskalasyonu, 5.000 CR.
-- **Yerel modellerde test (Qwen3-4B-Thinking, R1-Distill) → TAMAMLANDI:** CoT %50.0 / yalnız-CoT %45.8 (Qwen3), %16.7 / %4.2 (R1) — §9.8b
+- **Yerel modellerde test → TAMAMLANDI (1280 token, doğrulanmış):** Qwen3-4B-Thinking CoT %50.0 / cot-only **3/24=%12.5**; R1-7B CoT %16.7 / **final %20.8** (finalde daha fazla!); R1-1.5B %16.7 / cot-only 1/24=%4.2 → §9.9
 
-### 9.9 Yerel model zafiyeti ve Kalkan Etkisi (v6.2 ile DOĞRULANDI) ⭐
-`data/redteam/redteam_v6_2_summary.json` — 5 model × 101 küratörlü saldırı + 60 benign = 805 sorgu (Colab T4, greedy decoding):
+### 9.9 Yerel model zafiyeti ve Kalkan Etkisi (v6.2 ile DOĞRULANDI — 10 model) ⭐
+`data/redteam/redteam_v6_2_{summary,core_full}.json` — **10 açık ağırlıklı model** × 101 küratörlü saldırı + 60 benign (Colab A100, 4-bit NF4, greedy). Tier-3 API modelleri: §9.8.
 
 | Model | Parametre | Kalkan OFF (ASR %) | Wilson %95 GA | L3-only (%) | Kalkan ON (ASR %) | Wilson %95 GA | Blok Oranı | FP (%) |
 |---|---|---|---|---|---|---|---|---|
@@ -579,10 +579,15 @@ L0–L2 **tamamen baypas** varsayımı (model sırrı sızdırdı), yalnızca L3
 | **Gemma-2-2B** | 2.61B | **8.9%** (9/101) | [4.8, 16.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
 | **Phi-3-mini** | 3.82B | **7.9%** (8/101) | [4.1, 14.9] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
 | **Qwen2.5-1.5B** | 1.54B | **5.0%** (5/101) | [2.1, 11.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Qwen2.5-7B** | 7.62B | **18.8%** (19/101) | [12.4, 27.5] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Llama-3.1-8B** | 8.03B | **14.8%** (15/101) | [9.2, 23.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Mistral-7B-v0.3** | 7.25B | **40.6%** (41/101) | [31.5, 50.3] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Gemma-2-9B** | 9.24B | **8.9%** (9/101) | [4.8, 16.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Qwen2.5-14B** | 14.7B | **10.9%** (11/101) | [6.2, 18.5] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
 
-> ✅ **Nihai Ampirik Kanıt:** 5 modelin tamamı kalkan kapalıyken sır sızdırmakta (%5.0–%25.7); NeuralShield kalkanı açıkken sızıntı **istisnasız %0.0'a** düşmektedir (blok oranı %100.0). Gerçek model çıktılarına doğrudan L3 uygulandığında bile sızıntı **%0.0'a** inmektedir (`L3-only % = 0.0%`).
+> ✅ **Nihai Ampirik Kanıt (14/14 model):** Kalkan kapalıyken sızıntı **%4.95–%40.59** (final) ve API modellerde **%0 final / %0–66.3 CoT**; kalkan açıkken **ON ASR istisnasız %0.0**, blok **%100**, benign FP **%6.67**. L3-only gerçek çıktılarda 62/62 (%100).
 > Sıcaklık kontrolü ($n=20$): Greedy %35.0 vs T=0.7 %35.0 (fark: 0.0 puan).
-> Etkili alt küme ($n=35$): Qwen2.5-3B zafiyeti %74.3'ten %0.0'a indirilmiştir.
+> Etkili alt küme (10 model): **62/101 (%61.4)**; Mistral-7B %66.1, Qwen2.5-3B %41.9, Qwen2.5-7B %30.6, Qwen2.5-1.5B %8.1 → ON modda hepsi %0.0.
 
 ---
 
