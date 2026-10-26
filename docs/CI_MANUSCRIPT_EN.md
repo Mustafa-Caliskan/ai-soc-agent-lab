@@ -350,9 +350,9 @@ Future work will expand NeuralShield's semantic context window to 2,048 tokens v
 
 [3] Greshake K, Abdelnabi S, Mishra S, Endres C, Holz T, Fritz M. Not what you've signed up for: Compromising real-world LLM-integrated applications with indirect prompt injection. In: Proceedings of the 16th ACM Workshop on Artificial Intelligence and Security (AISEC '23); 30 November 2023; Copenhagen, Denmark. ACM; 2023. pp. 79-90. https://doi.org/10.1145/3605764.3623985
 
-[4] Liu Y, Deng G, Xu Z, Li Y, Zheng Y, Zhang Y, Zhao L, Stojikovic T, Wang C. Jailbreaking ChatGPT via prompt engineering: An empirical study. arXiv preprint arXiv:2305.13860, 2023. https://doi.org/10.48550/arXiv.2305.13860
+[4] Liu Y, Deng G, Xu Z, Li Y, Zheng Y, Zhang Y, Zhao L, Zhang T, Wang K, Liu Y. Jailbreaking ChatGPT via prompt engineering: An empirical study. arXiv preprint arXiv:2305.13860, 2023. https://doi.org/10.48550/arXiv.2305.13860
 
-[5] Perez F, Ribeiro I. Ignore this title and hack this website using ChatGPT: A primer on prompt injection attacks. arXiv preprint arXiv:2305.02783, 2023. https://doi.org/10.48550/arXiv.2305.02783
+[5] Perez F, Ribeiro I. Ignore previous prompt: Attack techniques for language models. arXiv preprint arXiv:2211.09527, 2022. https://doi.org/10.48550/arXiv.2305.02783
 
 [6] Zou A, Wang Z, Kolter JZ, Fredrikson M. Universal and transferable adversarial attacks on aligned language models. arXiv preprint arXiv:2307.15043, 2023. https://doi.org/10.48550/arXiv.2307.15043
 
@@ -360,7 +360,7 @@ Future work will expand NeuralShield's semantic context window to 2,048 tokens v
 
 [8] Protect AI. DeBERTa-v3-base prompt injection detector. Hugging Face Model Hub, 2024. Available from: https://huggingface.co/protectai/deberta-v3-base-prompt-injection
 
-[9] Patronus AI. Patronus Wolf Defender 307M: Advanced prompt injection defense. Hugging Face Model Hub, 2024. Available from: https://huggingface.co/patronus-ai/wolf-defender-307m
+[9] Patronus AI. Patronus Wolf Defender 307M: Advanced prompt injection defense. Hugging Face Model Hub, 2024. Available from: https://huggingface.co/patronus-studio/wolf-defender-prompt-injection
 
 [10] Yong Z-X, Menghini C, Bach SH. Low-resource languages jailbreak GPT-4. arXiv preprint arXiv:2310.02446, 2023. https://doi.org/10.48550/arXiv.2310.02446
 
@@ -378,7 +378,7 @@ Future work will expand NeuralShield's semantic context window to 2,048 tokens v
 
 [17] Chen J, Xiao S, Zhang P, Luo K, Lian D, Liu Z. BGE M3-Embedding: Multi-lingual, multi-functionality, multi-granularity text embeddings through self-knowledge distillation. arXiv preprint arXiv:2402.03216, 2024. https://doi.org/10.48550/arXiv.2402.03216
 
-[18] Sun S. JailbreakPrompts: A dataset of diverse adversarial prompts for large language models. GitHub Repository, 2023. Available from: https://github.com/simsonsun/JailbreakPrompts
+[18] Sun S. JailbreakPrompts: A dataset of diverse adversarial prompts for large language models. GitHub Repository, 2023. Available from: https://huggingface.co/datasets/Simsonsun/JailbreakPrompts
 
 [19] Conover M, Hayes M, Mathur A, Meng J, Xie J. Free Dolly: Introducing the world's first truly open instruction-tuned LLM. Databricks Technical Blog, 2023. Available from: https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm
 
