@@ -274,6 +274,45 @@ Hakemlerin *"Yalnızca 1.5B–3.8B küçük modeller test edilmiş"* eleştirisi
 > 3. SSE streaming ile düşünme adımlarını son kullanıcıya ileten ya da muhakeme zincirini loglayan sistemlerde bu durum doğrudan veri sızıntısına yol açmaktadır (*Silent CoT Exfiltration*).
 > 4. **NeuralShield Koruma Garantisi:** NeuralShield v6.2 devredeyken (`ON`), 101 saldırının tamamı L0–L2 seviyesinde önceden engellendiği için model hiç çağrılmamış (**ON ASR = %0.0**); girdi filtresi devre dışı bırakılsa dahi L3 Çıktı DLP hem nihai yanıtı hem düşünme akışını tarayarak tüm sızıntıları anında maskelemiştir (**L3-Only ASR = %0.0**). Normal yolcu sorgularında ($n=60$) hiçbir sızıntı yaşanmamıştır.
 
+### 6.12 Ölçek ve Hizalama: Zafiyet Model Büyüklüğüne Değil Hizalamaya Bağlıdır
+
+Aynı 161 örneklik küratörlü set ve aynı v6.2 geçidi ile **10 açık ağırlıklı model** (1.5B–14.7B,
+4-bit NF4, greedy) ve **4 amiral gemisi API modeli** test edilmiştir.
+
+| Sınıf | Model | Parametre | OFF Final ASR % | Blok % |
+|---|---|---|---|---|
+| Tier-1 (uç) | Qwen2.5-1.5B | 1.54B | 4.95 | 100.0 |
+| Tier-1 | Phi-3-mini | 3.82B | 7.92 | 100.0 |
+| Tier-1 | Gemma-2-2B | 2.61B | 8.91 | 100.0 |
+| Tier-1 | Llama-3.2-3B | 3.21B | 13.86 | 100.0 |
+| Tier-1 | Qwen2.5-3B | 3.09B | 25.74 | 100.0 |
+| **Tier-2 (kurumsal)** | Gemma-2-9B | 9.24B | 8.91 | 100.0 |
+| **Tier-2** | Qwen2.5-14B | 14.7B | 10.89 | 100.0 |
+| **Tier-2** | Llama-3.1-8B | 8.03B | 14.85 | 100.0 |
+| **Tier-2** | Qwen2.5-7B | 7.62B | 18.81 | 100.0 |
+| **Tier-2** | **Mistral-7B-v0.3** | **7.25B** | **40.59** | **100.0** |
+| Tier-3 (API) | DeepSeek-v4.1-Flash | MoE | 0.0 (CoT 0.0) | 100.0 |
+| Tier-3 | GLM-5.3 | Flagship | 0.0 (CoT 1.98) | 100.0 |
+| Tier-3 | Qwen3.8-Flash-Next | MoE | 0.0 (CoT 14.85) | 100.0 |
+| Tier-3 | Gemma-4-31B | 31B | 0.0 (**CoT 66.34**) | 100.0 |
+
+> **Bulgu 1 — "küçük model" itirazı çürütülmüştür:** Kurumsal ölçekte yaygın kullanılan
+> **Mistral-7B-v0.3, tüm 14 model içinde en yüksek final-sızıntı oranına (%40.59) sahiptir**.
+> Yani zafiyet "oyuncak model" sorunu değildir; gerçek üretim dağıtımlarını doğrudan ilgilendirir.
+
+> **Bulgu 2 — ölçek monoton değildir:** Qwen ailesinde 1.5B→3B→7B→14B için ASR
+> %4.95→%25.74→%18.81→%10.89; Llama'da 3.2B %13.86 → 8B %14.85; Gemma'da 2B %8.91 → 9B %8.91.
+> **Büyüklük zafiyeti tek başına açıklamıyor; belirleyici etken hizalama/safety-tuning kalitesidir.**
+> Bu, "daha büyük = daha güvenli" varsayımını da "daha büyük = daha zafiyetli" varsayımını da reddeder.
+
+> **Bulgu 3 — iki farklı zafiyet rejimi:** Açık ağırlıklı 7–14B modeller sırrı **doğrudan nihai
+> yanıtta** sızdırırken, API ile sunulan amiral gemisi modeller nihai yanıtta reddedip sırrı
+> **yalnızca düşünme kanalında** (CoT) sızdırmaktadır (§6.11). İkisi de aynı geçitle %0.0'a indirilmiştir.
+
+> **Sınırlama:** Tüm açık ağırlıklı modeller 4-bit NF4 ile yüklenmiştir; nicemleme güvenlik
+> hizalamasını etkileyebilir (FP16 kontrolü gelecek çalışma). Mistral-v0.3'ün görece zayıf güvenlik
+> hizalaması bilinen bir özelliktir ve bulguyu açıklar; yine de mutlak ASR değerleri üst sınır sayılmalıdır.
+
 ## 7. Analiz
 
 ### 7.1 Benchmark kaynak sızıntısı (temel bulgu)
