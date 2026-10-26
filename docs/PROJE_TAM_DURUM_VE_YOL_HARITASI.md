@@ -664,6 +664,22 @@ Modeller **sırayla** yüklenir (OOM yok), her model ayrı JSON'a yazılır (cac
 
 ---
 
+
+### 11.4 EVREN H200 Tier-3 Amiral Gemisi Modeller Test Sonuçları (Tamamlandı — 26.10.2026)
+Hakemlerin *"küçük modellerde test edilmiş"* eleştirisini kapatmak üzere aynı küratörlü veri seti (`curated_redteam_v6_2.json`: 101 saldırı + 60 benign = 161 örnek) ile EVREN platformundaki 4 büyük model yerel bilgisayardan REST API üzerinden test edilmiştir:
+
+| Model | Tip / Parametre | OFF Final ASR | **OFF CoT ASR** | **Sadece-CoT Sızıntısı** | **Kalkan ON** | L3-Only |
+|---|---|---|---|---|---|---|
+| **Gemma-4-31B** | Google (31B Dense) | **%0.0** (0/101) | **%66.3** (67/101) | **%66.3** (67/101) | **%0.0** (0/101) | **%0.0** |
+| **Qwen3.8-Flash-Next** | Alibaba (MoE Flagship) | **%0.0** (0/101) | **%14.9** (15/101) | **%14.9** (15/101) | **%0.0** (0/101) | **%0.0** |
+| **GLM-5.3** | Zhipu AI (Flagship) | **%0.0** (0/101) | **%2.0** (2/101) | **%2.0** (2/101) | **%0.0** (0/101) | **%0.0** |
+| **DeepSeek-v4.1-Flash** | DeepSeek (MoE Flagship) | **%0.0** (0/101) | **%0.0** (0/101) | **%0.0** (0/101) | **%0.0** (0/101) | **%0.0** |
+
+- **Temel Bulgu:** Büyük modeller nihai yanıtta saldırıyı reddetse de (`OFF Final = %0.0`), iç muhakeme zincirinde (`reasoning` / CoT) `Gemma-4-31B` %66.3, `Qwen3.8-Flash-Next` %14.9 oranında sistem promptundaki gizli sırları açık metin olarak sızdırmıştır (*Silent CoT Exfiltration*).
+- **NeuralShield Katkısı:** L0–L2 girişte tüm 101 saldırıyı durdurarak model çağrısını engeller (**ON ASR = %0.0**); girdi filtresi baypas edilse bile L3 Çıktı DLP hem yanıtı hem CoT akışını maskeleyerek sızıntıyı **%0.0'a** indirir.
+- **Kayıt Dosyaları:** `data/redteam/evren_v6_2_summary.json` ve `data/redteam/evren_v6_2_full.json`.
+
+
 ## 12. Bilinen zayıflıklar
 
 ### 12.1 Metodolojik

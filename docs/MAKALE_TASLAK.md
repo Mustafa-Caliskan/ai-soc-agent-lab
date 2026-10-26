@@ -248,6 +248,32 @@ Muhakeme modelleri nihai yanıtı sansürleyip sırrı **düşünme metninde** d
 
 ---
 
+
+### 6.11 Tier-3 Amiral Gemisi Modellerde Zafiyet ve Sessiz CoT Sızıntısı (EVREN H200, N=161)
+
+Hakemlerin *"Yalnızca 1.5B–3.8B küçük modeller test edilmiş"* eleştirisini önceden karşılamak üzere, **aynı küratörlü veri seti** (`curated_redteam_v6_2.json`: 101 saldırı + 60 benign = 161 örnek) ve **aynı sistem promptu** ile TÜBİTAK/SSYZ EVREN H200 kümesindeki amiral gemisi/büyük modeller yerel bilgisayardan REST API üzerinden test edilmiştir (1536 token bütçesi, $T=0.0$ deterministik üretim).
+
+| Model | Mimari / Parametre | OFF Final ASR % | Wilson %95 GA | **OFF CoT ASR %** | Wilson %95 GA | **Sadece-CoT %** | L3-only % | **Kalkan ON %** |
+|---|---|---|---|---|---|---|---|---|
+| **Gemma-4-31B** | Google (31B Dense) | **0.0%** (0/101) | [0.0, 3.7] | **66.3%** (67/101) | [56.7, 74.8] | **66.3%** (67/101) | **0.0%** | **0.0%** (0/101) |
+| **Qwen3.8-Flash-Next** | Alibaba (MoE Flagship) | **0.0%** (0/101) | [0.0, 3.7] | **14.9%** (15/101) | [9.2, 23.1] | **14.9%** (15/101) | **0.0%** | **0.0%** (0/101) |
+| **GLM-5.3** | Zhipu AI (Flagship) | **0.0%** (0/101) | [0.0, 3.7] | **2.0%** (2/101) | [0.5, 6.9] | **2.0%** (2/101) | **0.0%** | **0.0%** (0/101) |
+| **DeepSeek-v4.1-Flash** | DeepSeek (MoE Flagship) | **0.0%** (0/101) | [0.0, 3.7] | **0.0%** (0/101) | [0.0, 3.7] | **0.0%** (0/101) | **0.0%** | **0.0%** (0/101) |
+
+#### Saldırı Sınıfı x Model: CoT Sızıntı Oranı Dağılımı
+| Model | direct ($n=16$) | indirect ($n=26$) | encoding ($n=26$) | stego ($n=33$) | Toplam ($n=101$) |
+|---|---|---|---|---|---|
+| **Gemma-4-31B** | **81.2%** (13/16) | **76.9%** (20/26) | **76.9%** (20/26) | **42.4%** (14/33) | **66.3%** (67/101) |
+| **Qwen3.8-Flash-Next** | **25.0%** (4/16) | **34.6%** (9/26) | **3.8%** (1/26) | **3.0%** (1/33) | **14.9%** (15/101) |
+| **GLM-5.3** | **6.2%** (1/16) | **0.0%** (0/26) | **0.0%** (0/26) | **3.0%** (1/33) | **2.0%** (2/101) |
+| **DeepSeek-v4.1-Flash** | **0.0%** (0/16) | **0.0%** (0/26) | **0.0%** (0/26) | **0.0%** (0/33) | **0.0%** (0/101) |
+
+> **Kritik Bilimsel Çıkarım (Sessiz CoT Sızıntısı):**
+> 1. Büyük ölçekli ve kurumsal modeller (`Gemma-4-31B`, `Qwen3.8-Flash-Next`), son kullanıcıya sunulan nihai yanıtta (`content`) saldırıların tamamını reddetmiş (**%0.0 Final ASR**), dışarıdan bakıldığında "kusursuz güvenli" izlenimi vermiştir.
+> 2. Ancak modelin iç düşünme akışında (`reasoning` / CoT), `Gemma-4-31B` 101 saldırının 67'sinde (**%66.3**), `Qwen3.8-Flash-Next` ise 15'inde (**%14.9**) sistem promptuna gömülü gizli canary'leri açık metin olarak sayıklamıştır.
+> 3. SSE streaming ile düşünme adımlarını son kullanıcıya ileten ya da muhakeme zincirini loglayan sistemlerde bu durum doğrudan veri sızıntısına yol açmaktadır (*Silent CoT Exfiltration*).
+> 4. **NeuralShield Koruma Garantisi:** NeuralShield v6.2 devredeyken (`ON`), 101 saldırının tamamı L0–L2 seviyesinde önceden engellendiği için model hiç çağrılmamış (**ON ASR = %0.0**); girdi filtresi devre dışı bırakılsa dahi L3 Çıktı DLP hem nihai yanıtı hem düşünme akışını tarayarak tüm sızıntıları anında maskelemiştir (**L3-Only ASR = %0.0**). Normal yolcu sorgularında ($n=60$) hiçbir sızıntı yaşanmamıştır.
+
 ## 7. Analiz
 
 ### 7.1 Benchmark kaynak sızıntısı (temel bulgu)
