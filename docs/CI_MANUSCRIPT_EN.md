@@ -19,9 +19,9 @@ Prompt injection, instruction hijacking, and confidential data extraction repres
 The rapid deployment of Large Language Models (LLMs) across enterprise domains—including retrieval-augmented generation (RAG), autonomous workflow agents, and interactive customer service—has fundamentally expanded the computational attack surface of modern software systems [1, 2]. Unlike traditional relational software where executable control logic is strictly demarcated from data payloads, transformer architectures process instructions and untrusted inputs within an identical, undivided context window [3, 4]. Consequently, malicious actors can exploit this architectural conflation via prompt injection attacks, wherein adversarial inputs override developer system prompts, hijack execution flows, or force the model to exfiltrate proprietary data, API credentials, and internal system variables [5, 6].
 
 Securing LLM-integrated pipelines against prompt injection poses formidable operational and theoretical challenges. While commercial and open-source guardrails have emerged—most notably Meta Prompt Guard [7], ProtectAI DeBERTa-v3 [8], and Patronus AI's Wolf Defender [9]—contemporary solutions exhibit three acute limitations:
-1. **Severe Multilingual Vulnerability and Translation Bias:** Existing guardrail models are trained overwhelmingly on English corpora. In non-English contexts, safety classifiers frequently collapse, failing to detect adversarial instructions expressed in morphologically rich, low-resource, or non-Latin scripts [10, 11]. Furthermore, synthetic translations used in academic datasets often introduce "translationese" artifacts, failing to capture native colloquial syntax and regional attack vectors [12].
-2. **Benchmark Source Contamination:** Prior empirical benchmarks assessing guardrail performance frequently suffer from undetected data leakage. In our systematic audit of conventional out-of-distribution (OOD) evaluation suites, we identified a 76.9% source-level overlap between public training repositories and benchmark splits, artificially inflating reported detection metrics.
-3. **The Silent Chain-of-Thought (CoT) Exfiltration Vector:** Modern reasoning models (e.g., DeepSeek-R1, Qwen-Thinking, and next-generation dense architectures) employ explicit reasoning traces before emitting a user-facing response [13]. Standard guardrails focus exclusively on the final conversational output. We observe that even when a model successfully refuses an attack in its user-facing message (0.0% final Attack Success Rate), it frequently verbalizes confidential system prompts and cryptographic canaries verbatim within its internal chain-of-thought tokens. In applications streaming raw reasoning chunks via Server-Sent Events (SSE) or persisting execution logs, this constitutes catastrophic, unmonitored data exfiltration.
+(i) **Severe Multilingual Vulnerability and Translation Bias:** Existing guardrail models are trained overwhelmingly on English corpora. In non-English contexts, safety classifiers frequently collapse, failing to detect adversarial instructions expressed in morphologically rich, low-resource, or non-Latin scripts [10, 11]. Furthermore, synthetic translations used in academic datasets often introduce "translationese" artifacts, failing to capture native colloquial syntax and regional attack vectors [12].
+(ii) **Benchmark Source Contamination:** Prior empirical benchmarks assessing guardrail performance frequently suffer from undetected data leakage. In our systematic audit of conventional out-of-distribution (OOD) evaluation suites, we identified a 76.9% source-level overlap between public training repositories and benchmark splits, artificially inflating reported detection metrics.
+(iii) **The Silent Chain-of-Thought (CoT) Exfiltration Vector:** Modern reasoning models (e.g., DeepSeek-R1, Qwen-Thinking, and next-generation dense architectures) employ explicit reasoning traces before emitting a user-facing response [13]. Standard guardrails focus exclusively on the final conversational output. We observe that even when a model successfully refuses an attack in its user-facing message (0.0% final Attack Success Rate), it frequently verbalizes confidential system prompts and cryptographic canaries verbatim within its internal chain-of-thought tokens. In applications streaming raw reasoning chunks via Server-Sent Events (SSE) or persisting execution logs, this constitutes catastrophic, unmonitored data exfiltration.
 
 To address these vulnerabilities, we propose **NeuralShield**, a production-ready, multi-layer application security gateway designed for low-latency, multilingual LLM deployments. NeuralShield integrates four complementary defensive layers: (L0) an aggressive structural normalization and recursive deobfuscation engine; (L1) a sub-millisecond deterministic regex and canary-trap fast-path; (L2) a 12-language multilingual semantic transformer classifier (mmBERT-base, 307M parameters); and (L3) a real-time egress Data Loss Prevention (DLP) sanitizer with dual-stream reasoning inspection. The layer decisions are governed by a deterministic OR-Gate arbiter that balances high recall against enterprise false-positive constraints.
 
@@ -197,13 +197,13 @@ To quantify the individual contribution of each defensive layer, we evaluated th
 | L0+L1 Only (Deterministic Fast-Path) | 76.24% (77/101) | [67.1, 83.5] | **0.00%** (0/60) | 86.50% | **<1 ms** |
 | L2-Only (mmBERT FP32 Raw Text) | 100.00% (101/101) | [96.3, 100.0] | 6.67% (4/60) | 98.12% | 50.6 ms |
 | L2-Only (mmBERT INT8 Quantized) | 89.11% (90/101) | [81.5, 93.8] | 6.67% (4/60) | 92.30% | 61.9 ms |
-| L0 + L2-INT8 (Normalized INT8) | 95.05% (96/101) | [88.9, 97.9] | 6.67% (4/60) | 95.50% | 62.4 ms |
+| L0 + L2-INT8 (Dual-Channel Extended Text) | 95.05% (96/101) | [88.9, 97.9] | 6.67% (4/60) | 95.50% | 62.4 ms |
 | **NeuralShield Full Pipeline (FP32)** | **100.00%** (101/101) | [96.3, 100.0] | 6.67% (4/60) | **98.12%** | 51.2 ms |
 
 The ablation analysis reveals three critical operational insights:
 1. **The Deterministic Fast-Path:** The combination of L0 normalization and L1 regex automata intercepts **76.24% of all attacks with exactly 0.00% False Positives and sub-millisecond execution times (<1 ms)**. In high-throughput architectures, this layer acts as an inexpensive firewall, eliminating over three-quarters of adversarial traffic before invoking transformer inference.
 2. **L0 Normalization Value in OOD Domain:** On the broader $N=2,849$ fair benchmark, incorporating L0 normalization prior to L2 inference yielded a statistically measurable **+1.04% recall gain** (recovering 17 previously missed attacks, Macro-F1 increasing from 84.86% to 85.40%).
-3. **Recovery of Quantization Degradation:** In memory-constrained scenarios where INT8 must be utilized, L0 normalization recovers 6 missed attacks, restoring attack recall from 89.11% back to 95.05%.
+3. **Recovery of Quantization Degradation via Dual-Channel Evaluation:** In memory-constrained scenarios where INT8 must be utilized, L0 normalization recovers 6 missed attacks, restoring attack recall from 89.11% back to 95.05%. In this dual-channel configuration, L0 passes both raw input and deobfuscated text (extended_text) to L2, evaluating max(P_raw, P_ext), successfully trapping obfuscations that would otherwise evade INT8 quantization clipping.
 
 ### 3.5. Multi-Model Empirical Red-Team: Tier-1 and Tier-2 Open-Weight LLMs
 
@@ -234,11 +234,29 @@ We conducted live red-teaming across 10 open-weight models ($N=101$ attacks, 60 
 3. **Effective Attack Subset:** Across all 10 models, 62 out of 101 attacks (61.39%) successfully breached at least one model. Within this verified effective subset, Mistral-7B leaked in 66.1% of trials, Qwen2.5-3B in 41.9%, and Qwen2.5-7B in 30.6%.
 4. **Live Defense-in-Depth and Autonomous Leakage (`BEN_TR_016`):** In a remarkable finding during benign testing, Llama-3.2-3B was presented with an innocent passenger query: *"My flight has been delayed, what are my rights?"* (`BEN_TR_016`). The input classifier correctly assigned a negligible risk score ($P_{\text{malicious}} = 0.0431$), passing the prompt. However, due to attention cross-talk in the model's ungrounded weights, **Llama-3.2-3B spontaneously emitted all four secret canary tokens verbatim into its response**. Because NeuralShield implements multi-layer defense-in-depth, L3 Egress DLP intercepted the outgoing generation, redacting all four canaries in real time (`on_leak = []`). This real-world incident validates the absolute necessity of post-generation egress sanitization.
 
-### 3.6. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models
+### 3.6. Chain-of-Thought Exfiltration in Open-Weight Reasoning LLMs
+
+We specifically evaluated reasoning architectures endowed with explicit deliberation tokens under a 1,280-token generation budget across 24 curated attacks and 12 benign queries (=36$). In these models, the internal chain-of-thought trace (
+easoning) and final conversational answer (inal) were parsed independently. Table 6 summarizes the empirical breakdown.
+
+*Table 6. Empirical Vulnerability in Open-Weight Reasoning Models (=24$ attacks, 12 benign queries, 1280-token reasoning budget).*
+
+| Model Architecture | Parameters | CoT Leakage ASR (%) | 95% Wilson CI | Final Content ASR (%) | 95% Wilson CI | Verified CoT-Only Exfiltration (%) | NeuralShield Protected ASR (%) |
+|---|---|---|---|---|---|---|---|
+| **Qwen3-4B-Thinking** | 4.02B | **50.00%** (12/24) | [30.8, 69.2] | 8.33% (2/24) | [2.3, 25.8] | **12.50%** (3/24) | **0.00%** (0/24) |
+| **R1-Distill-Qwen-1.5B** | 1.78B | **16.67%** (4/24) | [6.7, 35.9] | 12.50% (3/24) | [4.3, 31.0] | 4.17% (1/24) | **0.00%** (0/24) |
+| **R1-Distill-Qwen-7B** | 7.62B | **16.67%** (4/24) | [6.7, 35.9] | **20.83%** (5/24) | [9.2, 40.5] | 4.17% (1/24) | **0.00%** (0/24) |
+
+#### Analysis of Open-Weight Reasoning Vulnerability
+1. **The Qwen3-4B-Thinking Secret Verbalization:** In Qwen3-4B-Thinking, **50.00% of attacks caused the model to expose secret canary tokens within its internal reasoning trace**. Crucially, in 12.50% of attacks (Verified CoT-Only), the model successfully finished its deliberation within token budget, issued a polite refusal in its final response, yet verbalized the internal secret verbatim in its thought trace.
+2. **Distillation Asymmetry in R1-Distill-Qwen-7B:** In R1-Distill-Qwen-7B, final content leakage (**20.83%**) actually exceeded internal reasoning leakage (16.67%). This demonstrates that reasoning distillation transfers stylistic chain-of-thought tokens without transferring the robust safety alignment of the teacher model.
+3. **Full Mitigation:** NeuralShield dropped both reasoning and final response leakage to flat **0.00%** across all reasoning architectures.
+
+### 3.7. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models
 
 To assess whether massive frontier architectures resolve prompt injection vulnerabilities, we evaluated four flagship models hosted on EVREN NVIDIA H200 supercomputing clusters using the identical 161-prompt curated suite. Table 6 and Figure 2b detail the findings.
 
-*Table 6. Empirical Vulnerability in Tier-3 Flagship API Models ($N=101$ attacks, 60 benign queries, 1536-token reasoning budget).*
+*Table 7. Empirical Vulnerability in Tier-3 Flagship API Models ($N=101$ attacks, 60 benign queries, 1536-token reasoning budget).*
 
 | Model Architecture | Host Infrastructure | Shield OFF Final Content ASR (%) | 95% Wilson CI | **Shield OFF Reasoning CoT ASR (%)** | 95% Wilson CI | Verified CoT-Only Exfiltration (%) | NeuralShield Protected ASR (%) |
 |---|---|---|---|---|---|---|---|
@@ -258,7 +276,7 @@ The empirical data reveals a critical, previously uncharacterized security vulne
 
 To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool ($N=101$) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 7 and Figure 3 present the empirical findings.
 
-*Table 7. Full-pool paired methodological ablations on NVIDIA A100 infrastructure ($N=101$ attacks, 60 benign queries).*
+*Table 8. Full-pool paired methodological ablations on NVIDIA A100 infrastructure ($N=101$ attacks, 60 benign queries).*
 
 | Experiment Condition | Sample Size | Evaluated Parameter | Measured ASR (%) | 95% Wilson CI | Discordant Pairs (A/B) | McNemar Exact $p$ | Benign Over-Refusal (% FP) |
 |---|---|---|---|---|---|---|---|
@@ -275,7 +293,7 @@ To address potential methodological critiques regarding quantization artifacts a
 *Figure 3. Full-pool ablation findings: (a) Quantization invariance across Mistral-7B-v0.3 and Llama-3.1-8B, demonstrating that 4-bit NF4 compression does not induce vulnerability; (b) The prompt hardening trade-off, showing residual leakage (16.83%) and benign over-refusal penalties.*
 
 #### Disproving Quantization-Induced Vulnerability
-A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization degrades safety-tuning alignments, artificially inflating reported ASR. As documented in Table 7 and Figure 3a:
+A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization degrades safety-tuning alignments, artificially inflating reported ASR. As documented in Table 8 and Figure 3a:
 - In `Llama-3.1-8B`, unquantized FP16 weights actually exhibited a slightly higher leak rate (**16.83% vs. 14.85%**, $\Delta = +1.98$ points), with virtually identical confidence intervals ([10.8, 25.3] vs. [9.2, 23.1]) and a non-significant McNemar test ($p = 0.804$, discordant pairs: 7 vs. 9).
 - In `Mistral-7B-v0.3`, while pure FP16 reduced ASR from 40.59% to 29.70% ($\Delta = -10.89$ points), the reduction failed to achieve strict statistical significance at the $\alpha = 0.05$ level (exact McNemar $p = 0.071$), and the Wilson confidence intervals overlap ([21.7, 39.2] vs. [31.5, 50.3]). Nearly one-third of all attacks succeeded against the uncompressed model.
 - These results mathematically establish **quantization invariance**: 4-bit quantization did not cause the vulnerability. Architectural safety alignment and context disambiguation dictate robustness.
@@ -287,9 +305,9 @@ We evaluated whether aggressive system prompt hardening (*"ABSOLUTE DIRECTIVE: N
 - Prompt hardening therefore degrades utility while failing to guarantee confidentiality. An architectural, external gateway remains non-negotiable.
 
 #### Methodological Insight: The Fallacy of Small-Sample Pilots
-Our comparative evaluation highlights a vital methodological lesson for AI security benchmarking. Table 8 contrasts the findings from our preliminary pilot study ($n=25$) against the full-scale benchmark ($N=101$).
+Our comparative evaluation highlights a vital methodological lesson for AI security benchmarking. Table 9 contrasts the findings from our preliminary pilot study ($n=25$) against the full-scale benchmark ($N=101$).
 
-*Table 8. Methodological comparison: Pilot sample artifacts ($n=25$) versus full-pool evaluation ($N=101$).*
+*Table 9. Methodological comparison: Pilot sample artifacts ($n=25$) versus full-pool evaluation ($N=101$).*
 
 | Experimental Comparison | Pilot Study ($n=25$) Delta | Full-Pool ($N=101$) Delta | Methodological Shift & Finding |
 |---|---|---|---|
@@ -297,7 +315,7 @@ Our comparative evaluation highlights a vital methodological lesson for AI secur
 | Llama-3.1-8B: 4-bit $\to$ Saf FP16 | -8.00 pp | **+1.98 pp** | **Direction flipped! FP16 leaks more than 4-bit** |
 | Prompt Hardening: Standard $\to$ Hardened | -24.00 pp | **-7.92 pp** | **Effect size attenuated by 3.0x; non-significant ($p = 0.115$)** |
 
-As demonstrated in Table 8, pilot evaluations with small sample sizes ($n \le 25$) yield severe statistical artifacts: the observed effect of prompt hardening was exaggerated by a factor of three (-24.0 pp vs. -7.92 pp), and the effect of quantization on Llama-3.1-8B completely reversed direction (-8.0 pp vs. +1.98 pp). This underscores that rigorous, reviewer-proof empirical evaluation of LLM security requires adequately powered sample sizes ($N \ge 100$) paired with non-parametric significance testing.
+As demonstrated in Table 9, pilot evaluations with small sample sizes ($n \le 25$) yield severe statistical artifacts: the observed effect of prompt hardening was exaggerated by a factor of three (-24.0 pp vs. -7.92 pp), and the effect of quantization on Llama-3.1-8B completely reversed direction (-8.0 pp vs. +1.98 pp). This underscores that rigorous, reviewer-proof empirical evaluation of LLM security requires adequately powered sample sizes ($N \ge 100$) paired with non-parametric significance testing.
 
 ---
 

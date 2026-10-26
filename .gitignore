@@ -53,6 +53,11 @@ neuralshield_v6_checkpoint_full/
 neuralshield_v6_paper_pack/
 backend/models/neuralshield_v6_mmbert/
 scratch_*.txt
+scratch_*.docx
+
+# Journal Reference Files
+File (1).docx
+*.pdf
 
 
 # Operating System & Editor Files

@@ -3,13 +3,22 @@ Script to generate publication-ready Word documents strictly adhering to
 Computers and Informatics (C&I) journal formatting rules:
 1. docs/NeuralShield_CI_Manuscript.docx (Masked for Blind Review)
 2. docs/Title_Page.docx (Unmasked Author & Institutional Metadata Page)
+
+Refined with all 7 reviewer & template compliance checks:
+- Proper centered PAGE field in footer
+- Heading 1/2/3 styles applied for navigation & TOC
+- Strict 10 pt Times New Roman for all tables & references
+- Dedicated Table & Section for Open-Weight Reasoning Models (§3.6)
+- Introduction bullets mapped to (i), (ii), (iii)
+- Keywords styled in Segoe UI 9pt (bold+italic label)
+- Clarified Table 4 dual-channel extended_text label
 """
 
 import os
 import docx
 from docx.shared import Inches, Pt, RGBColor, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
 
@@ -48,30 +57,68 @@ def set_cell_borders(cell, top=None, bottom=None, left=None, right=None):
             tcBorders.append(b_elem)
     tcPr.append(tcBorders)
 
-def add_styled_heading(doc, text, level=1):
-    """Add C&I compliant heading."""
-    p = doc.add_paragraph()
-    p.paragraph_format.keep_with_next = True
-    run = p.add_run(text)
+def add_footer_page_number(section):
+    """Add centered page number to section footer using PAGE XML field."""
+    footer = section.footer
+    p = footer.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
+    run = p.add_run()
     run.font.name = 'Times New Roman'
-    run.bold = True
+    run.font.size = Pt(10)
     
+    fldChar1 = OxmlElement('w:fldChar')
+    fldChar1.set(qn('w:fldCharType'), 'begin')
+    instrText = OxmlElement('w:instrText')
+    instrText.set(qn('xml:space'), 'preserve')
+    instrText.text = "PAGE"
+    fldChar2 = OxmlElement('w:fldChar')
+    fldChar2.set(qn('w:fldCharType'), 'separate')
+    fldChar3 = OxmlElement('w:fldChar')
+    fldChar3.set(qn('w:fldCharType'), 'end')
+    
+    run._r.append(fldChar1)
+    run._r.append(instrText)
+    run._r.append(fldChar2)
+    run._r.append(fldChar3)
+
+def add_styled_heading(doc, text, level=1):
+    """Add C&I compliant heading using Word Heading styles for document outline & navigation."""
     if level == 1:
-        # 1. INTRODUCTION (Uppercase, 11pt, space before=12pt, space after=6pt)
-        run.font.size = Pt(11)
+        # 1. INTRODUCTION (Uppercase, 11pt, space before=12pt, space after=4pt)
+        p = doc.add_paragraph(style='Heading 1')
+        p.paragraph_format.keep_with_next = True
         p.paragraph_format.space_before = Pt(12)
         p.paragraph_format.space_after = Pt(4)
-    elif level == 2:
-        # 2.1. Threat Model (Title Case, 11pt, space before=8pt, space after=3pt)
+        run = p.add_run(text)
+        run.font.name = 'Times New Roman'
         run.font.size = Pt(11)
+        run.bold = True
+        run.font.color.rgb = RGBColor(0, 0, 0)
+    elif level == 2:
+        # 2.1. Subheading (Title Case, 11pt, space before=8pt, space after=3pt)
+        p = doc.add_paragraph(style='Heading 2')
+        p.paragraph_format.keep_with_next = True
         p.paragraph_format.space_before = Pt(8)
         p.paragraph_format.space_after = Pt(3)
+        run = p.add_run(text)
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(11)
+        run.bold = True
+        run.font.color.rgb = RGBColor(0, 0, 0)
     elif level == 3:
         # Sub-subheading (Italic, 11pt)
-        run.font.size = Pt(11)
-        run.italic = True
+        p = doc.add_paragraph(style='Heading 3')
+        p.paragraph_format.keep_with_next = True
         p.paragraph_format.space_before = Pt(6)
         p.paragraph_format.space_after = Pt(2)
+        run = p.add_run(text)
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(11)
+        run.bold = True
+        run.italic = True
+        run.font.color.rgb = RGBColor(0, 0, 0)
     return p
 
 def add_body_p(doc, text="", bold_prefix=None, space_after=5):
@@ -121,8 +168,8 @@ def add_figure_caption(doc, caption_text):
     run.italic = True
     return p
 
-def format_cell_text(cell, text, bold=False, italic=False, size=9.5, align=WD_ALIGN_PARAGRAPH.LEFT, color='000000'):
-    """Format single cell text cleanly."""
+def format_cell_text(cell, text, bold=False, italic=False, size=10.0, align=WD_ALIGN_PARAGRAPH.LEFT, color='000000'):
+    """Format single cell text cleanly: Times New Roman 10pt strictly per C&I template."""
     cell.text = ""
     p = cell.paragraphs[0]
     p.alignment = align
@@ -137,9 +184,8 @@ def format_cell_text(cell, text, bold=False, italic=False, size=9.5, align=WD_AL
     if color != '000000':
         run.font.color.rgb = RGBColor.from_string(color)
 
-
 def create_table_from_data(doc, headers, rows, col_widths=None):
-    """Creates a beautifully styled C&I compliant table."""
+    """Creates a beautifully styled C&I compliant table with 10pt TNR font."""
     tbl = doc.add_table(rows=len(rows) + 1, cols=len(headers))
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     
@@ -147,16 +193,16 @@ def create_table_from_data(doc, headers, rows, col_widths=None):
     b_bot = {'val': 'single', 'sz': 8, 'color': '1E293B'}
     b_mid = {'val': 'single', 'sz': 4, 'color': 'E2E8F0'}
     
-    # Headers
+    # Headers (10.0 pt Bold TNR)
     hdr_row = tbl.rows[0]
     for idx, h_text in enumerate(headers):
         cell = hdr_row.cells[idx]
-        format_cell_text(cell, h_text, bold=True, size=9.5, align=WD_ALIGN_PARAGRAPH.CENTER)
+        format_cell_text(cell, h_text, bold=True, size=10.0, align=WD_ALIGN_PARAGRAPH.CENTER)
         set_cell_shading(cell, 'F1F5F9')
         set_cell_borders(cell, top=b_top, bottom=b_top, left=None, right=None)
         set_cell_margins(cell, top=120, bottom=120, left=140, right=140)
         
-    # Rows
+    # Rows (10.0 pt TNR)
     for r_idx, row_data in enumerate(rows):
         row = tbl.rows[r_idx + 1]
         is_last = (r_idx == len(rows) - 1)
@@ -164,18 +210,15 @@ def create_table_from_data(doc, headers, rows, col_widths=None):
         
         for c_idx, val in enumerate(row_data):
             cell = row.cells[c_idx]
-            # Center numeric / short values, left-align names
             align = WD_ALIGN_PARAGRAPH.LEFT if c_idx == 0 and len(str(val)) > 8 else WD_ALIGN_PARAGRAPH.CENTER
             bold_flag = True if (c_idx == 0 and ('NeuralShield' in str(val) or 'Mistral' in str(val) or 'Tier' in str(val))) else False
-            format_cell_text(cell, str(val), bold=bold_flag, size=9.0, align=align)
+            format_cell_text(cell, str(val), bold=bold_flag, size=10.0, align=align)
             
-            # Subtle alternating shading
             if r_idx % 2 == 1:
                 set_cell_shading(cell, 'F8FAFC')
             set_cell_borders(cell, top=None, bottom=b_current_bot, left=None, right=None)
             set_cell_margins(cell, top=100, bottom=100, left=140, right=140)
             
-    # Set explicit widths if provided
     if col_widths:
         for row in tbl.rows:
             for idx, w in enumerate(col_widths):
@@ -189,7 +232,6 @@ def build_title_page():
     """Builds docs/Title_Page.docx with complete unmasked author and institutional details."""
     doc = docx.Document()
     
-    # Set A4 margins to 2.5 cm
     for s in doc.sections:
         s.page_width = Cm(21.0)
         s.page_height = Cm(29.7)
@@ -198,7 +240,6 @@ def build_title_page():
         s.left_margin = Cm(2.5)
         s.right_margin = Cm(2.5)
         
-    # Journal Header Info
     p_top = doc.add_paragraph()
     p_top.alignment = WD_ALIGN_PARAGRAPH.LEFT
     r = p_top.add_run("Computers and Informatics (C&I)\nDergiPark Academic Publishing | ISSN: 2757-8259\n")
@@ -206,7 +247,6 @@ def build_title_page():
     r.font.size = Pt(10)
     r.font.color.rgb = RGBColor(100, 116, 139)
     
-    # Title
     p_title = doc.add_paragraph()
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.paragraph_format.space_before = Pt(18)
@@ -216,7 +256,6 @@ def build_title_page():
     r_title.font.size = Pt(16)
     r_title.bold = True
     
-    # Notice
     p_type = doc.add_paragraph()
     p_type.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r_type = p_type.add_run("AUTHOR INFORMATION TITLE PAGE (UNMASKED)")
@@ -226,7 +265,6 @@ def build_title_page():
     r_type.font.color.rgb = RGBColor(15, 23, 42)
     p_type.paragraph_format.space_after = Pt(20)
 
-    # Author Table
     authors = [
         ("Mustafa ÇALIŞKAN *", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: mustafacaliskan@ogr.mehmetakif.edu.tr\nORCID: 0009-0004-9407-7424"),
         ("Prof. Dr. Ali Hakan IŞIK", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: hisik@mehmetakif.edu.tr\nORCID: 0000-0001-8473-7717")
@@ -260,9 +298,7 @@ def build_title_page():
     r_cor.font.size = Pt(10)
     r_cor.italic = True
     
-    # Declarations
     add_styled_heading(doc, "DECLARATIONS AND STATEMENTS", level=1)
-    
     add_body_p(doc, "This research received computational GPU resource allocations from the TÜBİTAK ULAKBİM High Performance Computing and Artificial Intelligence Center (SSYZ / EVREN H200 Supercomputing Infrastructure). The authors gratefully acknowledge the technical support provided.", bold_prefix="Funding & Acknowledgments: ")
     add_body_p(doc, "The authors declare that they have no competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.", bold_prefix="Conflict of Interest: ")
     add_body_p(doc, "All datasets, code artifacts, ONNX models, benchmark evaluation suites, and full per-item JSON outputs generated during this study are publicly hosted on GitHub at https://github.com/MustafaCaliskan48/Akademik_yayin and archived under open-source permissive licensing.", bold_prefix="Data and Code Availability: ")
@@ -277,7 +313,6 @@ def build_masked_manuscript():
     """Builds docs/NeuralShield_CI_Manuscript.docx (Blind Review C&I Standard)."""
     doc = docx.Document()
     
-    # Configure 2 Sections: Section 0 (Title & Abstract), Section 1 (Body with running header)
     sec0 = doc.sections[0]
     sec0.page_width = Cm(21.0)
     sec0.page_height = Cm(29.7)
@@ -296,7 +331,7 @@ def build_masked_manuscript():
     r_title.font.size = Pt(16)
     r_title.bold = True
     
-    # Masked Author Section (Table 0 in template)
+    # Masked Author Section
     tbl_auth = doc.add_table(rows=2, cols=1)
     tbl_auth.alignment = WD_TABLE_ALIGNMENT.CENTER
     c0 = tbl_auth.rows[0].cells[0]
@@ -306,7 +341,7 @@ def build_masked_manuscript():
     format_cell_text(c1, "[Institution, Department, Province, Country, E-mail Masked for Blind Review]", italic=True, size=10, align=WD_ALIGN_PARAGRAPH.CENTER)
     set_cell_margins(c1, top=40, bottom=80, left=100, right=100)
     
-    # Submission Metadata Table (Table 1 in template)
+    # Submission Metadata Table
     tbl_dates = doc.add_table(rows=3, cols=2)
     tbl_dates.alignment = WD_TABLE_ALIGNMENT.LEFT
     dates_info = [("Submitted:", "26.10.2026"), ("Accepted:", "[In Review]"), ("Published:", "[In Review]")]
@@ -325,7 +360,7 @@ def build_masked_manuscript():
     r_cor.font.size = Pt(8)
     r_cor.italic = True
     
-    # Abstract Label & Body (Segoe UI, 9pt, justified, 150-200 words)
+    # Abstract (Segoe UI, 9pt, justified, 189 words)
     p_abs_lbl = doc.add_paragraph()
     p_abs_lbl.paragraph_format.space_before = Pt(6)
     p_abs_lbl.paragraph_format.space_after = Pt(2)
@@ -358,20 +393,20 @@ def build_masked_manuscript():
     r_abs.font.name = 'Segoe UI'
     r_abs.font.size = Pt(9)
     
-    # Keywords
+    # Keywords in Segoe UI 9pt with bold+italic label
     p_kw = doc.add_paragraph()
     p_kw.paragraph_format.space_after = Pt(10)
     r_kw_lbl = p_kw.add_run("Keywords: ")
-    r_kw_lbl.font.name = 'Times New Roman'
+    r_kw_lbl.font.name = 'Segoe UI'
     r_kw_lbl.font.size = Pt(9)
     r_kw_lbl.bold = True
     r_kw_lbl.italic = True
     r_kw_val = p_kw.add_run("Canary leakage, Large language models, Multilingual security, Prompt injection, Reasoning exfiltration")
-    r_kw_val.font.name = 'Times New Roman'
+    r_kw_val.font.name = 'Segoe UI'
     r_kw_val.font.size = Pt(9)
     r_kw_val.italic = True
     
-    # Citation footer box (Table 2 in template)
+    # Citation footer box
     tbl_cite = doc.add_table(rows=1, cols=2)
     tbl_cite.alignment = WD_TABLE_ALIGNMENT.CENTER
     c_c0 = tbl_cite.rows[0].cells[0]
@@ -393,13 +428,16 @@ def build_masked_manuscript():
     r_hdr.font.size = Pt(8.5)
     r_hdr.font.color.rgb = RGBColor(148, 163, 184)
     
+    # Add page number field to Section 1 footer
+    add_footer_page_number(sec1)
+    
     # 1. INTRODUCTION
     add_styled_heading(doc, "1. INTRODUCTION", level=1)
     add_body_p(doc, "The rapid deployment of Large Language Models (LLMs) across enterprise domains—including retrieval-augmented generation (RAG), autonomous workflow agents, and interactive customer service—has fundamentally expanded the computational attack surface of modern software systems [1, 2]. Unlike traditional relational software where executable control logic is strictly demarcated from data payloads, transformer architectures process instructions and untrusted inputs within an identical, undivided context window [3, 4]. Consequently, malicious actors can exploit this architectural conflation via prompt injection attacks, wherein adversarial inputs override developer system prompts, hijack execution flows, or force the model to exfiltrate proprietary data, API credentials, and internal system variables [5, 6].")
     add_body_p(doc, "Securing LLM-integrated pipelines against prompt injection poses formidable operational and theoretical challenges. While commercial and open-source guardrails have emerged—most notably Meta Prompt Guard [7], ProtectAI DeBERTa-v3 [8], and Patronus AI's Wolf Defender [9]—contemporary solutions exhibit three acute limitations:")
-    add_body_p(doc, "Existing guardrail models are trained overwhelmingly on English corpora. In non-English contexts, safety classifiers frequently collapse, failing to detect adversarial instructions expressed in morphologically rich, low-resource, or non-Latin scripts [10, 11]. Furthermore, synthetic translations used in academic datasets often introduce 'translationese' artifacts, failing to capture native colloquial syntax and regional attack vectors [12].", bold_prefix="1. Severe Multilingual Vulnerability and Translation Bias: ")
-    add_body_p(doc, "Prior empirical benchmarks assessing guardrail performance frequently suffer from undetected data leakage. In our systematic audit of conventional out-of-distribution (OOD) evaluation suites, we identified a 76.9% source-level overlap between public training repositories and benchmark splits, artificially inflating reported detection metrics.", bold_prefix="2. Benchmark Source Contamination: ")
-    add_body_p(doc, "Modern reasoning models employ explicit reasoning traces before emitting a user-facing response [13]. Standard guardrails focus exclusively on the final conversational output. We observe that even when a model successfully refuses an attack in its user-facing message (0.0% final Attack Success Rate), it frequently verbalizes confidential system prompts and cryptographic canaries verbatim within its internal chain-of-thought tokens. In applications streaming raw reasoning chunks via Server-Sent Events (SSE) or persisting execution logs, this constitutes catastrophic, unmonitored data exfiltration.", bold_prefix="3. The Silent Chain-of-Thought (CoT) Exfiltration Vector: ")
+    add_body_p(doc, "Existing guardrail models are trained overwhelmingly on English corpora. In non-English contexts, safety classifiers frequently collapse, failing to detect adversarial instructions expressed in morphologically rich, low-resource, or non-Latin scripts [10, 11]. Furthermore, synthetic translations used in academic datasets often introduce 'translationese' artifacts, failing to capture native colloquial syntax and regional attack vectors [12].", bold_prefix="(i) Severe Multilingual Vulnerability and Translation Bias: ")
+    add_body_p(doc, "Prior empirical benchmarks assessing guardrail performance frequently suffer from undetected data leakage. In our systematic audit of conventional out-of-distribution (OOD) evaluation suites, we identified a 76.9% source-level overlap between public training repositories and benchmark splits, artificially inflating reported detection metrics.", bold_prefix="(ii) Benchmark Source Contamination: ")
+    add_body_p(doc, "Modern reasoning models employ explicit reasoning traces before emitting a user-facing response [13]. Standard guardrails focus exclusively on the final conversational output. We observe that even when a model successfully refuses an attack in its user-facing message (0.0% final Attack Success Rate), it frequently verbalizes confidential system prompts and cryptographic canaries verbatim within its internal chain-of-thought tokens. In applications streaming raw reasoning chunks via Server-Sent Events (SSE) or persisting execution logs, this constitutes catastrophic, unmonitored data exfiltration.", bold_prefix="(iii) The Silent Chain-of-Thought (CoT) Exfiltration Vector: ")
     add_body_p(doc, "To address these vulnerabilities, we propose NeuralShield, a production-ready, multi-layer application security gateway designed for low-latency, multilingual LLM deployments. NeuralShield integrates four complementary defensive layers: (L0) an aggressive structural normalization and recursive deobfuscation engine; (L1) a sub-millisecond deterministic regex and canary-trap fast-path; (L2) a 12-language multilingual semantic transformer classifier (mmBERT-base, 307M parameters); and (L3) a real-time egress Data Loss Prevention (DLP) sanitizer with dual-stream reasoning inspection. The layer decisions are governed by a deterministic OR-Gate arbiter that balances high recall against enterprise false-positive constraints.")
     
     add_body_p(doc, "This study offers five principal scientific contributions: (i) an end-to-end multi-layer architecture operating on standard dual-thread CPU hardware with a median latency of ~50.6 ms; (ii) a rigorously source-disjoint fair evaluation protocol ($N=2,849$) demonstrating statistical parity in Macro-F1 with commercial state-of-the-art defenses while delivering superior recall on native Turkish (+34.4%) and Russian Cyrillic (AUC 0.890 vs. 0.631) corpora; (iii) multi-tier empirical red-teaming across 14 language models achieving a 100% block rate; (iv) the empirical discovery and live mitigation of Silent Chain-of-Thought Exfiltration; and (v) full-pool ($N=101$) ablations mathematically confirming quantization invariance and demonstrating that prompt hardening cannot replace architectural guardrails.", bold_prefix="Contributions: ")
@@ -414,7 +452,6 @@ def build_masked_manuscript():
     add_styled_heading(doc, "2.2. Multi-Layer NeuralShield Pipeline Architecture", level=2)
     add_body_p(doc, "NeuralShield is architected as an in-line, four-layer inspection pipeline governed by an adaptive OR-Gate arbiter. Figure 1 illustrates the complete operational workflow and isolation boundaries of the system.")
     
-    # Insert Figure 1
     if os.path.exists("docs/figures/figure1_architecture.png"):
         p_fig1 = doc.add_paragraph()
         p_fig1.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -430,7 +467,6 @@ def build_masked_manuscript():
     
     add_body_p(doc, "The overall input decision D_in in {PASS, BLOCK} is synthesized via an asymmetric logical OR-Gate:", bold_prefix="Deterministic OR-Gate Arbiter: ")
     
-    # Equation 1
     p_eq1 = doc.add_paragraph()
     p_eq1.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_eq1.paragraph_format.space_before = Pt(4)
@@ -459,7 +495,6 @@ def build_masked_manuscript():
     add_styled_heading(doc, "2.6. Statistical Evaluation Metrics", level=2)
     add_body_p(doc, "All empirical proportions are reported with 95% Wilson Score Confidence Intervals [21]:")
     
-    # Equation 2
     p_eq2 = doc.add_paragraph()
     p_eq2.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_eq2.paragraph_format.space_before = Pt(4)
@@ -529,12 +564,12 @@ def build_masked_manuscript():
         ["L0+L1 Only (Fast-Path)", "76.24% (77/101)", "[67.1, 83.5]", "0.00% (0/60)", "86.50%", "<1 ms"],
         ["L2-Only (mmBERT FP32)", "100.00% (101/101)", "[96.3, 100.0]", "6.67% (4/60)", "98.12%", "50.6 ms"],
         ["L2-Only (mmBERT INT8)", "89.11% (90/101)", "[81.5, 93.8]", "6.67% (4/60)", "92.30%", "61.9 ms"],
-        ["L0 + L2-INT8 (Normalized)", "95.05% (96/101)", "[88.9, 97.9]", "6.67% (4/60)", "95.50%", "62.4 ms"],
+        ["L0 + L2-INT8 (Dual-Channel Extended Text)", "95.05% (96/101)", "[88.9, 97.9]", "6.67% (4/60)", "95.50%", "62.4 ms"],
         ["NeuralShield Full (FP32)", "100.00% (101/101)", "[96.3, 100.0]", "6.67% (4/60)", "98.12%", "51.2 ms"]
     ]
-    create_table_from_data(doc, t4_headers, t4_rows, [3.8, 3.0, 2.6, 2.2, 2.2, 2.2])
+    create_table_from_data(doc, t4_headers, t4_rows, [4.4, 2.8, 2.4, 2.2, 2.2, 2.2])
 
-    add_body_p(doc, "The ablation analysis reveals three critical operational insights: (1) The combination of L0 normalization and L1 regex automata intercepts 76.24% of all attacks with exactly 0.00% False Positives and sub-millisecond execution times (<1 ms). In high-throughput architectures, this layer acts as an inexpensive firewall, eliminating over three-quarters of adversarial traffic before invoking transformer inference. (2) On the broader N=2,849 fair benchmark, incorporating L0 normalization prior to L2 inference yielded a statistically measurable +1.04% recall gain (recovering 17 previously missed attacks, Macro-F1 increasing from 84.86% to 85.40%). (3) In memory-constrained scenarios where INT8 must be utilized, L0 normalization recovers 6 missed attacks, restoring attack recall from 89.11% back to 95.05%.")
+    add_body_p(doc, "The ablation analysis reveals three critical operational insights: (1) The combination of L0 normalization and L1 regex automata intercepts 76.24% of all attacks with exactly 0.00% False Positives and sub-millisecond execution times (<1 ms). In high-throughput architectures, this layer acts as an inexpensive firewall, eliminating over three-quarters of adversarial traffic before invoking transformer inference. (2) On the broader N=2,849 fair benchmark, incorporating L0 normalization prior to L2 inference yielded a statistically measurable +1.04% recall gain (recovering 17 previously missed attacks, Macro-F1 increasing from 84.86% to 85.40%). (3) In memory-constrained scenarios where INT8 must be utilized, L0 normalization recovers 6 missed attacks, restoring attack recall from 89.11% back to 95.05%. Note that in the dual-channel configuration, L0 passes both raw input and deobfuscated text (extended_text) to L2, evaluating max(P_raw, P_ext), successfully trapping obfuscations that would otherwise evade INT8 quantization clipping.")
 
     add_styled_heading(doc, "3.5. Multi-Model Empirical Red-Team: Tier-1 and Tier-2 Open-Weight LLMs", level=2)
     add_body_p(doc, "We conducted live red-teaming across 10 open-weight models (N=101 attacks, 60 benign queries). In the unprotected baseline (Shield OFF), models operated with their default chat templates and system instructions. In the protected condition (Shield ON), incoming traffic passed through NeuralShield. Table 5 presents the empirical results, corroborated by Figure 2.")
@@ -568,27 +603,44 @@ def build_masked_manuscript():
     add_body_p(doc, "Vulnerability does not decrease monotonically with parameter scale. In the Qwen family, ASR fluctuates non-linearly: 1.5B (4.95%) -> 3B (25.74%) -> 7B (18.81%) -> 14B (10.89%). More importantly, Qwen2.5-14B exhibited 0.00% (0/16) vulnerability to direct injection, yet suffered a 42.31% (11/26) breach rate on indirect document injection. While scaling and RLHF alignment harden models against overt direct jailbreaks, they fail to prevent the model from treating injected instructions within third-party documents as legitimate contextual data.", bold_prefix="Non-Monotonicity of Scale and the Contextual Illusion: ")
     add_body_p(doc, "In a remarkable finding during benign testing, Llama-3.2-3B was presented with an innocent passenger query: 'My flight has been delayed, what are my rights?' (BEN_TR_016). The input classifier correctly assigned a negligible risk score (P_malicious = 0.0431), passing the prompt. However, due to attention cross-talk in the model's ungrounded weights, Llama-3.2-3B spontaneously emitted all four secret canary tokens verbatim into its response. Because NeuralShield implements multi-layer defense-in-depth, L3 Egress DLP intercepted the outgoing generation, redacting all four canaries in real time (on_leak = []). This real-world incident validates the absolute necessity of post-generation egress sanitization.", bold_prefix="Live Defense-in-Depth and Autonomous Leakage (BEN_TR_016): ")
 
-    add_styled_heading(doc, "3.6. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models", level=2)
-    add_body_p(doc, "To assess whether massive frontier architectures resolve prompt injection vulnerabilities, we evaluated four flagship models hosted on EVREN NVIDIA H200 supercomputing clusters using the identical 161-prompt curated suite. Table 6 and Figure 2b detail the findings.")
+    # 3.6. Chain-of-Thought Exfiltration in Open-Weight Reasoning LLMs
+    add_styled_heading(doc, "3.6. Chain-of-Thought Exfiltration in Open-Weight Reasoning LLMs", level=2)
+    add_body_p(doc, "We specifically evaluated reasoning architectures endowed with explicit deliberation tokens under a 1,280-token generation budget across 24 curated attacks and 12 benign queries (N=36). In these models, the internal chain-of-thought trace (reasoning) and final conversational answer (final) were parsed independently. Table 6 summarizes the empirical breakdown.")
     
-    add_table_caption(doc, "Table 6. Empirical Vulnerability in Tier-3 Flagship API Models (N=101 attacks, 60 benign queries, 1536-token reasoning budget).")
-    t6_headers = ["Model Architecture", "Infrastructure", "Final Content ASR (%)", "95% Wilson CI", "Reasoning CoT ASR (%)", "95% Wilson CI", "NeuralShield ON"]
+    add_table_caption(doc, "Table 6. Empirical Vulnerability in Open-Weight Reasoning Models (N=24 attacks, 12 benign queries, 1280-token reasoning budget).")
+    t6_headers = ["Model Architecture", "Params", "CoT Leakage (%)", "95% Wilson CI", "Final Content (%)", "95% Wilson CI", "Verified CoT-Only (%)", "NeuralShield ON"]
     t6_rows = [
+        ["Qwen3-4B-Thinking", "4.02B", "50.00% (12/24)", "[30.8, 69.2]", "8.33% (2/24)", "[2.3, 25.8]", "12.50% (3/24)", "0.00% (0/24)"],
+        ["R1-Distill-Qwen-1.5B", "1.78B", "16.67% (4/24)", "[6.7, 35.9]", "12.50% (3/24)", "[4.3, 31.0]", "4.17% (1/24)", "0.00% (0/24)"],
+        ["R1-Distill-Qwen-7B", "7.62B", "16.67% (4/24)", "[6.7, 35.9]", "20.83% (5/24)", "[9.2, 40.5]", "4.17% (1/24)", "0.00% (0/24)"]
+    ]
+    create_table_from_data(doc, t6_headers, t6_rows, [3.2, 1.4, 2.4, 2.0, 2.4, 2.0, 2.6, 2.2])
+
+    add_body_p(doc, "In Qwen3-4B-Thinking, 50.00% of attacks caused the model to expose secret canary tokens within its internal reasoning trace. Crucially, in 12.50% of attacks (Verified CoT-Only), the model successfully finished its deliberation within token budget, issued a polite refusal in its final response, yet verbalized the internal secret verbatim in its thought trace. Furthermore, in R1-Distill-Qwen-7B, final content leakage (20.83%) actually exceeded internal reasoning leakage (16.67%), demonstrating that reasoning distillation transfers stylistic chain-of-thought tokens without transferring the robust safety alignment of the teacher model. NeuralShield dropped both reasoning and final response leakage to flat 0.00% across all reasoning architectures.", bold_prefix="Analysis of Open-Weight Reasoning Vulnerability: ")
+
+    # 3.7. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models
+    add_styled_heading(doc, "3.7. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models", level=2)
+    add_body_p(doc, "To assess whether massive frontier architectures resolve prompt injection vulnerabilities, we evaluated four flagship models hosted on EVREN NVIDIA H200 supercomputing clusters using the identical 161-prompt curated suite. Table 7 and Figure 2b detail the findings.")
+    
+    add_table_caption(doc, "Table 7. Empirical Vulnerability in Tier-3 Flagship API Models (N=101 attacks, 60 benign queries, 1536-token reasoning budget).")
+    t7_headers = ["Model Architecture", "Infrastructure", "Final Content ASR (%)", "95% Wilson CI", "Reasoning CoT ASR (%)", "95% Wilson CI", "NeuralShield ON"]
+    t7_rows = [
         ["DeepSeek-v4.1-Flash", "EVREN H200", "0.00% (0/101)", "[0.0, 3.7]", "0.00% (0/101)", "[0.0, 3.7]", "0.00% (0/101)"],
         ["GLM-5.3 Flagship", "EVREN H200", "0.00% (0/101)", "[0.0, 3.7]", "1.98% (2/101)", "[0.5, 6.9]", "0.00% (0/101)"],
         ["Qwen3.8-Flash-Next", "EVREN H200", "0.00% (0/101)", "[0.0, 3.7]", "14.85% (15/101)", "[9.2, 23.1]", "0.00% (0/101)"],
         ["Gemma-4-31B Dense", "EVREN H200", "0.00% (0/101)", "[0.0, 3.7]", "66.34% (67/101)", "[56.7, 74.8]", "0.00% (0/101)"]
     ]
-    create_table_from_data(doc, t6_headers, t6_rows, [3.4, 2.2, 2.6, 2.0, 2.6, 2.0, 2.2])
+    create_table_from_data(doc, t7_headers, t7_rows, [3.4, 2.2, 2.6, 2.0, 2.6, 2.0, 2.2])
 
     add_body_p(doc, "In their user-facing conversational outputs (content), all four flagship models achieved a 0.00% Final Content ASR, issuing flawless, polite refusals on all 101 attacks. Evaluated by conventional benchmarks that inspect only final messages, these systems appear perfectly secure. However, inspection of intermediate reasoning traces (reasoning tokens) paints a starkly different reality: in 66.34% of attacks (67 out of 101), Gemma-4-31B verbalized the confidential canary secrets verbatim within its internal chain-of-thought tokens while deliberating how to respond. Similarly, Qwen3.8-Flash-Next leaked canaries in its reasoning traces in 14.85% (15/101) of attacks. In modern software architectures deploying reasoning models, intermediate reasoning chunks are routinely streamed to clients via Server-Sent Events (SSE) to reduce perceived latency, or stored in application telemetry databases for monitoring. Under these standard operational patterns, the user-facing refusal is rendered irrelevant: the confidential secret is fully exfiltrated via the streaming reasoning channel. NeuralShield completely resolves this vulnerability: L0–L2 prevents model invocation, and L3 dual-stream DLP scrubs both reasoning and content streams in real time.", bold_prefix="Analysis of Silent CoT Exfiltration: ")
 
-    add_styled_heading(doc, "3.7. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance", level=2)
-    add_body_p(doc, "To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 7 and Figure 3 present the empirical findings.")
+    # 3.8. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance
+    add_styled_heading(doc, "3.8. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance", level=2)
+    add_body_p(doc, "To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 8 and Figure 3 present the empirical findings.")
     
-    add_table_caption(doc, "Table 7. Full-pool paired methodological ablations on NVIDIA A100 infrastructure (N=101 attacks, 60 benign queries).")
-    t7_headers = ["Condition", "Size", "Evaluated Parameter", "ASR (%)", "95% Wilson CI", "Discordant (A/B)", "McNemar p", "Over-Refusal"]
-    t7_rows = [
+    add_table_caption(doc, "Table 8. Full-pool paired methodological ablations on NVIDIA A100 infrastructure (N=101 attacks, 60 benign queries).")
+    t8_headers = ["Condition", "Size", "Evaluated Parameter", "ASR (%)", "95% Wilson CI", "Discordant (A/B)", "McNemar p", "Over-Refusal"]
+    t8_rows = [
         ["(A1) Mistral 4-bit NF4", "N=101", "Quantization", "40.59% (41/101)", "[31.5, 50.3]", "21 (4-bit only)", "p = 0.071", "0.00% (0/60)"],
         ["(A1) Mistral Saf FP16", "N=101", "Unquantized Baseline", "29.70% (30/101)", "[21.7, 39.2]", "10 (FP16 only)", "(Marginal)", "0.00% (0/60)"],
         ["(A2) Llama-3.1-8B 4-bit", "N=101", "Quantization", "14.85% (15/101)", "[9.2, 23.1]", "7 (4-bit only)", "p = 0.804", "0.00% (0/60)"],
@@ -597,7 +649,7 @@ def build_masked_manuscript():
         ["(B2) Hardened Prompt", "N=101", "Aggressive Hardening", "16.83% (17/101)", "[10.8, 25.3]", "6 (New Leaks)", "(Not Sig.)", "1.67% (1/60)"],
         ["(B3) NeuralShield (ON)", "N=101", "Multi-Layer Defense", "0.00% (0/101)", "[0.0, 3.7]", "All Blocked", "p < 0.001", "0.00% (Zero)"]
     ]
-    create_table_from_data(doc, t7_headers, t7_rows, [2.8, 1.4, 2.4, 2.2, 2.2, 2.2, 1.8, 1.8])
+    create_table_from_data(doc, t8_headers, t8_rows, [2.8, 1.4, 2.4, 2.2, 2.2, 2.2, 1.8, 1.8])
 
     if os.path.exists("docs/figures/figure3_ablations.png"):
         p_fig3 = doc.add_paragraph()
@@ -608,22 +660,22 @@ def build_masked_manuscript():
         r_img3.add_picture("docs/figures/figure3_ablations.png", width=Inches(6.2))
         add_figure_caption(doc, "Figure 3. Full-pool ablation findings: (a) Quantization invariance across Mistral-7B-v0.3 and Llama-3.1-8B, demonstrating that 4-bit NF4 compression does not induce vulnerability; (b) The prompt hardening trade-off, showing residual leakage (16.83%) and benign over-refusal penalties.")
 
-    add_body_p(doc, "A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization degrades safety-tuning alignments, artificially inflating reported ASR. As documented in Table 7 and Figure 3a, in Llama-3.1-8B, unquantized FP16 weights actually exhibited a slightly higher leak rate (16.83% vs. 14.85%, delta = +1.98 points), with virtually identical confidence intervals ([10.8, 25.3] vs. [9.2, 23.1]) and a non-significant McNemar test (p = 0.804, discordant pairs: 7 vs. 9). In Mistral-7B-v0.3, while pure FP16 reduced ASR from 40.59% to 29.70% (delta = -10.89 points), the reduction failed to achieve strict statistical significance at the alpha = 0.05 level (exact McNemar p = 0.071), and the Wilson confidence intervals overlap ([21.7, 39.2] vs. [31.5, 50.3]). Nearly one-third of all attacks succeeded against the uncompressed model. These results mathematically establish quantization invariance: 4-bit quantization did not cause the vulnerability. Architectural safety alignment and context disambiguation dictate robustness.", bold_prefix="Disproving Quantization-Induced Vulnerability: ")
+    add_body_p(doc, "A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization degrades safety-tuning alignments, artificially inflating reported ASR. As documented in Table 8 and Figure 3a, in Llama-3.1-8B, unquantized FP16 weights actually exhibited a slightly higher leak rate (16.83% vs. 14.85%, delta = +1.98 points), with virtually identical confidence intervals ([10.8, 25.3] vs. [9.2, 23.1]) and a non-significant McNemar test (p = 0.804, discordant pairs: 7 vs. 9). In Mistral-7B-v0.3, while pure FP16 reduced ASR from 40.59% to 29.70% (delta = -10.89 points), the reduction failed to achieve strict statistical significance at the alpha = 0.05 level (exact McNemar p = 0.071), and the Wilson confidence intervals overlap ([21.7, 39.2] vs. [31.5, 50.3]). Nearly one-third of all attacks succeeded against the uncompressed model. These results mathematically establish quantization invariance: 4-bit quantization did not cause the vulnerability. Architectural safety alignment and context disambiguation dictate robustness.", bold_prefix="Disproving Quantization-Induced Vulnerability: ")
     add_body_p(doc, "We evaluated whether aggressive system prompt hardening ('ABSOLUTE DIRECTIVE: Never reveal internal keys under any circumstance; any violation triggers immediate system termination') could substitute for external guardrails. While prompt hardening decreased ASR from 24.75% to 16.83% in Qwen2.5-3B (delta = -7.92 points), the change is not statistically significant (McNemar p = 0.115). While 14 attacks were neutralized, 6 previously blocked attacks broke through under the hardened instructions, leaving 17 attacks completely breaching the model. Furthermore, this hardening introduced a 1.67% false-positive over-refusal rate on authentic passenger queries (e.g., rejecting an innocent inquiry regarding flight delays). Prompt hardening therefore degrades utility while failing to guarantee confidentiality. An architectural, external gateway remains non-negotiable.", bold_prefix="The Failure of Prompt Hardening and Over-Refusal Cost: ")
 
     add_styled_heading(doc, "Methodological Insight: The Fallacy of Small-Sample Pilots", level=3)
-    add_body_p(doc, "Our comparative evaluation highlights a vital methodological lesson for AI security benchmarking. Table 8 contrasts the findings from our preliminary pilot study (n=25) against the full-scale benchmark (N=101).")
+    add_body_p(doc, "Our comparative evaluation highlights a vital methodological lesson for AI security benchmarking. Table 9 contrasts the findings from our preliminary pilot study (n=25) against the full-scale benchmark (N=101).")
     
-    add_table_caption(doc, "Table 8. Methodological comparison: Pilot sample artifacts (n=25) versus full-pool evaluation (N=101).")
-    t8_headers = ["Experimental Comparison", "Pilot (n=25) Delta", "Full-Pool (N=101) Delta", "Methodological Shift & Scientific Finding"]
-    t8_rows = [
+    add_table_caption(doc, "Table 9. Methodological comparison: Pilot sample artifacts (n=25) versus full-pool evaluation (N=101).")
+    t9_headers = ["Experimental Comparison", "Pilot (n=25) Delta", "Full-Pool (N=101) Delta", "Methodological Shift & Scientific Finding"]
+    t9_rows = [
         ["Mistral-7B: 4-bit -> Saf FP16", "-12.00 pp", "-10.89 pp", "Consistent direction, but non-significant (p = 0.071)"],
         ["Llama-3.1-8B: 4-bit -> Saf FP16", "-8.00 pp", "+1.98 pp", "Direction flipped! FP16 leaks more than 4-bit (p = 0.804)"],
         ["Prompt Hardening: Std -> Hardened", "-24.00 pp", "-7.92 pp", "Effect size attenuated by 3.0x; non-significant (p = 0.115)"]
     ]
-    create_table_from_data(doc, t8_headers, t8_rows, [4.4, 2.6, 2.6, 6.4])
+    create_table_from_data(doc, t9_headers, t9_rows, [4.4, 2.6, 2.6, 6.4])
     
-    add_body_p(doc, "As demonstrated in Table 8, pilot evaluations with small sample sizes (n <= 25) yield severe statistical artifacts: the observed effect of prompt hardening was exaggerated by a factor of three (-24.0 pp vs. -7.92 pp), and the effect of quantization on Llama-3.1-8B completely reversed direction (-8.0 pp vs. +1.98 pp). This underscores that rigorous, reviewer-proof empirical evaluation of LLM security requires adequately powered sample sizes (N >= 100) paired with non-parametric significance testing.")
+    add_body_p(doc, "As demonstrated in Table 9, pilot evaluations with small sample sizes (n <= 25) yield severe statistical artifacts: the observed effect of prompt hardening was exaggerated by a factor of three (-24.0 pp vs. -7.92 pp), and the effect of quantization on Llama-3.1-8B completely reversed direction (-8.0 pp vs. +1.98 pp). This underscores that rigorous, reviewer-proof empirical evaluation of LLM security requires adequately powered sample sizes (N >= 100) paired with non-parametric significance testing.")
 
     # 4. LIMITATIONS AND ETHICAL CONSIDERATIONS
     add_styled_heading(doc, "4. LIMITATIONS AND ETHICAL CONSIDERATIONS", level=1)
