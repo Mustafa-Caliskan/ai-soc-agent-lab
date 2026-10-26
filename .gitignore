@@ -48,6 +48,13 @@ poisoned_*.txt
 # Intermediate benchmark build artifacts (large; regenerate via scripts/)
 data/_appsec_pool_*.json
 
+# Heavy Checkpoints and Bundles (>100MB)
+neuralshield_v6_checkpoint_full/
+neuralshield_v6_paper_pack/
+backend/models/neuralshield_v6_mmbert/
+scratch_*.txt
+
+
 # Operating System & Editor Files
 .DS_Store
 Thumbs.db
