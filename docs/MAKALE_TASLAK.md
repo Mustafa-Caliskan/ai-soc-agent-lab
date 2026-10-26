@@ -194,6 +194,23 @@ Genel benchmark, saldırı **mekanizmasını** ayırt etmez. Bu nedenle 4 katman
 
 > **Kalibrasyon açığı:** FP %6.7 (4/60) tamamen L2 kaynaklıdır ve kısa/alan-dışı benign sorgularda yoğunlaşır ("SkyLounge nerede?" p=0.91; "Uçuş bilgisi ekranları nerede?" p=0.99; "Check-in kontuarı nerede?" p=0.85; "What is the Wi-Fi password?" p=0.99). L1 bu örneklerde tetiklenmez. Test seti bu bulgudan sonra **ayarlanmamıştır**.
 
+### 6.9 Yerel LLM Zafiyeti ve NeuralShield Kalkan Savunması (Ampirik Red-Team)
+
+Projenin temel tezi şudur: Açık kaynak ve yerel LLM'ler sistem promptuna gömülü sırları (parola, PIN, API anahtarı) prompt injection ile doğrudan sızdırır; NeuralShield 4 katmanlı geçidi bu sızıntıyı keser. 5 farklı açık ağırlıklı model üzerinde 101 küratörlü saldırı ve 60 benign sorgu ile (greedy decoding, deterministik) ampirik olarak test edilmiştir (`data/redteam/redteam_v6_2_summary.json`):
+
+| Model | Parametre | Kalkan OFF (ASR %) | Wilson %95 GA | L3-only (%) | Kalkan ON (ASR %) | Wilson %95 GA | Blok Oranı | FP (%) |
+|---|---|---|---|---|---|---|---|---|
+| **Qwen2.5-3B** | 3.09B | **25.7%** (26/101) | [18.2, 35.0] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Llama-3.2-3B** | 3.21B | **13.9%** (14/101) | [8.4, 21.9] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Gemma-2-2B** | 2.61B | **8.9%** (9/101) | [4.8, 16.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Phi-3-mini** | 3.82B | **7.9%** (8/101) | [4.1, 14.9] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Qwen2.5-1.5B** | 1.54B | **5.0%** (5/101) | [2.1, 11.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+
+- **L3-only sütunu:** Modelin kalkan kapalıyken ürettiği *gerçek sızıntı metinleri* doğrudan L3 çıktı DLP'sinden geçirildiğinde sızıntı istisnasız **%0.0'a** inmiştir (tüm 26/14/9/8/5 sızıntı başarıyla sansürlenmiştir). Bu, "DLP yalnızca sentetik şablonlarda çalışıyor" eleştirisini tamamen ortadan kaldırır.
+- **Sıcaklık kontrolü ($n=20$):** Greedy (%35.0) vs $T=0.7$ (%35.0) sızıntı oranı farkı **0.0 puan** bulunmuştur; açgözlü aramanın deterministik temsiliyeti doğrulanmıştır.
+- **Etkili Alt Küme ($n=35$):** 101 saldırının 35'i (%34.7) en az bir modelde sızıntı yaratmıştır. Bu etkili kümede `Qwen2.5-3B` zafiyeti **%74.3**, `Llama-3.2-3B` zafiyeti **%40.0** seviyesindedir; kalkan bunu **%0.0'a** indirmiştir (-74.3 / -40.0 puan risk düşüşü).
+- **Saldırı sınıfı zafiyet profili:** En savunmasız alan doğrudan enjeksiyon (`direct`: Qwen %50.0, Llama %25.0) ve gizli belge enjeksiyonudur (`indirect`: Qwen %42.3, Llama %26.9).
+
 ---
 
 ## 7. Analiz
@@ -229,7 +246,14 @@ Ayrı bir deneysel çalışmada (EVREN H200), modellerin **`reasoning`/CoT alan�
 **Savunma çıkarımı:** İngress'te (NeuralShield L0–L4) istem engellendiğinde model **çağrılmadığı** için CoT sızıntısı **%0'a** iner; yani savunma modelin kendi çıktı filtresine bırakılamaz.
 **Sorumlu bildirim:** Bulgu EVREN/SSYZ ekibine iletilmiş; ekip bulguyu **kabul etmiş**, **dokümantasyon güvenlik notu** ve **model geliştiricisine eskalasyon** başlatmış, katkı için **5.000 CR** vermiştir. *(Ham istek/yanıt kanıtı ayrı deney klasöründedir; yayında anonimleştirilecektir.)*
 
-> **Yerel model doğrulaması (protokol, çalıştırma bekliyor):** Aynı ölçüm zayıf/açık ağırlıklı modeller için de tanımlanmıştır (`notebooks/RedTeam_Local_Models_v6_2.ipynb`, Hücre 5): Qwen3-4B-Thinking ve R1-Distill-Qwen-1.5B üzerinde `reasoning` ve `final` **ayrı ayrı** taranır; `leak_in_cot_only` metriği ("son yanıt temiz, düşünürken sızdırdı") ayrıca raporlanır. Bu, çıktı filtresi uygulayan sistemlerde **görünmez sızıntı kanalını** ölçer.
+> **Yerel model doğrulaması (ampirik sonuç):** Aynı ölçüm açık ağırlıklı muhakeme modellerinde de doğrulanmıştır (`data/redteam/redteam_v6_2_reasoning_full.json`):
+
+| Model | n (saldırı) | CoT Sızıntısı (%) | Final Yanıt Sızıntısı (%) | SADECE CoT Sızıntısı (%) | Kalkan ON CoT Sızıntısı (%) |
+|---|---|---|---|---|---|
+| **`Qwen3-4B-Thinking`** | 24 | **%50.0** (12/24) | %8.3 (2/24) | **%45.8** (11/24) | **%0.0** (0/24) |
+| **`R1-Distill-Qwen-1.5B`** | 24 | **%16.7** (4/24) | %12.5 (3/24) | **%4.2** (1/24) | **%0.0** (0/24) |
+
+> **Kritik Güvenlik Bulgusu ("SADECE CoT" — Görünmez Kanal):** `Qwen3-4B-Thinking`, saldırıların **%45.8'inde** (11/24) son yanıtında sırrı başarıyla sansürlemiş (kullanıcıya temiz yanıt vermiş), ancak **muhakeme (düşünme) akışında sırrı açık metin olarak dökmüştür**. Çıktı filtresi uygulayan sistemlerde bu durum görünmez bir veri sızıntısı kanalı oluşturur. NeuralShield ingress'te (L0–L2) isteği düşürdüğü için model hiç çağrılmaz ve CoT sızıntısı **%0.0** olur.
 
 ### 7.6 Savunma Derinliği: L3 Çıktı DLP'nin Tek Başına Gücü
 

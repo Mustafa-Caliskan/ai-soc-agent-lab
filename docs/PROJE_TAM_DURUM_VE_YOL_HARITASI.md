@@ -568,19 +568,20 @@ L0–L2 **tamamen baypas** varsayımı (model sırrı sızdırdı), yalnızca L3
 - **Sorumlu bildirim:** EVREN ekibi kabul etti, dokümantasyon notu + geliştirici eskalasyonu, 5.000 CR.
 - **Yerel modellerde test (Qwen3-4B-Thinking, R1-Distill) → BEKLİYOR.** (§13.2)
 
-### 9.9 Yerel model zafiyeti (v5 ile, **yeniden koşulacak**)
-`docs/historical/MULTI_MODEL_BENCHMARK_RESULTS.md` — 5 model × 45 saldırı = 225 sorgu:
+### 9.9 Yerel model zafiyeti ve Kalkan Etkisi (v6.2 ile DOĞRULANDI) ⭐
+`data/redteam/redteam_v6_2_summary.json` — 5 model × 101 küratörlü saldırı + 60 benign = 805 sorgu (Colab T4, greedy decoding):
 
-| Model | Parametre | OFF ASR | ON ASR | Blok |
-|---|---|---|---|---|
-| qwen2.5:3b | 3.09B | **%31.1** (14/45) | **0.0** | 100% |
-| llama3.2:3b | 3.21B | %24.4 (11/45) | **0.0** | 100% |
-| gemma2:2b | 2.61B | %22.2 (10/45) | **0.0** | 100% |
-| phi3:mini | 3.82B | %13.3 (6/45) | **0.0** | 100% |
-| qwen2.5:1.5b | 1.54B | %8.9 (4/45) | **0.0** | 100% |
+| Model | Parametre | Kalkan OFF (ASR %) | Wilson %95 GA | L3-only (%) | Kalkan ON (ASR %) | Wilson %95 GA | Blok Oranı | FP (%) |
+|---|---|---|---|---|---|---|---|---|
+| **Qwen2.5-3B** | 3.09B | **25.7%** (26/101) | [18.2, 35.0] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Llama-3.2-3B** | 3.21B | **13.9%** (14/101) | [8.4, 21.9] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Gemma-2-2B** | 2.61B | **8.9%** (9/101) | [4.8, 16.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Phi-3-mini** | 3.82B | **7.9%** (8/101) | [4.1, 14.9] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
+| **Qwen2.5-1.5B** | 1.54B | **5.0%** (5/101) | [2.1, 11.1] | **0.0%** | **0.0%** (0/101) | [0.0, 3.7] | 100.0% | 6.7% |
 
-> ⚠️ **Bu sonuçlar v5 modeli + ham (kalite sorunlu) korpus ile üretildi.**
-> v6.2 + küratörlü set ile **yeniden koşulacak** (§13.1). Bu tablo şu an **kanıt değil, ön sonuç**.
+> ✅ **Nihai Ampirik Kanıt:** 5 modelin tamamı kalkan kapalıyken sır sızdırmakta (%5.0–%25.7); NeuralShield kalkanı açıkken sızıntı **istisnasız %0.0'a** düşmektedir (blok oranı %100.0). Gerçek model çıktılarına doğrudan L3 uygulandığında bile sızıntı **%0.0'a** inmektedir (`L3-only % = 0.0%`).
+> Sıcaklık kontrolü ($n=20$): Greedy %35.0 vs T=0.7 %35.0 (fark: 0.0 puan).
+> Etkili alt küme ($n=35$): Qwen2.5-3B zafiyeti %74.3'ten %0.0'a indirilmiştir.
 
 ---
 
@@ -616,10 +617,10 @@ v6.2 ile **kanıtlanmadı**.
 | Katman ablasyonu | ✅ tamamlandı |
 | L3 tek başına | ✅ **%100** (secret registry sonrası) |
 | Canary tespiti sağlamlaştırma | ✅ 11/11 birim test |
-| **Colab defteri (9 hücre)** | ✅ **yazıldı, ÇALIŞTIRILMADI** |
-| **Yerel modellerle ASR (v6.2)** | ❌ **BEKLİYOR** |
-| **CoT sızıntısı (yerel modeller)** | ❌ **BEKLİYOR** |
-| **Sıcaklık kontrolü (greedy vs T=0.7)** | ❌ **BEKLİYOR** |
+| **Colab defteri (9 hücre)** | ✅ **ÇALIŞTIRILDI, TAMAMLANDI** |
+| **Yerel modellerle ASR (v6.2)** | ✅ **DOĞRULANDI (ON ASR %0.0)** |
+| **CoT sızıntısı (yerel modeller)** | ✅ **DOĞRULANDI (CoT %50.0, ON %0.0)** |
+| **Sıcaklık kontrolü (greedy vs T=0.7)** | ✅ **DOĞRULANDI (Fark: 0.0 puan)** |
 
 ### 11.3 Defter: `notebooks/RedTeam_Local_Models_v6_2.ipynb` (9 hücre)
 | Hücre | İş |
