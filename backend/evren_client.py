@@ -117,7 +117,8 @@ class EvrenClient:
         system_instruction: Optional[str] = None,
         model: Optional[str] = None,
         max_tokens: int = 4096,
-        temperature: float = 0.3
+        temperature: float = 0.3,
+        enable_thinking: Optional[bool] = None
     ) -> Dict[str, Any]:
         """Tek seferlik (non-streaming) sohbet tamamlama çağrısı."""
         self.ensure_terms_accepted()
@@ -128,13 +129,14 @@ class EvrenClient:
             messages.append({"role": "system", "content": system_instruction})
         messages.append({"role": "user", "content": prompt})
 
-        payload = {
+        payload: Dict[str, Any] = {
             "model": target_model,
             "messages": messages,
             "max_tokens": max_tokens,
             "temperature": temperature,
-            "chat_template_kwargs": {"enable_thinking": False}
         }
+        if enable_thinking is not None:
+            payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
 
         try:
             r = requests.post(f"{self.base_url}/chat/completions", headers=self._headers(), json=payload, timeout=60)
@@ -166,7 +168,8 @@ class EvrenClient:
         system_instruction: Optional[str] = None,
         model: Optional[str] = None,
         max_tokens: int = 4096,
-        temperature: float = 0.3
+        temperature: float = 0.3,
+        enable_thinking: Optional[bool] = None
     ) -> Generator[Dict[str, Any], None, None]:
         """Akış (streaming SSE) sohbet tamamlama üreteci. (reasoning ve content parçacıklarını iletir)."""
         self.ensure_terms_accepted()
@@ -177,15 +180,16 @@ class EvrenClient:
             messages.append({"role": "system", "content": system_instruction})
         messages.append({"role": "user", "content": prompt})
 
-        payload = {
+        payload: Dict[str, Any] = {
             "model": target_model,
             "messages": messages,
             "max_tokens": max_tokens,
             "temperature": temperature,
             "stream": True,
             "stream_options": {"include_usage": True},
-            "chat_template_kwargs": {"enable_thinking": False}
         }
+        if enable_thinking is not None:
+            payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
 
         try:
             with requests.post(
