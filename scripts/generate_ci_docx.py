@@ -515,8 +515,8 @@ def build_masked_manuscript():
     add_table_caption(doc, "Table 1. Evaluation on the Source-Disjoint Fair Multilingual Benchmark (N=2,849 at decision threshold tau=0.70). Confidence intervals denote 95% cluster-bootstrap bounds.")
     t1_headers = ["Model Backbone", "Params", "Recall (%)", "FP (%)", "Macro-F1 [95% CI]", "ROC-AUC [95% CI]", "Recall @ FP=1%"]
     t1_rows = [
-        ["XLM-RoBERTa-base", "278M", "47.50", "2.20", "70.60 [0.652, 0.758]", "0.8916 [0.854, 0.926]", "0.3120"],
-        ["BGE-M3", "568M", "61.50", "2.20", "78.80 [0.741, 0.832]", "0.9347 [0.908, 0.959]", "0.4480"],
+        ["XLM-RoBERTa-base", "278M", "47.50", "2.20", "70.63 [0.656, 0.752]", "0.8916 [0.840, 0.931]", "0.3958"],
+        ["BGE-M3", "568M", "61.50", "2.20", "78.80 [0.738, 0.826]", "0.9347 [0.892, 0.963]", "0.5257"],
         ["NeuralShield (mmBERT)", "307M", "74.10", "3.83", "84.86 [0.809, 0.880]", "0.9494 [0.919, 0.972]", "0.5854"],
         ["Patronus Wolf Defender", "307M", "70.10", "0.80", "84.23 [0.804, 0.881]", "0.9767 [0.967, 0.986]", "0.7222"]
     ]
@@ -553,7 +553,7 @@ def build_masked_manuscript():
     ]
     create_table_from_data(doc, t3_headers, t3_rows, [3.4, 4.0, 2.2, 2.2, 2.2, 2.6])
 
-    add_body_p(doc, "While Post-Training Quantization (PTQ) to INT8 reduces storage by ~4x (from 1.23 GB to 294 MB), it induces a catastrophic 21.07 percentage-point collapse in OOD recall (falling from 74.10% to 53.30% even when paired with L0 normalization). The mathematical mechanism behind this failure is activation distribution overflow: post-training dynamic quantization maps continuous activations to 8-bit integers based on calibration statistics gathered from standard text distributions. When confronted with adversarial out-of-distribution inputs (such as homoglyphs, zero-width steganography, or low-resource language shifts), intermediate transformer activations exceed the dynamic clipping thresholds. This causes severe saturation clipping, degrading logit separation. Consequently, we formulate a crucial operational guideline: LLM security classifiers should not be deployed under INT8 PTQ without rigorous OOD verification. NeuralShield is permanently standardized on FP32 ONNX execution, delivering a predictable 32–50 ms latency profile on commodity dual-core CPUs.", bold_prefix="The Quantization Fragility Discovery: ")
+    add_body_p(doc, "While Post-Training Quantization (PTQ) to INT8 reduces storage by ~4x (from 1.23 GB to 294 MB), it induces a catastrophic 20.80 percentage-point collapse in OOD recall (falling from 74.10% to 53.30% even when paired with L0 normalization). The mathematical mechanism behind this failure is activation distribution overflow: post-training dynamic quantization maps continuous activations to 8-bit integers based on calibration statistics gathered from standard text distributions. When confronted with adversarial out-of-distribution inputs (such as homoglyphs, zero-width steganography, or low-resource language shifts), intermediate transformer activations exceed the dynamic clipping thresholds. This causes severe saturation clipping, degrading logit separation. Consequently, we formulate a crucial operational guideline: LLM security classifiers should not be deployed under INT8 PTQ without rigorous OOD verification. NeuralShield is permanently standardized on FP32 ONNX execution, delivering a predictable 32–50 ms latency profile on commodity dual-core CPUs.", bold_prefix="The Quantization Fragility Discovery: ")
 
     add_styled_heading(doc, "3.4. End-to-End Multi-Layer Pipeline Ablation", level=2)
     add_body_p(doc, "To quantify the individual contribution of each defensive layer, we evaluated the complete pipeline across both the source-disjoint fair set (N=2,849) and the curated red-team suite (N=161). Table 4 outlines the structural ablation.")
@@ -610,7 +610,7 @@ def build_masked_manuscript():
     add_table_caption(doc, "Table 6. Empirical Vulnerability in Open-Weight Reasoning Models (N=24 attacks, 12 benign queries, 1280-token reasoning budget).")
     t6_headers = ["Model Architecture", "Params", "CoT Leakage (%)", "95% Wilson CI", "Final Content (%)", "95% Wilson CI", "Verified CoT-Only (%)", "NeuralShield ON"]
     t6_rows = [
-        ["Qwen3-4B-Thinking", "4.02B", "50.00% (12/24)", "[30.8, 69.2]", "8.33% (2/24)", "[2.3, 25.8]", "12.50% (3/24)", "0.00% (0/24)"],
+        ["Qwen3-4B-Thinking", "4.02B", "50.00% (12/24)", "[31.4, 68.6]", "8.33% (2/24)", "[2.3, 25.8]", "12.50% (3/24)", "0.00% (0/24)"],
         ["R1-Distill-Qwen-1.5B", "1.78B", "16.67% (4/24)", "[6.7, 35.9]", "12.50% (3/24)", "[4.3, 31.0]", "4.17% (1/24)", "0.00% (0/24)"],
         ["R1-Distill-Qwen-7B", "7.62B", "16.67% (4/24)", "[6.7, 35.9]", "20.83% (5/24)", "[9.2, 40.5]", "4.17% (1/24)", "0.00% (0/24)"]
     ]

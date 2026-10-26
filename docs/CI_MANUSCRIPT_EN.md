@@ -141,8 +141,8 @@ We first benchmark the semantic classifier layer (L2) on the source-disjoint fai
 
 | Model Backbone | Parameters | Recall (%) | False Pos. (%) | Macro-F1 [95% CI] | ROC-AUC [95% CI] | Recall @ FP=1% |
 |---|---|---|---|---|---|---|
-| XLM-RoBERTa-base | 278M | 47.50 | 2.20 | 70.60 [0.652, 0.758] | 0.8916 [0.854, 0.926] | 0.3120 |
-| BGE-M3 | 568M | 61.50 | 2.20 | 78.80 [0.741, 0.832] | 0.9347 [0.908, 0.959] | 0.4480 |
+| XLM-RoBERTa-base | 278M | 47.50 | 2.20 | 70.63 [0.656, 0.752] | 0.8916 [0.840, 0.931] | 0.3958 |
+| BGE-M3 | 568M | 61.50 | 2.20 | 78.80 [0.738, 0.826] | 0.9347 [0.892, 0.963] | 0.5257 |
 | **NeuralShield (mmBERT)** | 307M | **74.10** | 3.83 | **84.86** [0.809, 0.880] | 0.9494 [0.919, 0.972] | 0.5854 |
 | **Patronus Wolf Defender** | 307M | 70.10 | **0.80** | 84.23 [0.804, 0.881] | **0.9767** [0.967, 0.986] | **0.7222** |
 
@@ -182,7 +182,7 @@ Operational security gateways must maintain strict latency budgets to avoid degr
 | INT8 Dynamic PTQ + L0 | 2-vCPU Cloud Container | 62.40 ms | 211.80 ms | 294 MB | 53.30% |
 
 #### The Quantization Fragility Discovery
-While Post-Training Quantization (PTQ) to INT8 reduces storage by ~4$\times$ (from 1.23 GB to 294 MB), it induces a catastrophic **21.07 percentage-point collapse in OOD recall** (falling from 74.10% to 53.30% even when paired with L0 normalization). 
+While Post-Training Quantization (PTQ) to INT8 reduces storage by ~4$\times$ (from 1.23 GB to 294 MB), it induces a catastrophic **20.80 percentage-point collapse in OOD recall** (falling from 74.10% to 53.30% even when paired with L0 normalization). 
 
 The mathematical mechanism behind this failure is activation distribution overflow: post-training dynamic quantization maps continuous activations to 8-bit integers based on calibration statistics gathered from standard text distributions. When confronted with adversarial out-of-distribution inputs (such as homoglyphs, zero-width steganography, or low-resource language shifts), intermediate transformer activations exceed the dynamic clipping thresholds. This causes severe saturation clipping, degrading logit separation. Consequently, we formulate a crucial operational guideline: **LLM security classifiers should not be deployed under INT8 PTQ without rigorous OOD verification.** NeuralShield is permanently standardized on FP32 ONNX execution, delivering a predictable 32–50 ms latency profile on commodity dual-core CPUs.
 
@@ -243,7 +243,7 @@ easoning) and final conversational answer (inal) were parsed independently. Tab
 
 | Model Architecture | Parameters | CoT Leakage ASR (%) | 95% Wilson CI | Final Content ASR (%) | 95% Wilson CI | Verified CoT-Only Exfiltration (%) | NeuralShield Protected ASR (%) |
 |---|---|---|---|---|---|---|---|
-| **Qwen3-4B-Thinking** | 4.02B | **50.00%** (12/24) | [30.8, 69.2] | 8.33% (2/24) | [2.3, 25.8] | **12.50%** (3/24) | **0.00%** (0/24) |
+| **Qwen3-4B-Thinking** | 4.02B | **50.00%** (12/24) | [31.4, 68.6] | 8.33% (2/24) | [2.3, 25.8] | **12.50%** (3/24) | **0.00%** (0/24) |
 | **R1-Distill-Qwen-1.5B** | 1.78B | **16.67%** (4/24) | [6.7, 35.9] | 12.50% (3/24) | [4.3, 31.0] | 4.17% (1/24) | **0.00%** (0/24) |
 | **R1-Distill-Qwen-7B** | 7.62B | **16.67%** (4/24) | [6.7, 35.9] | **20.83%** (5/24) | [9.2, 40.5] | 4.17% (1/24) | **0.00%** (0/24) |
 
