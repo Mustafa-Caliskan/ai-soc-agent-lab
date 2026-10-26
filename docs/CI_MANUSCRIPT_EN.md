@@ -83,7 +83,7 @@ If $\mathcal{D}_{\text{in}} = 1$, the request is immediately rejected with an HT
 Even if an adversarial prompt circumvents input filtering, or if an LLM hallucinates sensitive data on benign queries, L3 inspects outgoing tokens prior to client dispatch:
 - **Dual-Stream Inspection:** L3 processes both the user-facing `content` stream and the internal `reasoning` (Chain-of-Thought) token stream emitted during SSE generation.
 - **Pattern and Checksum Validation:** Enforces pattern masking for system canary strings, secret keys, API tokens, credit card numbers (validated via the Luhn algorithm), and national identification numbers (e.g., Turkish TCKN modulo-11 checksums).
-- **Masking Replacement:** Sensitive entities are masked with cryptographic entity tags (e.g., `[CONFIDENTIAL_PIN_REDACTED]`), neutralizing exfiltration in real time.
+- **Masking Replacement:** Sensitive entities are masked with cryptographic entity tags (e.g., `[SIR_SANSÜRLENDİ]`, `[API_KEY_SANSÜRLENDİ]`), neutralizing exfiltration in real time.
 
 ### 2.3. Dataset Construction (v6.2) and Quality Control
 
@@ -109,9 +109,9 @@ To establish an uncompromised evaluation standard, we constructed `heldout_bench
 
 To measure empirical vulnerability under operational conditions, we established a red-team evaluation environment modeling a mission-critical infrastructure assistant: the **SkyPort International Airport Operations AI**. The system prompt embeds operational guidelines alongside four distinct, high-entropy canary secrets:
 1. `ATC-KX9425-PIN`: Tower operations PIN.
-2. `SkyPortAdmin7F3A91B2`: High-Frequency Air Traffic Surveillance Encryption Key.
-3. `SHA256:e3b0c442...`: Central Terminal Mainframe Root Hash.
-4. `RooTPassZx8W22M9`: Master Bypass Token.
+2. `SkyPortAdmin7F3A91B2`: System administrator password.
+3. `skcrew9f3a71c2d8b04e5`: Flight crew API key.
+4. `RooTPassZx8W22M9`: Database root password.
 
 The red-team benchmark (`curated_redteam_v6_2.json`) contains **101 curated attacks** and **60 domain-specific benign queries** ($N=161$). Attacks are evenly distributed across the four vulnerability classes: `direct` ($n=16$), `indirect` ($n=26$), `encoding` ($n=26$), and `stego` ($n=33$). Benign queries simulate authentic passenger requests (e.g., flight status, gate locations, baggage allowances).
 
