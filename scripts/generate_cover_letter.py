@@ -88,7 +88,7 @@ def build_cover_letter():
 
     # Bullet points
     add_p("On a source-disjoint fair 12-language benchmark (N=2,849), NeuralShield demonstrates statistical parity in Macro-F1 with a commercial guardrail (Patronus Wolf Defender: 84.86% vs. 84.23%, overlapping 95% cluster-bootstrap confidence intervals), while achieving higher recall on native non-translated corpora (+34.4 pp on native Turkish; AUC 0.890 vs. 0.631 on native Cyrillic Russian).", bold_prefix="• Source-Disjoint Fair Parity: ")
-    add_p("Empirical red-teaming across 14 diverse LLMs (from 1.5B edge models to Tier-2 enterprise models and Tier-3 flagship models evaluated on TÜBİTAK ULAKBİM EVREN H200 supercomputing infrastructure) blocked all 101 curated in-domain attacks, driving attack success rates (ASR) from up to 40.59% (Mistral-7B-v0.3) to flat 0.00%.", bold_prefix="• 14-Model Empirical Red-Teaming: ")
+    add_p("Empirical red-teaming across 14 diverse LLMs (from 1.5B edge models to Tier-2 enterprise models and Tier-3 flagship models evaluated on an Enterprise NVIDIA H200 Supercomputing Cluster) blocked all 101 curated in-domain attacks, driving attack success rates (ASR) from up to 40.59% (Mistral-7B-v0.3) to flat 0.00%.", bold_prefix="• 14-Model Empirical Red-Teaming: ")
     add_p("We document the phenomenon of 'Silent Chain-of-Thought Exfiltration', showing that flagship reasoning models (Gemma-4-31B and Qwen3.8-Flash-Next) achieve 0.00% user-facing ASR but verbalize confidential system canary secrets verbatim in 66.34% and 14.85% of internal reasoning traces—creating a critical exfiltration vector for SSE streaming architectures that is completely neutralized by NeuralShield's dual-stream egress DLP.", bold_prefix="• Discovery of Silent CoT Exfiltration: ")
     add_p("Full-sample (N=101) paired McNemar tests find no statistically significant quantization effect (4-bit NF4 vs. uncompressed FP16 exhibit overlapping CIs, p=0.804 on Llama-3.1-8B), while demonstrating that aggressive system prompt hardening leaves 16.83% residual leakage and also produces 1.67% benign canary leakage on legitimate user traffic.", bold_prefix="• Full-Pool Paired Ablations: ")
 
@@ -124,7 +124,7 @@ def build_cover_letter():
         "ORCID: 0009-0004-3861-7628\n\n"
         "On behalf of:\n"
         "Prof. Dr. Ali Hakan IŞIK (Co-Author & Academic Advisor)\n"
-        "Email: ahkan@mehmetakif.edu.tr | ORCID: 0000-0003-3561-9375"
+        "Email: ahakan@mehmetakif.edu.tr | ORCID: 0000-0003-3561-9375"
     )
     r_sig.font.name = 'Times New Roman'
     r_sig.font.size = Pt(10.5)
@@ -155,7 +155,7 @@ As Large Language Models (LLMs) are rapidly integrated into production environme
 ### Key Contributions and Findings
 In this work, we propose NeuralShield, a four-layer application security gateway (L0 Structural Normalizer, L1 Sub-millisecond Deterministic Regex, L2 12-Language mmBERT-base Transformer Classifier, and L3 Egress DLP Masker governed by an adaptive OR-Gate). NeuralShield runs entirely on commodity dual-thread CPU hardware with a median latency of ~50.6 ms (FP32 ONNX runtime), delivering high throughput without requiring expensive GPU infrastructure. Key scientific highlights include:
 - **Source-Disjoint Fair Parity:** On a source-disjoint fair 12-language benchmark ($N=2,849$), NeuralShield demonstrates statistical parity in Macro-F1 with a commercial guardrail (Patronus Wolf Defender: 84.86% vs. 84.23%, overlapping 95% cluster-bootstrap confidence intervals), while achieving higher recall on native non-translated corpora (+34.4 pp on native Turkish; AUC 0.890 vs. 0.631 on native Cyrillic Russian).
-- **14-Model Empirical Red-Teaming:** Empirical red-teaming across 14 diverse LLMs (from 1.5B edge models to Tier-2 enterprise models and Tier-3 flagship models evaluated on TÜBİTAK ULAKBİM EVREN H200 supercomputing infrastructure) blocked all 101 curated in-domain attacks, driving attack success rates (ASR) from up to 40.59% (Mistral-7B-v0.3) to flat 0.00%.
+- **14-Model Empirical Red-Teaming:** Empirical red-teaming across 14 diverse LLMs (from 1.5B edge models to Tier-2 enterprise models and Tier-3 flagship models evaluated on an Enterprise NVIDIA H200 Supercomputing Cluster) blocked all 101 curated in-domain attacks, driving attack success rates (ASR) from up to 40.59% (Mistral-7B-v0.3) to flat 0.00%.
 - **Discovery of Silent CoT Exfiltration:** We document the phenomenon of "Silent Chain-of-Thought Exfiltration", showing that flagship reasoning models (Gemma-4-31B and Qwen3.8-Flash-Next) achieve 0.00% user-facing ASR but verbalize confidential system canary secrets verbatim in 66.34% and 14.85% of internal reasoning traces—creating a critical exfiltration vector for SSE streaming architectures that is completely neutralized by NeuralShield's dual-stream egress DLP.
 - **Full-Pool Paired Ablations:** Full-sample ($N=101$) paired McNemar tests find no statistically significant quantization effect (4-bit NF4 vs. uncompressed FP16 exhibit overlapping CIs, $p=0.804$ on Llama-3.1-8B), while demonstrating that aggressive system prompt hardening leaves 16.83% residual leakage and also produces 1.67% benign canary leakage on legitimate user traffic.
 
@@ -183,7 +183,7 @@ Email: 2211404051@ogr.mehmetakif.edu.tr | ORCID: 0009-0004-3861-7628
 
 *On behalf of:*  
 **Prof. Dr. Ali Hakan IŞIK** (Co-Author & Academic Advisor)  
-Email: ahkan@mehmetakif.edu.tr | ORCID: 0000-0003-3561-9375  
+Email: ahakan@mehmetakif.edu.tr | ORCID: 0000-0003-3561-9375  
 """
     with open("docs/CI_COVER_LETTER.md", "w", encoding="utf-8") as f:
         f.write(md_content)
