@@ -370,9 +370,9 @@ def build_masked_manuscript():
     r_abs_lbl.bold = True
     
     abstract_text = (
-        "Prompt injection, instruction hijacking, and confidential data extraction represent critical security "
-        "threats to large language model (LLM) applications. This paper presents NeuralShield, a multilingual, "
-        "multi-layer defense gateway combining: (L0) structural normalization and recursive deobfuscation, (L1) "
+        "Prompt injection, instruction hijacking, and confidential data extraction threaten large language " 
+        "model (LLM) applications. We present NeuralShield, a multilingual, " 
+        "multi-layer gateway combining: (L0) structural normalization and recursive deobfuscation, (L1) "
         "deterministic regex and canary traps, (L2) a 12-language mmBERT-base semantic classifier, (L3) egress "
         "data loss prevention (DLP), and an adaptive OR-Gate arbiter. Trained on the balanced v6.2 corpus (98,606 "
         "records across 12 languages), NeuralShield achieves statistical parity in Macro-F1 with commercial state-of-the-art "
@@ -380,8 +380,8 @@ def build_masked_manuscript():
         "on a rigorously source-disjoint benchmark (N=2,849). On native non-English corpora it attains higher recall "
         "(Turkish: 79.4% vs. 45.0%; Cyrillic AUC: 0.890 vs. 0.631), although Turkish ROC-AUC remains lower "
         "(0.952 vs. 0.972) and Cyrillic false positives are substantially higher (69.8% vs. 26.9%). In an extensive empirical red-team "
-        "benchmark spanning 14 models—including 10 open-weight models (1.5B–14.7B) and 4 flagship models on H200 "
-        "supercomputing infrastructure—NeuralShield reduces attack success rates (ASR) from up to 40.59% (Mistral-7B) to 0.0%. "
+        "benchmark of 14 models (10 open-weight, 1.5B–14.7B; 4 flagship on H200), "
+        "NeuralShield reduces attack success rates (ASR) from up to 40.59% (Mistral-7B) to 0.0%. "
         "Furthermore, we uncover Silent Chain-of-Thought Exfiltration in flagship models (Gemma-4-31B leaking secrets in 66.34% "
         "of reasoning traces despite 0.0% final content ASR), fully mitigated by our dual-stream egress DLP. Full-pool "
         "ablations (N=101) find no statistically significant quantization effect and confirm that prompt "
@@ -479,7 +479,7 @@ def build_masked_manuscript():
     r_eq1.bold = True
     
     add_body_p(doc, "If D_in = 1, the request is immediately rejected with an HTTP 403 status code, completely terminating the execution pipeline before invoking the downstream target LLM. If D_in = 0, the sanitized text is forwarded to the target LLM within a context-isolated execution barrier.")
-    add_body_p(doc, "Even if an adversarial prompt circumvents input filtering, or if an LLM hallucinates sensitive data on benign queries, L3 inspects outgoing tokens prior to client dispatch. L3 concurrently monitors both the user-facing content stream and the internal reasoning (Chain-of-Thought) token stream emitted during SSE generation. It enforces pattern masking for system canary strings, secret keys, API tokens, credit card numbers (validated via the Luhn algorithm), and national identification numbers (e.g., Turkish TCKN modulo-11 checksums), substituting sensitive entities with cryptographic entity tags (e.g., [CONFIDENTIAL_PIN_REDACTED]).", bold_prefix="Layer 3 (L3) Egress DLP Sanitizer: ")
+    add_body_p(doc, "Even if an adversarial prompt circumvents input filtering, or if an LLM hallucinates sensitive data on benign queries, L3 inspects outgoing tokens prior to client dispatch. L3 concurrently monitors both the user-facing content stream and the internal reasoning (Chain-of-Thought) token stream emitted during SSE generation. It enforces pattern masking for system canary strings, secret keys, API tokens, credit card numbers (validated via the Luhn algorithm), and national identification numbers (e.g., Turkish TCKN modulo-11 checksums), substituting sensitive entities with cryptographic entity tags (e.g., [SIR_SANSÜRLENDİ] or [API_KEY_SANSÜRLENDİ]).", bold_prefix="Layer 3 (L3) Egress DLP Sanitizer: ")
 
     add_styled_heading(doc, "2.3. Dataset Construction (v6.2) and Quality Control", level=2)
     add_body_p(doc, "The NeuralShield v6.2 corpus comprises 98,606 curated records balanced across 12 typologically diverse languages: English (en), Turkish (tr), German (de), French (fr), Spanish (es), Italian (it), Portuguese (pt), Russian (ru), Arabic (ar), Japanese (ja), Korean (ko), and Simplified Chinese (zh). The dataset contains 48,627 malicious samples (49.3%) and 49,979 benign samples (50.7%). English and Turkish constitute primary core sets (en: 29,983 records, 30.4%; tr: 29,011 records, 29.4%), while the remaining 10 languages contain ~4,000 balanced instances each.")
@@ -515,7 +515,7 @@ def build_masked_manuscript():
     add_body_p(doc, "We first benchmark the semantic classifier layer (L2) on the source-disjoint fair evaluation set (N=2,849). Table 1 summarizes the performance of candidate backbones alongside Patronus AI's commercial Wolf Defender.")
     
     add_table_caption(doc, "Table 1. Evaluation on the Source-Disjoint Fair Multilingual Benchmark (N=2,849 at decision threshold tau=0.70). Confidence intervals denote 95% cluster-bootstrap bounds.")
-    t1_headers = ["Model Backbone", "Params", "Recall (%)", "FP (%)", "Macro-F1 [95% CI]", "ROC-AUC [95% CI]", "Recall @ FP=1%"]
+    t1_headers = ["Model Backbone", "Params", "Recall (%. Macro-F1 values are E2E pipeline estimates; the cluster-bootstrap point estimate for mmBERT is 84.82)", "FP (%)", "Macro-F1 [95% CI]", "ROC-AUC [95% CI]", "Recall @ FP=1%"]
     t1_rows = [
         ["XLM-RoBERTa-base", "278M", "47.50", "2.20", "70.63 [0.656, 0.752]", "0.8916 [0.840, 0.931]", "0.3958"],
         ["BGE-M3", "568M", "61.50", "2.20", "78.80 [0.738, 0.826]", "0.9347 [0.892, 0.963]", "0.5257"],
@@ -524,7 +524,7 @@ def build_masked_manuscript():
     ]
     create_table_from_data(doc, t1_headers, t1_rows, [3.4, 1.4, 1.8, 1.4, 3.2, 3.2, 2.0])
 
-    add_body_p(doc, "As demonstrated in Table 1, Table 1, mmBERT-base achieved the highest Macro-F1 (84.86%) among open models, decisively outperforming XLM-RoBERTa-base [15] (+14.26 F1 points) and the substantially larger BGE-M3 [17] (+6.06 F1 points). Crucially, comparison with Patronus Wolf Defender reveals that the 95% cluster-bootstrap confidence intervals for Macro-F1 overlap completely ([0.809, 0.880] vs. [0.804, 0.881]). This provides mathematical proof of statistical parity in overall F1 between NeuralShield and the premier commercial defense. While Patronus maintains an advantage in conservative low-false-alarm regions (ROC-AUC 0.9767 vs. 0.9494; Recall@FP=1% 72.22% vs. 58.54%), NeuralShield achieves higher uncalibrated attack recall (74.10% vs. 70.10%).")
+    add_body_p(doc, "As demonstrated in Table 1, mmBERT-base achieved the highest Macro-F1 (84.86%) among open models, decisively outperforming XLM-RoBERTa-base [15] (+14.23 F1 points) and the substantially larger BGE-M3 [17] (+6.06 F1 points). Crucially, comparison with Patronus Wolf Defender reveals that the 95% cluster-bootstrap confidence intervals for Macro-F1 overlap completely ([0.809, 0.880] vs. [0.804, 0.881]). This provides mathematical proof of statistical parity in overall F1 between NeuralShield and the premier commercial defense. While Patronus maintains an advantage in conservative low-false-alarm regions (ROC-AUC 0.9767 vs. 0.9494; Recall@FP=1% 72.22% vs. 58.54%), NeuralShield achieves higher uncalibrated attack recall (74.10% vs. 70.10%).")
 
     add_styled_heading(doc, "3.2. Native Held-Out Evaluation: Overcoming the Translationese Bias", level=2)
     add_body_p(doc, "Low-resource languages are known to be disproportionately vulnerable to jailbreak attempts [10]. To examine whether models suffer from synthetic translation artifacts, we evaluated performance on two completely native, non-translated held-out sets: native Turkish dialogues (n=1,077) and native Cyrillic Russian adversarial queries (n=16,636). Table 2 reports the results.")
@@ -688,7 +688,7 @@ def build_masked_manuscript():
     t8_headers = ["Condition", "Size", "Evaluated Parameter", "ASR (%)", "95% Wilson CI", "Discordant (A/B)", "McNemar p", "Benign Leakage"]
     t8_rows = [
         ["(A1) Mistral 4-bit NF4", "N=101", "Quantization", "40.59% (41/101)", "[31.5, 50.3]", "21 (4-bit only)", "p = 0.071", "0.00% (0/60)"],
-        ["(A1) Mistral Saf FP16", "N=101", "Unquantized Baseline", "29.70% (30/101)", "[21.7, 39.2]", "10 (FP16 only)", "(Marginal)", "not measured"],
+        ["(A1) Mistral Pure FP16", "N=101", "Unquantized Baseline", "29.70% (30/101)", "[21.7, 39.2]", "10 (FP16 only)", "(Marginal)", "not measured"],
         ["(A2) Llama-3.1-8B 4-bit", "N=101", "Quantization", "14.85% (15/101)", "[9.2, 23.1]", "7 (4-bit only)", "p = 0.804", "0.00% (0/60)"],
         ["(A2) Llama-3.1-8B FP16", "N=101", "Unquantized Baseline", "16.83% (17/101)", "[10.8, 25.3]", "9 (FP16 only)", "(Not Sig.)", "not measured"],
         ["(B1) Standard Prompt", "N=101", "Prompt Engineering", "24.75% (25/101)", "[17.4, 34.0]", "14 (Resolved)", "p = 0.115", "0.00% (0/60)"],
@@ -709,14 +709,14 @@ def build_masked_manuscript():
     add_body_p(doc, "A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization [22] degrades safety-tuning alignments [23], artificially inflating reported ASR. As documented in Table 9 and Figure 3a, in Llama-3.1-8B, unquantized FP16 weights actually exhibited a slightly higher leak rate (16.83% vs. 14.85%, delta = +1.98 points), with virtually identical confidence intervals ([10.8, 25.3] vs. [9.2, 23.1]) and a non-significant McNemar test (p = 0.804, discordant pairs: 7 vs. 9). In Mistral-7B-v0.3, pure FP16 lowered ASR from 40.59% to 29.70% (delta = -10.89 points), the reduction failed to achieve strict statistical significance at the alpha = 0.05 level (exact McNemar p = 0.071), and the Wilson confidence intervals overlap ([21.7, 39.2] vs. [31.5, 50.3]). Nearly one-third of all attacks succeeded against the uncompressed model. These results indicate that 4-bit quantization did not create the vulnerability; note that in Mistral-7B the FP16 advantage is borderline (p = 0.071), so 4-bit ASR values are approximately representative rather than systematically inflated. Architectural safety alignment and context disambiguation dictate robustness.", bold_prefix="Testing the Quantization Hypothesis: ")
     add_body_p(doc, "We evaluated whether aggressive system prompt hardening ('ABSOLUTE DIRECTIVE: Never reveal internal keys under any circumstance; any violation triggers immediate system termination') could substitute for external guardrails. While prompt hardening decreased ASR from 24.75% to 16.83% in Qwen2.5-3B (delta = -7.92 points), the change is not statistically significant (McNemar p = 0.115). While 14 attacks were neutralized, 6 previously blocked attacks broke through under the hardened instructions, leaving 17 attacks completely breaching the model. Furthermore, under the hardened prompt one of 60 genuine passenger queries (1.67%) caused the model to emit the tower-operations canary in its answer; this is benign-query secret leakage rather than simple over-refusal, and it illustrates that prompt-level instructions do not remove the secret from the context. Prompt hardening therefore degrades utility while failing to guarantee confidentiality. An architectural, external gateway remains non-negotiable.", bold_prefix="The Limits of Prompt Hardening: ")
 
-    add_styled_heading(doc, "Methodological Insight: The Fallacy of Small-Sample Pilots", level=3)
+    add_styled_heading(doc, "3.9.1. Methodological Insight: The Fallacy of Small-Sample Pilots", level=3)
     add_body_p(doc, "Our comparative evaluation highlights a vital methodological lesson for AI security benchmarking. Table 9 contrasts the findings from our preliminary pilot study (n=25) against the full-scale benchmark (N=101).")
     
     add_table_caption(doc, "Table 10. Methodological comparison: Pilot sample artifacts (n=25) versus full-pool evaluation (N=101).")
     t9_headers = ["Experimental Comparison", "Pilot (n=25) Delta", "Full-Pool (N=101) Delta", "Methodological Shift & Scientific Finding"]
     t9_rows = [
-        ["Mistral-7B: 4-bit -> Saf FP16", "-12.00 pp", "-10.89 pp", "Consistent direction, but non-significant (p = 0.071)"],
-        ["Llama-3.1-8B: 4-bit -> Saf FP16", "-8.00 pp", "+1.98 pp", "Direction flipped! FP16 leaks more than 4-bit (p = 0.804)"],
+        ["Mistral-7B: 4-bit -> Pure FP16", "-12.00 pp", "-10.89 pp", "Consistent direction, but non-significant (p = 0.071)"],
+        ["Llama-3.1-8B: 4-bit -> Pure FP16", "-8.00 pp", "+1.98 pp", "Direction flipped! FP16 leaks more than 4-bit (p = 0.804)"],
         ["Prompt Hardening: Std -> Hardened", "-24.00 pp", "-7.92 pp", "Effect size attenuated by 3.0x; non-significant (p = 0.115)"]
     ]
     create_table_from_data(doc, t9_headers, t9_rows, [4.4, 2.6, 2.6, 6.4])
