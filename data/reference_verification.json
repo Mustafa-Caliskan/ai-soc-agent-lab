@@ -1,0 +1,170 @@
+[
+  {
+    "n": 1,
+    "status": "OK",
+    "claim": "Attention is all you need",
+    "real": "Attention Is All You Need",
+    "how": "arXiv:1706.03762"
+  },
+  {
+    "n": 2,
+    "status": "OK",
+    "claim": "GPT-4 technical report",
+    "real": "GPT-4 Technical Report",
+    "how": "arXiv:2303.08774"
+  },
+  {
+    "n": 3,
+    "status": "OK",
+    "claim": "Not what you've signed up for: Compromising real-world LLM-integrated applications with indirect prompt injection",
+    "real": "Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection",
+    "how": "DOI:10.1145/3605764.3623985"
+  },
+  {
+    "n": 4,
+    "status": "OK",
+    "claim": "Jailbreaking ChatGPT via prompt engineering: An empirical study",
+    "real": "Jailbreaking ChatGPT via Prompt Engineering: An Empirical Study",
+    "how": "arXiv:2305.13860"
+  },
+  {
+    "n": 5,
+    "status": "OK",
+    "claim": "Ignore previous prompt: Attack techniques for language models",
+    "real": "Ignore Previous Prompt: Attack Techniques For Language Models",
+    "how": "arXiv:2211.09527"
+  },
+  {
+    "n": 6,
+    "status": "OK",
+    "claim": "Universal and transferable adversarial attacks on aligned language models",
+    "real": "Universal and Transferable Adversarial Attacks on Aligned Language Models",
+    "how": "arXiv:2307.15043"
+  },
+  {
+    "n": 7,
+    "status": "URL OK",
+    "claim": "Prompt Guard 86M: A classifier model for prompt injection and jailbreak detection",
+    "real": "(URL kontrolu)",
+    "how": "https://huggingface.co/meta-llama/Prompt-Guard-86M"
+  },
+  {
+    "n": 8,
+    "status": "URL OK",
+    "claim": "DeBERTa-v3-base prompt injection detector",
+    "real": "(URL kontrolu)",
+    "how": "https://huggingface.co/protectai/deberta-v3-base-prompt-injection"
+  },
+  {
+    "n": 9,
+    "status": "URL OK",
+    "claim": "Patronus Wolf Defender 307M: Advanced prompt injection defense",
+    "real": "(URL kontrolu)",
+    "how": "https://huggingface.co/patronus-studio/wolf-defender-prompt-injection"
+  },
+  {
+    "n": 10,
+    "status": "OK",
+    "claim": "Low-resource languages jailbreak GPT-4",
+    "real": "Low-Resource Languages Jailbreak GPT-4",
+    "how": "arXiv:2310.02446"
+  },
+  {
+    "n": 11,
+    "status": "OK",
+    "claim": "'Do anything now': Characterizing and evaluating in-the-wild jailbreak prompts on large language models",
+    "real": "\"Do Anything Now\": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models",
+    "how": "DOI:10.1145/3658644.3670388"
+  },
+  {
+    "n": 12,
+    "status": "URL OK",
+    "claim": "Translationese and its dialects",
+    "real": "(URL kontrolu)",
+    "how": "https://aclanthology.org/P11-1132/"
+  },
+  {
+    "n": 13,
+    "status": "OK",
+    "claim": "DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning",
+    "real": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
+    "how": "arXiv:2501.12948"
+  },
+  {
+    "n": 14,
+    "status": "URL OK",
+    "claim": "OWASP Top 10 for Large Language Model Applications (Version 2",
+    "real": "(URL kontrolu)",
+    "how": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+  },
+  {
+    "n": 15,
+    "status": "OK",
+    "claim": "Unsupervised cross-lingual representation learning at scale",
+    "real": "Unsupervised Cross-lingual Representation Learning at Scale",
+    "how": "DOI:10.18653/v1/2020.acl-main.747"
+  },
+  {
+    "n": 16,
+    "status": "URL OK",
+    "claim": "mmBERT-base: A modern multilingual encoder (model card)",
+    "real": "(URL kontrolu)",
+    "how": "https://huggingface.co/jhu-clsp/mmBERT-base"
+  },
+  {
+    "n": 17,
+    "status": "OK",
+    "claim": "BGE M3-Embedding: Multi-lingual, multi-functionality, multi-granularity text embeddings through self-knowledge distillation",
+    "real": "M3-Embedding: Multi-Linguality, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation",
+    "how": "arXiv:2402.03216"
+  },
+  {
+    "n": 18,
+    "status": "URL OK",
+    "claim": "JailbreakPrompts: A dataset of diverse adversarial prompts for large language models",
+    "real": "(URL kontrolu)",
+    "how": "https://huggingface.co/datasets/Simsonsun/JailbreakPrompts"
+  },
+  {
+    "n": 19,
+    "status": "URL OK",
+    "claim": "Free Dolly: Introducing the world's first truly open instruction-tuned LLM",
+    "real": "(URL kontrolu)",
+    "how": "https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm"
+  },
+  {
+    "n": 20,
+    "status": "OK",
+    "claim": "No language left behind: Scaling human-centered machine translation",
+    "real": "No Language Left Behind: Scaling Human-Centered Machine Translation",
+    "how": "arXiv:2207.04672"
+  },
+  {
+    "n": 21,
+    "status": "OK",
+    "claim": "Probable inference, the law of succession, and statistical inference",
+    "real": "Probable Inference, the Law of Succession, and Statistical Inference",
+    "how": "DOI:10.1080/01621459.1927.10502953"
+  },
+  {
+    "n": 22,
+    "status": "OK",
+    "claim": "QLoRA: Efficient finetuning of quantized LLMs",
+    "real": "QLoRA: Efficient Finetuning of Quantized LLMs",
+    "how": "arXiv:2305.14314"
+  },
+  {
+    "n": 23,
+    "status": "OK",
+    "claim": "Constitutional AI: Harmlessness from AI feedback",
+    "real": "Constitutional AI: Harmlessness from AI Feedback",
+    "how": "arXiv:2212.08073"
+  },
+  {
+    "n": 24,
+    "status": "OK",
+    "claim": "Focal loss for dense object detection",
+    "real": "Focal Loss for Dense Object Detection",
+    "how": "DOI:10.1109/ICCV.2017.324"
+  }
+]

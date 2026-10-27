@@ -344,7 +344,7 @@ Future work will expand NeuralShield's semantic context window to 2,048 tokens v
 
 ## REFERENCES
 
-[1] Vaswani A, Shazeer N, Parmar N, Uszkoreit J, Jones L, Gomez AN, Kaiser Ł, Polosukhin I. Attention is all you need. In: Advances in Neural Information Processing Systems (NeurIPS 2017); 4-9 December 2017; Long Beach, CA, USA. Curran Associates, Inc.; 2017. pp. 5998-6008.
+[1] Vaswani A, Shazeer N, Parmar N, Uszkoreit J, Jones L, Gomez AN, Kaiser Ł, Polosukhin I. Attention is all you need. In: Advances in Neural Information Processing Systems (NeurIPS 2017); 4-9 December 2017; Long Beach, CA, USA. Curran Associates, Inc.; 2017. pp. 5998-6008. https://doi.org/10.48550/arXiv.1706.03762
 
 [2] OpenAI. GPT-4 technical report. arXiv preprint arXiv:2303.08774, 2023. https://doi.org/10.48550/arXiv.2303.08774
 
@@ -364,9 +364,9 @@ Future work will expand NeuralShield's semantic context window to 2,048 tokens v
 
 [10] Yong Z-X, Menghini C, Bach SH. Low-resource languages jailbreak GPT-4. arXiv preprint arXiv:2310.02446, 2023. https://doi.org/10.48550/arXiv.2310.02446
 
-[11] Shen X, Chen Z, Backes M, Zhang Y. "Do anything now": Characterizing and evaluating in-the-wild jailbreak prompts on large language models. In: Proceedings of the 2024 ACM SIGSAC Conference on Computer and Communications Security (CCS '24); 14-18 October 2024; Salt Lake City, UT, USA. ACM; 2024. pp. 41-55. https://doi.org/10.1145/3658644.3670390
+[11] Shen X, Chen Z, Backes M, Zhang Y. "Do anything now": Characterizing and evaluating in-the-wild jailbreak prompts on large language models. In: Proceedings of the 2024 ACM SIGSAC Conference on Computer and Communications Security (CCS '24); 14-18 October 2024; Salt Lake City, UT, USA. ACM; 2024. pp. 41-55. https://doi.org/10.1145/3658644.3670388
 
-[12] Koppel M, Ordan N. Translationese and its dialects. In: Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies; 19-24 June 2011; Portland, OR, USA. ACL; 2011. pp. 1318-1326.
+[12] Koppel M, Ordan N. Translationese and its dialects. In: Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies; 19-24 June 2011; Portland, OR, USA. ACL; 2011. pp. 1318-1326. Available from: https://aclanthology.org/P11-1132/
 
 [13] DeepSeek-AI. DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning. arXiv preprint arXiv:2501.12948, 2025. https://doi.org/10.48550/arXiv.2501.12948
 
