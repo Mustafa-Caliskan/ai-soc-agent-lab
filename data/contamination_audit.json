@@ -1,0 +1,114 @@
+{
+  "criterion": {
+    "pre_registered_in": "docs/HAKEM_DUZELTME_PLANI.md#E.3",
+    "normalisation": "lowercase, punctuation stripped, whitespace collapsed",
+    "unit": "word 8-gram",
+    "primary_rule": "at least one 8-gram shared with the training corpus",
+    "strict_rule": "at least 50% of 8-grams shared",
+    "evaluation_set": "data/appsec_benchmark_2000.json",
+    "training_set": [
+      "data/train_multilingual.csv",
+      "data/v6_multilingual_supplement.json"
+    ]
+  },
+  "counts": {
+    "evaluation_items": 2000,
+    "training_records": 85083,
+    "training_distinct_ngrams": 1215706,
+    "items_too_short_for_ngram": 289,
+    "primary_contaminated": 174,
+    "strict_contaminated": 62,
+    "items_with_public_source_field": 1785
+  },
+  "rates_pct": {
+    "primary_contamination": 8.7,
+    "strict_contamination": 3.1,
+    "public_source_lineage": 89.25
+  },
+  "per_source": {
+    "top_sources": [
+      [
+        "HF/reshabhs/SPML",
+        160
+      ],
+      [
+        "HF/reshabhs/SPML[MT->tr]",
+        107
+      ],
+      [
+        "HF/xTRam1/safe-guard",
+        105
+      ],
+      [
+        "HF/xTRam1/safe-guard[MT->tr]",
+        96
+      ],
+      [
+        "HF/Horizon/simsonsun_jailbreaks",
+        55
+      ],
+      [
+        "Local/adaptive_adversarial_50",
+        49
+      ],
+      [
+        "HF/rikka-snow/multilingual[native-zh]",
+        45
+      ],
+      [
+        "HF/rikka-snow/multilingual[native-de]",
+        45
+      ],
+      [
+        "HF/rikka-snow/multilingual[native-es]",
+        45
+      ],
+      [
+        "HF/rikka-snow/multilingual[native-fr]",
+        45
+      ]
+    ],
+    "top_contaminated_sources": [
+      [
+        "Local/benchmark_300",
+        26
+      ],
+      [
+        "HF/rikka-snow/multilingual[native-de]",
+        20
+      ],
+      [
+        "HF/xTRam1/safe-guard[MT->tr]",
+        19
+      ],
+      [
+        "HF/reshabhs/SPML[MT->fr]",
+        10
+      ],
+      [
+        "HF/reshabhs/SPML[MT->tr]",
+        10
+      ],
+      [
+        "HF/xTRam1/safe-guard[MT->es]",
+        9
+      ],
+      [
+        "HF/reshabhs/SPML[MT->pt]",
+        8
+      ],
+      [
+        "HF/xTRam1/safe-guard[MT->it]",
+        8
+      ],
+      [
+        "HF/xTRam1/safe-guard[MT->ar]",
+        7
+      ],
+      [
+        "HF/xTRam1/safe-guard[MT->pt]",
+        6
+      ]
+    ]
+  }
+}

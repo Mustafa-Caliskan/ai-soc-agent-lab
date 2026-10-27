@@ -17,7 +17,7 @@
 Bu belge, yeni bir yapay zeka modeli veya araştırmacı ajanın projeyi devralması durumunda, projenin geldiği aşamayı, yapılan bağımsız denetimleri, Turnitin intihal/AI test sonuçlarını ve atılacak adımları **hiçbir bağlam kaybı olmadan** anlaması için hazırlanmış eksiksiz bir rehberdir.
 
 ### Mevcut Durum Özeti:
-1. **Yazım ve Mizanpaj:** Makale C&I dergi şablonuna (TNR 11 pt, 2.5 cm kenar boşlukları, çift-kör inceleme kuralları) %100 uyumlu olarak yazılmış ve Word COM otomasyonu ile **tam 17 sayfa, 10 tablo (hiçbiri sayfa sonuna bölünmemiş), 3 şekil ve 25 referans** ile kilitlenmiştir.
+1. **Yazım ve Mizanpaj:** Makale C&I dergi şablonuna (TNR 11 pt, 2.5 cm kenar boşlukları, çift-kör inceleme kuralları) %100 uyumlu olarak yazılmış ve Word COM otomasyonu ile **tam 17 sayfa, 10 tablo (hiçbiri sayfa sonuna bölünmemiş), 3 şekil ve 27 referans** ile kilitlenmiştir.
 2. **Sayısal Doğrulama:** Bağımsız denetimde 10 tablonun ~170 hücresi kaynak JSON'larla doğrulanmış, 26 Wilson aralığı ve 3 McNemar testi hatasız bulunmuştur (%92.4 tam sayısal doğruluk, 0 aritmetik hata).
 3. **Turnitin / İntihal Sonucu:** 
    - Referanslar dahil: **%11 Benzerlik** (Dergi sınırı: $\le \%20$) -> **BAŞARILI / GEÇTİ**
@@ -157,7 +157,7 @@ Projeyi devralan modelin sırasıyla yürüteceği operasyonlar:
 | İş Paketi | Durum | Yapılan İşlem |
 |:---|:---:|:---|
 | **1. EVREN / Kurumsal İsim Nötrleştirmesi** | **TAMAMLANDI** | `generate_ci_docx.py` içindeki tüm `EVREN H200` ifadeleri kaldırıldı. Tier-3 tanımı "Enterprise NVIDIA H200 Supercomputing Cluster", Table 8 sütunu "NVIDIA H200", Appendix B Case 1 başlığı "NVIDIA H200 Cluster API" oldu. §2.3'teki "gemma-4-31b hosted on EVREN clusters" ifadesi "served on an HPC inference cluster" olarak genelleştirildi. §4.2 Sorumlu Bildirim metninde kurum adı yoktur (yalnızca "the affected platforms"). |
-| **2. Açık Kaynak Güvencesi ve HF Atıfları** | **TAMAMLANDI** | §2.3 sonuna lisans şeffaflık cümlesi eklendi (Hugging Face Hub, MIT / Apache-2.0 / CC-BY-SA). Ref [19] Databricks Dolly-15k HF Dataset bağlantısı ile güncellendi; yeni **[26] Deepset prompt-injections** HF Dataset referansı eklendi ve §2.3 kalite kontrol ensemble'ında atıflandı. Referans sayısı 26'dır. |
+| **2. Açık Kaynak Güvencesi ve HF Atıfları** | **TAMAMLANDI** | §2.3 sonuna lisans şeffaflık cümlesi eklendi (Hugging Face Hub, MIT / Apache-2.0 / CC-BY-SA). Ref [19] Databricks Dolly-15k HF Dataset bağlantısı ile güncellendi; yeni **[26] Deepset prompt-injections** HF Dataset referansı eklendi ve §2.3 kalite kontrol ensemble'ında atıflandı. Referans sayısı 27'dir ([26] Deepset, [27] Rubend18). |
 | **3. Humanizing Revizyonu** | **TAMAMLANDI** | Abstract tamamen yeniden yazıldı (değişken cümle ritmi, tüm metrikler korunarak). §1'deki `(i)/(ii)/(iii)` blokları üç akıcı paragrafa dönüştürüldü. §2.3'te 12 dil tek tek ISO kodlarıyla sayılmak yerine tipolojik aileler hâlinde gruplandı. "Moreover / Furthermore / As demonstrated in / In line with" klişeleri temizlendi. Appendix B Case 3, DOCX'teki güncel `RT_PERSONA_0022` metniyle MD'ye senkronize edildi. |
 | **4. Şekil 1 ve Şekil 2 Üretimi** | **TAMAMLANDI** | `generate_paper_figures.py` yeniden yazıldı. Şekil 1 katmanlı mimari (L0 yeşil, L1 petrol yeşili, L2 mor, L3 turuncu arbiter, L4 mavi, L5 kırmızı + sağda değerlendirme modülü) olarak **3600×2200 px** üretildi. Üç fazlı akış diyagramı (Faz A/B/C) **3600×2180 px** olarak `docs/figures/figure2_pipeline_flow.png` dosyasına kaydedildi. Her iki çizim **fiziksel punto biriminde** (446 pt kanvas, ~581 DPI) yazıldığı için 6.2 inç kolon genişliğinde etiketler tasarlandıkları 4.8–8 pt boyutunda basılır. |
 | **5. Mizanpaj ve 17 Sayfa Doğrulaması** | **TAMAMLANDI** | `audit_rendered_pages.py` sertleştirildi: Word COM üzerinden sayfa sayısı, 10 içerik tablosunun bölünmediği ve PDF dışa aktarımı otomatik doğrulanır; başarısızlıkta çıkış kodu 1'dir. Sonuç: **17 sayfa, 10/10 tablo bölünmemiş, `docs/NeuralShield_CI_Manuscript.pdf` üretildi.** `Title_Page.docx`'te danışman e-postası `ahakan@mehmetakif.edu.tr` olarak teyit edildi. |
@@ -172,3 +172,24 @@ Projeyi devralan modelin sırasıyla yürüteceği operasyonlar:
 ### 6.3. Metrik Bütünlüğü Kontrolü
 
 Düzenleme sonrası 72 kritik metrik değeri (84.86, 84.23, 74.10, 70.10, 79.40, 45.00, 91.40, 57.90, 69.80, 26.90, 0.9520, 0.9720, 0.8902, 0.6314, 40.59, 66.34, 14.85, 1.98, 20.83, 16.67, 50.00, 8.33, 12.50, 4.17, 0.804, 0.071, 0.115, 2,849, 98,606, 2,578, 2,311 vb.) yeniden taranmış ve **tamamı korunmuştur**; hiçbir sayısal değer değişmemiştir.
+
+### 6.4. Hakem Revizyonu Sonrası Güncelleme (Major Revision)
+
+Bağımsız hakem raporu sonrası yürütülen düzeltmeler `docs/HAKEM_DUZELTME_PLANI.md` ve
+`docs/HAKEM_CEVAP_MEKTUBU.md` dosyalarında belgelenmiştir. Öne çıkan değişiklikler:
+
+- Tablo 1 artık yalnızca arşivlenmiş metrikleri raporlar (Macro-F1, ROC-AUC, Recall@FP=1%);
+  kaynağı olmayan Recall/FP nokta değerleri tablodan çıkarılmış, mmBERT recall'u dipnota taşınmıştır.
+- Tablo 3'ten kaynağı bulunmayan "Local x86" satırı çıkarılmış; INT8 satırının 23 token, FP32 satırının
+  12 token ile ölçüldüğü açıkça belirtilmiş; FP32 depolama 1.23 GB (teorik) yerine ölçülen 1.17 GB yazılmıştır.
+- Tablo 4 tamamen kanonik `l2_only_ablation.json` dosyasından üretilmiş, "Macro-F1" sütunu gerçek makro
+  ortalamaya çevrilmiş, latency sütunu kaldırılmıştır.
+- §3.4'teki "17 kurtarılan saldırı" ifadesi "17 kurtarıldı, 2 kaybedildi, net +15" olarak düzeltilmiş ve
+  kesin McNemar testi eklenmiştir (p ≈ 0.0007).
+- %76.9 kaynak örtüşmesi iddiası, ön-kayıtlı denetimle değiştirilmiştir: %89.25 kamu kaynağı kökeni,
+  %8.7 8-gram örtüşmesi (`data/contamination_audit.json`).
+- Katman şeması tekilleştirilmiştir: altı aşama, beş savunma kontrolü (L0–L5); DLP artık L5'tir.
+- Lisans beyanı düzeltilmiş (NLLB CC-BY-NC 4.0 açıkça belirtilmiş) ve `docs/SUPPLEMENTARY_LICENSES.md`
+  (Tablo S1) eklenmiştir.
+- İki yeni doğrulama kapısı: `scripts/verify_paper_metrics.py` (162 manifest kaydı, yeniden-hesap)
+  ve `scripts/verify_layer_naming.py`. Her ikisi de geçmeden derleme kabul edilmez.

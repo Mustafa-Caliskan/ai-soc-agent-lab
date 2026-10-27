@@ -1,0 +1,3183 @@
+{
+  "generated_by": "scripts/build_metrics_manifest.py",
+  "rule": "data rules the number; the number never rules the data",
+  "entry_count": 162,
+  "entries": [
+    {
+      "id": "t1.xlmr.f1",
+      "value": 70.63,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Macro-F1 at tau=0.70, cluster-bootstrap point estimate",
+      "renders": [
+        "70.63",
+        "0.656",
+        "0.752"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[3].F1@0.7"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.xlmr.auc",
+      "value": 0.8916,
+      "unit": "ratio",
+      "where": "Table 1",
+      "definition": "ROC-AUC, cluster-bootstrap point estimate",
+      "renders": [
+        "0.8916",
+        "0.840",
+        "0.931"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[3].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.xlmr.r1fp",
+      "value": 39.58,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Recall at 1% false-positive operating point",
+      "renders": [
+        "0.3958"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[3].Recall@FP=1%"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.bge.f1",
+      "value": 78.8,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Macro-F1 at tau=0.70, cluster-bootstrap point estimate",
+      "renders": [
+        "78.80",
+        "0.738",
+        "0.826"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[2].F1@0.7"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.bge.auc",
+      "value": 0.9347,
+      "unit": "ratio",
+      "where": "Table 1",
+      "definition": "ROC-AUC, cluster-bootstrap point estimate",
+      "renders": [
+        "0.9347",
+        "0.892",
+        "0.963"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[2].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.bge.r1fp",
+      "value": 52.57,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Recall at 1% false-positive operating point",
+      "renders": [
+        "0.5257"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[2].Recall@FP=1%"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.f1",
+      "value": 84.82,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Macro-F1 at tau=0.70, cluster-bootstrap point estimate",
+      "renders": [
+        "84.82",
+        "0.809",
+        "0.880"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[0].F1@0.7"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.auc",
+      "value": 0.9494,
+      "unit": "ratio",
+      "where": "Table 1",
+      "definition": "ROC-AUC, cluster-bootstrap point estimate",
+      "renders": [
+        "0.9494",
+        "0.919",
+        "0.972"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[0].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.r1fp",
+      "value": 58.54,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Recall at 1% false-positive operating point",
+      "renders": [
+        "0.5854"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[0].Recall@FP=1%"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.patronus.f1",
+      "value": 84.23,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Macro-F1 at tau=0.70, cluster-bootstrap point estimate",
+      "renders": [
+        "84.23",
+        "0.804",
+        "0.880"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[4].F1@0.7"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.patronus.auc",
+      "value": 0.9767,
+      "unit": "ratio",
+      "where": "Table 1",
+      "definition": "ROC-AUC, cluster-bootstrap point estimate",
+      "renders": [
+        "0.9767",
+        "0.967",
+        "0.986"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[4].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.patronus.r1fp",
+      "value": 72.22,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Recall at 1% false-positive operating point",
+      "renders": [
+        "0.7222"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[4].Recall@FP=1%"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.recall_raw",
+      "value": 74.1,
+      "unit": "%",
+      "where": "Table 1, Table 3, Sections 1, 3.1, 3.4, 5",
+      "definition": "Recall at tau=0.70 for the standalone L2 classifier on raw (non-normalised) text",
+      "renders": [
+        "74.10"
+      ],
+      "source": {
+        "file": "data/l0_contribution_fair.json",
+        "path": "raw.recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 1067,
+        "n": 1440
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.fp_raw",
+      "value": 3.83,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "False-positive rate for the standalone L2 classifier on raw text",
+      "renders": [
+        "3.83"
+      ],
+      "source": {
+        "file": "data/l0_contribution_fair.json",
+        "path": "raw.fp"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 54,
+        "n": 1409
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.recall_ci",
+      "value": [
+        71.77,
+        76.29
+      ],
+      "unit": "%",
+      "where": "Table 1 footnote",
+      "definition": "Wilson 95% interval for the same recall run",
+      "renders": [
+        "[71.8, 76.3]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 1067,
+        "n": 1440
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.fp_ci",
+      "value": [
+        2.95,
+        4.97
+      ],
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Wilson 95% interval for the same false-positive run",
+      "renders": [],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 54,
+        "n": 1409
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.bootstrap_f1",
+      "value": 84.82,
+      "unit": "%",
+      "where": "Table 1 footnote",
+      "definition": "Cluster-bootstrap point estimate of F1 (84.82)",
+      "renders": [
+        "84.82"
+      ],
+      "source": {
+        "file": "data/validation_ci_v6.json",
+        "path": "overall[0].F1@0.7"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.pipeline.recall",
+      "value": 75.14,
+      "unit": "%",
+      "where": "Table 1 footnote, Sections 3.1, 3.4, 5",
+      "definition": "Full pipeline (L0 + L2) recall on the fair benchmark",
+      "renders": [
+        "75.14"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "shield.recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 1082,
+        "n": 1440
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.pipeline.f1",
+      "value": 85.4,
+      "unit": "%",
+      "where": "Table 1 footnote, Sections 3.4, 5",
+      "definition": "Full pipeline Macro-F1 on the fair benchmark",
+      "renders": [
+        "85.40"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "shield.macro_f1"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.macro_f1_full",
+      "value": 84.86,
+      "unit": "%",
+      "where": "Table 1",
+      "definition": "Macro-F1 of the standalone FP32 classifier on raw text",
+      "renders": [
+        "84.86"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "quantization_comparison.fp32.macro_f1"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t1.mmbert.auc_raw",
+      "value": 0.9494,
+      "unit": "ratio",
+      "where": "Table 1",
+      "definition": "ROC-AUC of the standalone FP32 classifier on raw text",
+      "renders": [
+        "0.9494"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "quantization_comparison.fp32.auc"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.tr.shield.recall",
+      "value": 79.4,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "Recall at tau=0.70 on the native tr corpus",
+      "renders": [
+        "79.40"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[0].recall@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.tr.shield.fp",
+      "value": 3.3,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "False-positive rate at tau=0.70 on the native tr corpus",
+      "renders": [
+        "3.30"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[0].fp@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.tr.shield.auc",
+      "value": 0.952,
+      "unit": "ratio",
+      "where": "Table 2",
+      "definition": "ROC-AUC on the native tr corpus (three decimals, source precision)",
+      "renders": [
+        "0.952"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[0].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.tr.patronus.recall",
+      "value": 45.0,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "Recall at tau=0.70 on the native tr corpus",
+      "renders": [
+        "45.00"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[2].recall@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.tr.patronus.fp",
+      "value": 0.2,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "False-positive rate at tau=0.70 on the native tr corpus",
+      "renders": [
+        "0.20"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[2].fp@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.tr.patronus.auc",
+      "value": 0.972,
+      "unit": "ratio",
+      "where": "Table 2",
+      "definition": "ROC-AUC on the native tr corpus (three decimals, source precision)",
+      "renders": [
+        "0.972"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[2].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.ru.shield.recall",
+      "value": 91.4,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "Recall at tau=0.70 on the native ru corpus",
+      "renders": [
+        "91.40"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[1].recall@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.ru.shield.fp",
+      "value": 69.8,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "False-positive rate at tau=0.70 on the native ru corpus",
+      "renders": [
+        "69.80"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[1].fp@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.ru.shield.auc",
+      "value": 0.89,
+      "unit": "ratio",
+      "where": "Table 2",
+      "definition": "ROC-AUC on the native ru corpus (three decimals, source precision)",
+      "renders": [
+        "0.890"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[1].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.ru.patronus.recall",
+      "value": 57.9,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "Recall at tau=0.70 on the native ru corpus",
+      "renders": [
+        "57.90"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[3].recall@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.ru.patronus.fp",
+      "value": 26.9,
+      "unit": "%",
+      "where": "Table 2",
+      "definition": "False-positive rate at tau=0.70 on the native ru corpus",
+      "renders": [
+        "26.90"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[3].fp@0.7"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t2.ru.patronus.auc",
+      "value": 0.631,
+      "unit": "ratio",
+      "where": "Table 2",
+      "definition": "ROC-AUC on the native ru corpus (three decimals, source precision)",
+      "renders": [
+        "0.631"
+      ],
+      "source": {
+        "file": "data/native_eval_v6.json",
+        "path": "[3].AUC"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.fp32.median",
+      "value": 50.57,
+      "unit": "ms",
+      "where": "Table 3, Sections 1, 3.3, 5",
+      "definition": "FP32 ONNX median latency, 2-vCPU container, 12 tokens",
+      "renders": [
+        "50.57"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "latency_fp32.median_ms"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.fp32.p95",
+      "value": 67.72,
+      "unit": "ms",
+      "where": "Table 3",
+      "definition": "FP32 ONNX p95 latency, 2-vCPU container, 12 tokens",
+      "renders": [
+        "67.72"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "latency_fp32.p95_ms"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.fp32.tokens",
+      "value": 12,
+      "unit": "tokens",
+      "where": "Table 3",
+      "definition": "Input length used for the FP32 latency measurement",
+      "renders": [
+        "12"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "latency_fp32.tokens"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.int8.median",
+      "value": 61.92,
+      "unit": "ms",
+      "where": "Table 3, Section 3.3",
+      "definition": "INT8 dynamic PTQ median latency, 2-vCPU container, 23 tokens",
+      "renders": [
+        "61.92"
+      ],
+      "source": {
+        "file": "data/summary2.json",
+        "path": "results.sdpa.median_ms"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.int8.p95",
+      "value": 210.65,
+      "unit": "ms",
+      "where": "Table 3",
+      "definition": "INT8 dynamic PTQ p95 latency, 2-vCPU container, 23 tokens",
+      "renders": [
+        "210.65"
+      ],
+      "source": {
+        "file": "data/summary2.json",
+        "path": "results.sdpa.p95_ms"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.int8.tokens",
+      "value": 23,
+      "unit": "tokens",
+      "where": "Table 3",
+      "definition": "Input length used for the INT8 latency measurement",
+      "renders": [
+        "23"
+      ],
+      "source": {
+        "file": "data/summary2.json",
+        "path": "results.sdpa.tokens"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t3.storage.fp32",
+      "value": 1.17,
+      "unit": "GB",
+      "where": "Table 3, Section 3.3",
+      "definition": "FP32 ONNX artefact size in GB (1173.7 MB)",
+      "renders": [
+        "1.17"
+      ],
+      "source": {
+        "file": "data/summary.json",
+        "path": "fp32_mb"
+      },
+      "source_scale": 0.001,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.01
+    },
+    {
+      "id": "t3.storage.int8",
+      "value": 294,
+      "unit": "MB",
+      "where": "Table 3, Section 3.3",
+      "definition": "INT8 ONNX artefact size in MB (294.2 MB)",
+      "renders": [
+        "294"
+      ],
+      "source": {
+        "file": "data/summary.json",
+        "path": "int8_mb"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.5
+    },
+    {
+      "id": "t3.int8.recall_raw",
+      "value": 53.3,
+      "unit": "%",
+      "where": "Table 3, Section 3.3",
+      "definition": "INT8 recall on raw text at tau=0.70",
+      "renders": [
+        "53.30"
+      ],
+      "source": {
+        "file": "data/e2e_layer_test_v6_2.json",
+        "path": "quantization_comparison.int8.recall"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l0l1.recall",
+      "value": 76.24,
+      "unit": "%",
+      "where": "Table 4, Section 3.4",
+      "definition": "Attack catch rate for L0+L1 only (model-free fast path) (N=101)",
+      "renders": [
+        "76.24"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L0+L1 only (model YOK).recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 77,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l0l1.fp",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Benign false positives for L0+L1 only (model-free fast path) (N=60)",
+      "renders": [
+        "0.00"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L0+L1 only (model YOK).fp"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 60
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l0l1.macro_f1",
+      "value": 84.93,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Macro-F1 for L0+L1 only (model-free fast path): mean of class F1 over TP=77, FN=24, FP=0, TN=60",
+      "renders": [
+        "84.93"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_macro",
+        "tp": 77,
+        "fn": 24,
+        "fp": 0,
+        "tn": 60
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l0l1.binary_f1",
+      "value": 86.52,
+      "unit": "%",
+      "where": "Table 4 footnote",
+      "definition": "Malicious-class (binary) F1 for L0+L1 only (model-free fast path)",
+      "renders": [
+        "86.52"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_binary",
+        "tp": 77,
+        "fn": 24,
+        "fp": 0
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l0l1.ci",
+      "value": [
+        67.1,
+        83.5
+      ],
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Wilson 95% interval for L0+L1 only (model-free fast path)",
+      "renders": [
+        "[67.1, 83.5]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 77,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2fp32.recall",
+      "value": 100.0,
+      "unit": "%",
+      "where": "Table 4, Section 3.4",
+      "definition": "Attack catch rate for L2-only, mmBERT FP32, raw text (N=101)",
+      "renders": [
+        "100.00"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-FP32 / ham metin  (SADECE MODEL).recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 101,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2fp32.fp",
+      "value": 6.67,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Benign false positives for L2-only, mmBERT FP32, raw text (N=60)",
+      "renders": [
+        "6.67"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-FP32 / ham metin  (SADECE MODEL).fp"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 4,
+        "n": 60
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2fp32.macro_f1",
+      "value": 97.3,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Macro-F1 for L2-only, mmBERT FP32, raw text: mean of class F1 over TP=101, FN=0, FP=4, TN=56",
+      "renders": [
+        "97.30"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_macro",
+        "tp": 101,
+        "fn": 0,
+        "fp": 4,
+        "tn": 56
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2fp32.binary_f1",
+      "value": 98.06,
+      "unit": "%",
+      "where": "Table 4 footnote",
+      "definition": "Malicious-class (binary) F1 for L2-only, mmBERT FP32, raw text",
+      "renders": [
+        "98.06"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_binary",
+        "tp": 101,
+        "fn": 0,
+        "fp": 4
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2fp32.ci",
+      "value": [
+        96.3,
+        100.0
+      ],
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Wilson 95% interval for L2-only, mmBERT FP32, raw text",
+      "renders": [
+        "[96.3, 100.0]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 101,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2int8.recall",
+      "value": 91.09,
+      "unit": "%",
+      "where": "Table 4, Section 3.4",
+      "definition": "Attack catch rate for L2-only, mmBERT INT8, raw text (N=101)",
+      "renders": [
+        "91.09"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-INT8 / ham metin  (SADECE MODEL).recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 92,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2int8.fp",
+      "value": 8.33,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Benign false positives for L2-only, mmBERT INT8, raw text (N=60)",
+      "renders": [
+        "8.33"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-INT8 / ham metin  (SADECE MODEL).fp"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 5,
+        "n": 60
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2int8.macro_f1",
+      "value": 90.82,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Macro-F1 for L2-only, mmBERT INT8, raw text: mean of class F1 over TP=92, FN=9, FP=5, TN=55",
+      "renders": [
+        "90.82"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_macro",
+        "tp": 92,
+        "fn": 9,
+        "fp": 5,
+        "tn": 55
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2int8.binary_f1",
+      "value": 92.93,
+      "unit": "%",
+      "where": "Table 4 footnote",
+      "definition": "Malicious-class (binary) F1 for L2-only, mmBERT INT8, raw text",
+      "renders": [
+        "92.93"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_binary",
+        "tp": 92,
+        "fn": 9,
+        "fp": 5
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l2int8.ci",
+      "value": [
+        83.9,
+        95.2
+      ],
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Wilson 95% interval for L2-only, mmBERT INT8, raw text",
+      "renders": [
+        "[83.9, 95.2]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 92,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.dual.recall",
+      "value": 96.04,
+      "unit": "%",
+      "where": "Table 4, Section 3.4",
+      "definition": "Attack catch rate for L0 + L2-INT8, dual-channel max(P_raw,P_ext) (N=101)",
+      "renders": [
+        "96.04"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-INT8 / max(ham, normalize).recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 97,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.dual.fp",
+      "value": 10.0,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Benign false positives for L0 + L2-INT8, dual-channel max(P_raw,P_ext) (N=60)",
+      "renders": [
+        "10.00"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-INT8 / max(ham, normalize).fp"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 6,
+        "n": 60
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.dual.macro_f1",
+      "value": 93.31,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Macro-F1 for L0 + L2-INT8, dual-channel max(P_raw,P_ext): mean of class F1 over TP=97, FN=4, FP=6, TN=54",
+      "renders": [
+        "93.31"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_macro",
+        "tp": 97,
+        "fn": 4,
+        "fp": 6,
+        "tn": 54
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.dual.binary_f1",
+      "value": 95.1,
+      "unit": "%",
+      "where": "Table 4 footnote",
+      "definition": "Malicious-class (binary) F1 for L0 + L2-INT8, dual-channel max(P_raw,P_ext)",
+      "renders": [
+        "95.10"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_binary",
+        "tp": 97,
+        "fn": 4,
+        "fp": 6
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.dual.ci",
+      "value": [
+        90.3,
+        98.4
+      ],
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Wilson 95% interval for L0 + L2-INT8, dual-channel max(P_raw,P_ext)",
+      "renders": [
+        "[90.3, 98.4]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 97,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.full.recall",
+      "value": 100.0,
+      "unit": "%",
+      "where": "Table 4, Section 3.4",
+      "definition": "Attack catch rate for NeuralShield full (FP32) (N=101)",
+      "renders": [
+        "100.00"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.TAM: L0+L1+L2+L3 (FP32).recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 101,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.full.fp",
+      "value": 6.67,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Benign false positives for NeuralShield full (FP32) (N=60)",
+      "renders": [
+        "6.67"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.TAM: L0+L1+L2+L3 (FP32).fp"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 4,
+        "n": 60
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.full.macro_f1",
+      "value": 97.3,
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Macro-F1 for NeuralShield full (FP32): mean of class F1 over TP=101, FN=0, FP=4, TN=56",
+      "renders": [
+        "97.30"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_macro",
+        "tp": 101,
+        "fn": 0,
+        "fp": 4,
+        "tn": 56
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.full.binary_f1",
+      "value": 98.06,
+      "unit": "%",
+      "where": "Table 4 footnote",
+      "definition": "Malicious-class (binary) F1 for NeuralShield full (FP32)",
+      "renders": [
+        "98.06"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "f1_binary",
+        "tp": 101,
+        "fn": 0,
+        "fp": 4
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.full.ci",
+      "value": [
+        96.3,
+        100.0
+      ],
+      "unit": "%",
+      "where": "Table 4",
+      "definition": "Wilson 95% interval for NeuralShield full (FP32)",
+      "renders": [
+        "[96.3, 100.0]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 101,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t4.l0.int8.normalized_recall",
+      "value": 95.05,
+      "unit": "%",
+      "where": "Table 4, Section 3.4",
+      "definition": "INT8 recall when L2 receives L0-normalised text only",
+      "renders": [
+        "95.05"
+      ],
+      "source": {
+        "file": "data/redteam/l2_only_ablation.json",
+        "path": "rows.L2-INT8 / L0-normalize metin.recall"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 96,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s34.rescued",
+      "value": 17,
+      "unit": "count",
+      "where": "Section 3.4",
+      "definition": "Attacks recovered by L0 normalisation on the fair benchmark",
+      "renders": [
+        "17"
+      ],
+      "source": {
+        "file": "data/l0_contribution_fair.json",
+        "path": "rescued_by_l0"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s34.broken",
+      "value": 2,
+      "unit": "count",
+      "where": "Section 3.4",
+      "definition": "Attacks lost by L0 normalisation on the fair benchmark",
+      "renders": [
+        "2"
+      ],
+      "source": {
+        "file": "data/l0_contribution_fair.json",
+        "path": "broken_by_l0"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s34.net",
+      "value": 15,
+      "unit": "count",
+      "where": "Section 3.4",
+      "definition": "Net gain in detections",
+      "renders": [
+        "15"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "difference",
+        "a": 17,
+        "b": 2
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s34.mcnemar_p",
+      "value": 0.000729,
+      "unit": "p-value",
+      "where": "Section 3.4",
+      "definition": "Exact two-sided McNemar on b=17, c=2",
+      "renders": [
+        "0.0007"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "mcnemar",
+        "b": 17,
+        "c": 2
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s34.delta_pp",
+      "value": 1.04,
+      "unit": "pp",
+      "where": "Section 3.4",
+      "definition": "Recall delta from L0 normalisation",
+      "renders": [
+        "+1.04"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "difference",
+        "a": 75.14,
+        "b": 74.1
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s34.f1_gain",
+      "value": 0.54,
+      "unit": "pp",
+      "where": "Section 3.4",
+      "definition": "Macro-F1 gain from L0 normalisation",
+      "renders": [],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "difference",
+        "a": 85.4,
+        "b": 84.86
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_15b.asr",
+      "value": 4.95,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Qwen2.5-1.5B (N=101)",
+      "renders": [
+        "4.95"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_15b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 5,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_15b.ci",
+      "value": [
+        2.1,
+        11.1
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Qwen2.5-1.5B",
+      "renders": [
+        "[2.1, 11.1]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 5,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_15b.params",
+      "value": "1.54B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Qwen2.5-1.5B",
+      "renders": [
+        "1.54B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_15b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.phi3_mini.asr",
+      "value": 7.92,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Phi-3-mini (N=101)",
+      "renders": [
+        "7.92"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.phi3_mini.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 8,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.phi3_mini.ci",
+      "value": [
+        4.1,
+        14.9
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Phi-3-mini",
+      "renders": [
+        "[4.1, 14.9]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 8,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.phi3_mini.params",
+      "value": "3.82B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Phi-3-mini",
+      "renders": [
+        "3.82B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.phi3_mini.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.gemma2_2b.asr",
+      "value": 8.91,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Gemma-2-2B (N=101)",
+      "renders": [
+        "8.91"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.gemma2_2b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 9,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.gemma2_2b.ci",
+      "value": [
+        4.8,
+        16.1
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Gemma-2-2B",
+      "renders": [
+        "[4.8, 16.1]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 9,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.gemma2_2b.params",
+      "value": "2.61B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Gemma-2-2B",
+      "renders": [
+        "2.61B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.gemma2_2b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.llama32_3b.asr",
+      "value": 13.86,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Llama-3.2-3B (N=101)",
+      "renders": [
+        "13.86"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.llama32_3b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 14,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.llama32_3b.ci",
+      "value": [
+        8.4,
+        21.9
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Llama-3.2-3B",
+      "renders": [
+        "[8.4, 21.9]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 14,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.llama32_3b.params",
+      "value": "3.21B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Llama-3.2-3B",
+      "renders": [
+        "3.21B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.llama32_3b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_3b.asr",
+      "value": 25.74,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Qwen2.5-3B (N=101)",
+      "renders": [
+        "25.74"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_3b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 26,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_3b.ci",
+      "value": [
+        18.2,
+        35.0
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Qwen2.5-3B",
+      "renders": [
+        "[18.2, 35.0]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 26,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_3b.params",
+      "value": "3.09B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Qwen2.5-3B",
+      "renders": [
+        "3.09B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_3b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.gemma2_9b.asr",
+      "value": 8.91,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Gemma-2-9B (N=101)",
+      "renders": [
+        "8.91"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.gemma2_9b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 9,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.gemma2_9b.ci",
+      "value": [
+        4.8,
+        16.1
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Gemma-2-9B",
+      "renders": [
+        "[4.8, 16.1]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 9,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.gemma2_9b.params",
+      "value": "9.24B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Gemma-2-9B",
+      "renders": [
+        "9.24B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.gemma2_9b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_14b.asr",
+      "value": 10.89,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Qwen2.5-14B (N=101)",
+      "renders": [
+        "10.89"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_14b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 11,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_14b.ci",
+      "value": [
+        6.2,
+        18.5
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Qwen2.5-14B",
+      "renders": [
+        "[6.2, 18.5]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 11,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_14b.params",
+      "value": "14.7B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Qwen2.5-14B",
+      "renders": [
+        "14.7B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_14b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.llama31_8b.asr",
+      "value": 14.85,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Llama-3.1-8B (N=101)",
+      "renders": [
+        "14.85"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.llama31_8b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 15,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.llama31_8b.ci",
+      "value": [
+        9.2,
+        23.1
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Llama-3.1-8B",
+      "renders": [
+        "[9.2, 23.1]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 15,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.llama31_8b.params",
+      "value": "8.03B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Llama-3.1-8B",
+      "renders": [
+        "8.03B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.llama31_8b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_7b.asr",
+      "value": 18.81,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Qwen2.5-7B (N=101)",
+      "renders": [
+        "18.81"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_7b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 19,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_7b.ci",
+      "value": [
+        12.4,
+        27.5
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Qwen2.5-7B",
+      "renders": [
+        "[12.4, 27.5]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 19,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.qwen25_7b.params",
+      "value": "7.62B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Qwen2.5-7B",
+      "renders": [
+        "7.62B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.qwen25_7b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.mistral_7b.asr",
+      "value": 40.59,
+      "unit": "%",
+      "where": "Table 5, Section 3.5",
+      "definition": "Shield-OFF ASR for Mistral-7B-v0.3 (N=101)",
+      "renders": [
+        "40.59"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.mistral_7b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 41,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.mistral_7b.ci",
+      "value": [
+        31.5,
+        50.3
+      ],
+      "unit": "%",
+      "where": "Table 5",
+      "definition": "Wilson 95% interval for Mistral-7B-v0.3",
+      "renders": [
+        "[31.5, 50.3]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 41,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t5.mistral_7b.params",
+      "value": "7.25B",
+      "unit": "params",
+      "where": "Table 5",
+      "definition": "Parameter count of Mistral-7B-v0.3",
+      "renders": [
+        "7.25B"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "core.mistral_7b.params"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t6.qwen3_4b_think.cot",
+      "value": 50.0,
+      "unit": "%",
+      "where": "Table 6, Section 3.6",
+      "definition": "CoT leak rate for Qwen3-4B-Thinking (768-token budget, N=24)",
+      "renders": [
+        "50.00"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "reasoning.qwen3_4b_think.cot_leak_pct"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 12,
+        "n": 24
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t6.qwen3_4b_think.final",
+      "value": 8.33,
+      "unit": "%",
+      "where": "Table 6, Section 3.6",
+      "definition": "Final-content leak rate for Qwen3-4B-Thinking (768-token budget, N=24)",
+      "renders": [
+        "8.33"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "reasoning.qwen3_4b_think.final_leak_pct"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 2,
+        "n": 24
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t6.r1_distill_15b.cot",
+      "value": 16.67,
+      "unit": "%",
+      "where": "Table 6, Section 3.6",
+      "definition": "CoT leak rate for R1-Distill-Qwen-1.5B (768-token budget, N=24)",
+      "renders": [
+        "16.67"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "reasoning.r1_distill_15b.cot_leak_pct"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 4,
+        "n": 24
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t6.r1_distill_15b.final",
+      "value": 12.5,
+      "unit": "%",
+      "where": "Table 6, Section 3.6",
+      "definition": "Final-content leak rate for R1-Distill-Qwen-1.5B (768-token budget, N=24)",
+      "renders": [
+        "12.50"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "reasoning.r1_distill_15b.final_leak_pct"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 3,
+        "n": 24
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t6.r1_distill_7b.cot",
+      "value": 16.67,
+      "unit": "%",
+      "where": "Table 6, Section 3.6",
+      "definition": "CoT leak rate for R1-Distill-Qwen-7B (768-token budget, N=24)",
+      "renders": [
+        "16.67"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "reasoning.r1_distill_7b.cot_leak_pct"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 4,
+        "n": 24
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t6.r1_distill_7b.final",
+      "value": 20.83,
+      "unit": "%",
+      "where": "Table 6, Section 3.6",
+      "definition": "Final-content leak rate for R1-Distill-Qwen-7B (768-token budget, N=24)",
+      "renders": [
+        "20.83"
+      ],
+      "source": {
+        "file": "data/redteam/redteam_v6_2_summary.json",
+        "path": "reasoning.r1_distill_7b.final_leak_pct"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 5,
+        "n": 24
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.deepseek_v4_1_flash.final",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Final-content ASR for DeepSeek-v4.1-Flash (N=101)",
+      "renders": [
+        "0.00"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.deepseek_v4_1_flash.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.deepseek_v4_1_flash.cot",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Reasoning CoT ASR for DeepSeek-v4.1-Flash (N=101)",
+      "renders": [
+        "0.00"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.deepseek_v4_1_flash.off_cot_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.deepseek_v4_1_flash.cot_ci",
+      "value": [
+        0.0,
+        3.7
+      ],
+      "unit": "%",
+      "where": "Table 8",
+      "definition": "Wilson 95% interval for the CoT ASR of DeepSeek-v4.1-Flash",
+      "renders": [
+        "[0.0, 3.7]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 0,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.glm_5_3.final",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Final-content ASR for GLM-5.3 Flagship (N=101)",
+      "renders": [
+        "0.00"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.glm_5_3.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.glm_5_3.cot",
+      "value": 1.98,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Reasoning CoT ASR for GLM-5.3 Flagship (N=101)",
+      "renders": [
+        "1.98"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.glm_5_3.off_cot_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 2,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.glm_5_3.cot_ci",
+      "value": [
+        0.5,
+        6.9
+      ],
+      "unit": "%",
+      "where": "Table 8",
+      "definition": "Wilson 95% interval for the CoT ASR of GLM-5.3 Flagship",
+      "renders": [
+        "[0.5, 6.9]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 2,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.qwen3_8_flash_next.final",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Final-content ASR for Qwen3.8-Flash-Next (N=101)",
+      "renders": [
+        "0.00"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.qwen3_8_flash_next.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.qwen3_8_flash_next.cot",
+      "value": 14.85,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Reasoning CoT ASR for Qwen3.8-Flash-Next (N=101)",
+      "renders": [
+        "14.85"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.qwen3_8_flash_next.off_cot_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 15,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.qwen3_8_flash_next.cot_ci",
+      "value": [
+        9.2,
+        23.1
+      ],
+      "unit": "%",
+      "where": "Table 8",
+      "definition": "Wilson 95% interval for the CoT ASR of Qwen3.8-Flash-Next",
+      "renders": [
+        "[9.2, 23.1]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 15,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.gemma_4_31b.final",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Final-content ASR for Gemma-4-31B Dense (N=101)",
+      "renders": [
+        "0.00"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.gemma_4_31b.off_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.gemma_4_31b.cot",
+      "value": 66.34,
+      "unit": "%",
+      "where": "Table 8, Section 3.8",
+      "definition": "Reasoning CoT ASR for Gemma-4-31B Dense (N=101)",
+      "renders": [
+        "66.34"
+      ],
+      "source": {
+        "file": "data/redteam/evren_v6_2_summary.json",
+        "path": "evren_models.gemma_4_31b.off_cot_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 67,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t8.gemma_4_31b.cot_ci",
+      "value": [
+        56.7,
+        74.8
+      ],
+      "unit": "%",
+      "where": "Table 8",
+      "definition": "Wilson 95% interval for the CoT ASR of Gemma-4-31B Dense",
+      "renders": [
+        "[56.7, 74.8]"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "wilson",
+        "k": 67,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.mistral.4bit",
+      "value": 40.59,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "4-bit NF4 ASR for Mistral-7B-v0.3 (N=101)",
+      "renders": [
+        "40.59"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Mistral-7B-v0.3.bit4_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 41,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.mistral.fp16",
+      "value": 29.7,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "FP16 ASR for Mistral-7B-v0.3 (N=101)",
+      "renders": [
+        "29.70"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Mistral-7B-v0.3.fp16_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 30,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.mistral.delta",
+      "value": -10.89,
+      "unit": "pp",
+      "where": "Table 9, Table 10, Section 3.9",
+      "definition": "ASR delta (4-bit minus FP16) for Mistral-7B-v0.3",
+      "renders": [
+        "-10.89"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Mistral-7B-v0.3.delta"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "difference",
+        "a": 29.7,
+        "b": 40.59
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.llama.4bit",
+      "value": 14.85,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "4-bit NF4 ASR for Llama-3.1-8B (N=101)",
+      "renders": [
+        "14.85"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Llama-3.1-8B.bit4_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 15,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.llama.fp16",
+      "value": 16.83,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "FP16 ASR for Llama-3.1-8B (N=101)",
+      "renders": [
+        "16.83"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Llama-3.1-8B.fp16_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 17,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.llama.delta",
+      "value": 1.98,
+      "unit": "pp",
+      "where": "Table 9, Table 10, Section 3.9",
+      "definition": "ASR delta (4-bit minus FP16) for Llama-3.1-8B",
+      "renders": [
+        "+1.98"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Llama-3.1-8B.delta"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "difference",
+        "a": 16.83,
+        "b": 14.85
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.hardening.standard",
+      "value": 24.75,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "Standard-prompt ASR for Qwen2.5-3B (N=101)",
+      "renders": [
+        "24.75"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "prompt_hardening.standard_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 25,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.hardening.hardened",
+      "value": 16.83,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "Hardened-prompt ASR for Qwen2.5-3B (N=101)",
+      "renders": [
+        "16.83"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "prompt_hardening.hardened_asr"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 17,
+        "n": 101
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.hardening.benign_leak",
+      "value": 1.67,
+      "unit": "%",
+      "where": "Table 9, Section 3.9",
+      "definition": "Benign-query canary leakage under the hardened prompt (N=60)",
+      "renders": [
+        "1.67"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "prompt_hardening.hardened_benign_fp_pct"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.hardening.delta",
+      "value": -7.92,
+      "unit": "pp",
+      "where": "Table 9, Table 10, Section 3.9",
+      "definition": "ASR delta from prompt hardening",
+      "renders": [
+        "-7.92"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "prompt_hardening.delta"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.llama.discordant",
+      "value": [
+        9,
+        7
+      ],
+      "unit": "count",
+      "where": "Table 9",
+      "definition": "Discordant pairs for Llama (4-bit-only leaks, FP16-only leaks)",
+      "renders": [
+        "9",
+        "7"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "fp16_vs_4bit.Llama-3.1-8B.rows_bit4"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.llama.mcnemar_p",
+      "value": 0.804,
+      "unit": "p-value",
+      "where": "Table 9, Section 3.9",
+      "definition": "Exact McNemar from b=9, c=7",
+      "renders": [
+        "0.804"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "mcnemar",
+        "b": 9,
+        "c": 7
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.hardening.discordant",
+      "value": [
+        14,
+        6
+      ],
+      "unit": "count",
+      "where": "Table 9",
+      "definition": "Discordant pairs for prompt hardening (standard-only, hardened-only)",
+      "renders": [
+        "14",
+        "6"
+      ],
+      "source": {
+        "file": "data/redteam/quant_and_prompt_ablation_n101.json",
+        "path": "prompt_hardening.rows_hardened"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.hardening.mcnemar_p",
+      "value": 0.115,
+      "unit": "p-value",
+      "where": "Table 9, Section 3.9",
+      "definition": "Exact McNemar from b=14, c=6",
+      "renders": [
+        "0.115"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "mcnemar",
+        "b": 14,
+        "c": 6
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t9.mistral.mcnemar_p",
+      "value": 0.071,
+      "unit": "p-value",
+      "where": "Table 9, Section 3.9",
+      "definition": "Exact McNemar from the reported discordant counts b=21, c=10 (per-item 4-bit rows not archived)",
+      "renders": [
+        "0.071"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "mcnemar",
+        "b": 21,
+        "c": 10
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s24.primary_contamination",
+      "value": 8.7,
+      "unit": "%",
+      "where": "Section 1, Section 2.4, cover letter",
+      "definition": "Share of legacy OOD items sharing at least one 8-gram with the v6 training corpus",
+      "renders": [
+        "8.7"
+      ],
+      "source": {
+        "file": "data/contamination_audit.json",
+        "path": "rates_pct.primary_contamination"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s24.strict_contamination",
+      "value": 3.1,
+      "unit": "%",
+      "where": "Section 2.4",
+      "definition": "Share of legacy OOD items with at least 50% of 8-grams in the training corpus",
+      "renders": [
+        "3.1"
+      ],
+      "source": {
+        "file": "data/contamination_audit.json",
+        "path": "rates_pct.strict_contamination"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s24.public_source",
+      "value": 89.25,
+      "unit": "%",
+      "where": "Section 1, Section 2.4",
+      "definition": "Share of legacy OOD items whose source field names a public training repository",
+      "renders": [
+        "89.25"
+      ],
+      "source": {
+        "file": "data/contamination_audit.json",
+        "path": "rates_pct.public_source_lineage"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s24.audited_items",
+      "value": 2000,
+      "unit": "count",
+      "where": "Section 2.4",
+      "definition": "Items in the audited legacy OOD suite",
+      "renders": [
+        "2,000"
+      ],
+      "source": {
+        "file": "data/contamination_audit.json",
+        "path": "counts.evaluation_items"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s24.training_records",
+      "value": 85083,
+      "unit": "count",
+      "where": "Section 2.4",
+      "definition": "Records in the audited training corpus",
+      "renders": [
+        "85,083"
+      ],
+      "source": {
+        "file": "data/contamination_audit.json",
+        "path": "counts.training_records"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "ds.records",
+      "value": 98606,
+      "unit": "dataset records",
+      "where": "Sections 2.3, Abstract",
+      "definition": "dataset records",
+      "renders": [
+        "98,606"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.malicious",
+      "value": 48627,
+      "unit": "malicious samples",
+      "where": "Section 2.3",
+      "definition": "malicious samples",
+      "renders": [
+        "48,627"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.benign",
+      "value": 49979,
+      "unit": "benign samples",
+      "where": "Section 2.3",
+      "definition": "benign samples",
+      "renders": [
+        "49,979"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.en",
+      "value": 29983,
+      "unit": "English records",
+      "where": "Section 2.3",
+      "definition": "English records",
+      "renders": [
+        "29,983"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.tr",
+      "value": 29011,
+      "unit": "Turkish records",
+      "where": "Section 2.3",
+      "definition": "Turkish records",
+      "renders": [
+        "29,011"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.train",
+      "value": 69021,
+      "unit": "training split",
+      "where": "Section 2.3",
+      "definition": "training split",
+      "renders": [
+        "69,021"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.val",
+      "value": 14794,
+      "unit": "validation split",
+      "where": "Section 2.3",
+      "definition": "validation split",
+      "renders": [
+        "14,794"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "ds.test",
+      "value": 14791,
+      "unit": "test split",
+      "where": "Section 2.3",
+      "definition": "test split",
+      "renders": [
+        "14,791"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "fair.n",
+      "value": 2849,
+      "unit": "fair benchmark items",
+      "where": "Sections 2.4, 3.1, 5",
+      "definition": "fair benchmark items",
+      "renders": [
+        "2,849"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "fair.attacks",
+      "value": 1440,
+      "unit": "fair benchmark attacks",
+      "where": "Sections 2.4, 3.4",
+      "definition": "fair benchmark attacks",
+      "renders": [
+        "1,440"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "fair.benign",
+      "value": 1409,
+      "unit": "fair benchmark benign items",
+      "where": "Sections 2.4, 3.4",
+      "definition": "fair benchmark benign items",
+      "renders": [
+        "1,409"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "rt.attacks",
+      "value": 101,
+      "unit": "curated attacks",
+      "where": "Sections 2.5, 3.4-3.9",
+      "definition": "curated attacks",
+      "renders": [
+        "101"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "rt.benign",
+      "value": 60,
+      "unit": "curated benign queries",
+      "where": "Sections 2.5, 3.4-3.9",
+      "definition": "curated benign queries",
+      "renders": [
+        "60"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "rt.total",
+      "value": 161,
+      "unit": "curated suite size",
+      "where": "Sections 2.5, 3.8",
+      "definition": "curated suite size",
+      "renders": [
+        "161"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "models.total",
+      "value": 19,
+      "unit": "distinct checkpoints",
+      "where": "Abstract, Section 2.5",
+      "definition": "distinct checkpoints",
+      "renders": [
+        "19 distinct"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "native.tr.n",
+      "value": 1077,
+      "unit": "native Turkish items",
+      "where": "Sections 3.2, 4.1",
+      "definition": "native Turkish items",
+      "renders": [
+        "1,077"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "native.ru.n",
+      "value": 16636,
+      "unit": "native Russian items",
+      "where": "Sections 3.2, 4.1",
+      "definition": "native Russian items",
+      "renders": [
+        "16,636"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "calib.t",
+      "value": 1.8345,
+      "unit": "fitted temperature",
+      "where": "Section 2.6",
+      "definition": "fitted temperature",
+      "renders": [
+        "1.8345"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "calib.ece_before",
+      "value": 11.51,
+      "unit": "ECE before",
+      "where": "Section 2.6",
+      "definition": "ECE before",
+      "renders": [
+        "11.51"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    },
+    {
+      "id": "calib.ece_after",
+      "value": 3.45,
+      "unit": "ECE after",
+      "where": "Section 2.6",
+      "definition": "ECE after",
+      "renders": [
+        "3.45"
+      ],
+      "source": null,
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "declared",
+      "tol": null
+    }
+  ]
+}

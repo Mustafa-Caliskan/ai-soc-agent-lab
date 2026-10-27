@@ -1,0 +1,194 @@
+"""
+Accuracy gate for the manuscript.
+
+Unlike a string-equality check, this script *recomputes* every derived statistic
+from its (k, n) / (tp, fp, fn) / (b, c) inputs and compares the result with both
+the manifest and the rendered manuscript. A manifest that encodes a wrong number
+therefore fails, it does not lock the error in.
+
+Checks
+  1. derivation   : recompute pct / wilson / f1_binary / f1_macro / mcnemar / difference
+  2. source       : the value still equals the value at its JSON path
+  3. presence     : every `renders` string appears in docs/CI_MANUSCRIPT_EN.md
+  4. forbidden    : retired numbers and retired terminology are absent
+
+Exit code 1 on any failure.
+"""
+
+import io
+import json
+import math
+import re
+import sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+
+MANIFEST = "data/paper_metrics_manifest.json"
+MANUSCRIPT = "docs/CI_MANUSCRIPT_EN.md"
+TOL = 0.051
+
+FORBIDDEN = [
+    "76.9", "89.11", "95.50", "98.12", "86.50", "92.30", "49.03",
+    "four-layer", "five defenses", "32–50 ms", "32-50 ms",
+    "attention cross-talk", "same statistic to two decimals",
+    "statistically measurable", "Jackhhao", "SPML",
+    "74.10% to 53.30% even when paired with L0",
+]
+
+FAIL = []
+WARN = []
+
+
+def resolve(doc, path):
+    """Resolve a dotted path that may contain bracketed indices and dots in keys."""
+    if path in ("", None):
+        return doc
+    parts = path.split(".")
+    node = doc
+    i = 0
+    while i < len(parts):
+        part = parts[i]
+        # fold trailing numeric fragments back into the key when lookup fails
+        candidates = [part]
+        j = i + 1
+        while j < len(parts):
+            candidates.append(".".join(parts[i:j + 1]))
+            j += 1
+        matched = False
+        for cand in candidates:
+            key, _, idx = cand.partition("[")
+            try:
+                nxt = node[key] if key else node
+            except (KeyError, TypeError, IndexError):
+                continue
+            if idx:
+                nxt = nxt[int(idx.rstrip("]"))]
+            node = nxt
+            i += cand.count(".") + 1
+            matched = True
+            break
+        if not matched:
+            raise KeyError(f"cannot resolve '{path}' at '{part}'")
+    return node
+
+
+def wilson(k, n, z=1.96):
+    p = k / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+    return [round((centre - half) * 100, 2), round((centre + half) * 100, 2)]
+
+
+def mcnemar_exact(b, c):
+    n = b + c
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, i) for i in range(min(b, c) + 1)) / (2 ** n)
+    return min(1.0, 2 * tail)
+
+
+def check_derivation(entry):
+    d = entry["derive"]
+    stat = d["statistic"]
+    if stat == "pct":
+        return 100.0 * d["k"] / d["n"]
+    if stat == "wilson":
+        return wilson(d["k"], d["n"])
+    if stat == "f1_binary":
+        return 100.0 * 2 * d["tp"] / (2 * d["tp"] + d["fp"] + d["fn"])
+    if stat == "f1_macro":
+        f_mal = 2 * d["tp"] / (2 * d["tp"] + d["fp"] + d["fn"])
+        f_ben = 2 * d["tn"] / (2 * d["tn"] + d["fp"] + d["fn"])
+        return 100.0 * (f_mal + f_ben) / 2
+    if stat == "mcnemar":
+        return mcnemar_exact(d["b"], d["c"])
+    if stat == "difference":
+        return d["a"] - d["b"]
+    raise ValueError(f"unknown statistic {stat}")
+
+
+def close(actual, expected, tol=TOL):
+    if isinstance(expected, (list, tuple)):
+        if not isinstance(actual, (list, tuple)) or len(actual) != len(expected):
+            return False
+        return all(abs(a - e) <= tol for a, e in zip(actual, expected))
+    return abs(actual - expected) <= tol
+
+
+def main():
+    manifest = json.load(io.open(MANIFEST, encoding="utf-8"))
+    text = io.open(MANUSCRIPT, encoding="utf-8").read()
+
+    n_checked = 0
+    for entry in manifest["entries"]:
+        mid = entry["id"]
+        status = entry.get("status", "measured")
+        value = entry["value"]
+
+        # 1. recompute
+        if entry.get("derive"):
+            try:
+                recomputed = check_derivation(entry)
+            except Exception as exc:  # noqa: BLE001
+                FAIL.append(f"{mid}: derivation error {exc}")
+                continue
+            if not close(recomputed, value, entry.get("tol") or TOL):
+                FAIL.append(f"{mid}: recomputed {recomputed} != manifest {value}")
+            n_checked += 1
+
+        # 2. source agreement
+        if entry.get("source"):
+            try:
+                src = resolve(json.load(io.open(entry["source"]["file"], encoding="utf-8")),
+                              entry["source"]["path"])
+            except Exception as exc:  # noqa: BLE001
+                FAIL.append(f"{mid}: source path error {exc}")
+                src = None
+            if src is not None:
+                scale = entry.get("source_scale", 1.0)
+                tol = entry.get("tol") or TOL
+                try:
+                    if isinstance(src, list) and all(isinstance(x, (int, float)) for x in src):
+                        scaled = [float(x) * scale for x in src]
+                        if isinstance(value, list) and not close(scaled, value, tol):
+                            FAIL.append(f"{mid}: source {src} != manifest {value}")
+                    elif isinstance(src, (int, float)) and not isinstance(src, bool):
+                        if not close(float(src) * scale, value, tol):
+                            FAIL.append(f"{mid}: source {src} (x{scale}) != manifest {value}")
+                except (TypeError, ValueError):
+                    FAIL.append(f"{mid}: non-numeric source value {src!r}")
+                n_checked += 1
+
+        # 3. presence in the manuscript
+        if status != "pilot-observation":
+            for rendered in entry.get("renders", []):
+                if not rendered:
+                    continue
+                pattern = r"(?<![\d.,])" + re.escape(rendered) + r"(?![\d])"
+                if not re.search(pattern, text):
+                    FAIL.append(f"{mid}: '{rendered}' missing from manuscript")
+
+        if status == "pilot-observation":
+            WARN.append(f"{mid}: pilot observation, not backed by a released artefact")
+
+    for token in FORBIDDEN:
+        pattern = r"(?<![\d.,])" + re.escape(token) + r"(?![\d])" if token[0].isdigit() else re.escape(token)
+        if re.search(pattern, text):
+            FAIL.append(f"forbidden token still present: '{token}'")
+
+    print(f"entries          : {manifest['entry_count']}")
+    print(f"values verified  : {n_checked}")
+    for warn in WARN:
+        print(f"WARN: {warn}")
+    if FAIL:
+        print(f"\n=== {len(FAIL)} FAILURE(S) ===")
+        for failure in FAIL:
+            print(f"FAIL: {failure}")
+        return 1
+    print("\nPASS: all metrics recompute, match their sources, and appear as rendered.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

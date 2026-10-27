@@ -166,5 +166,26 @@
     "claim": "Focal loss for dense object detection",
     "real": "Focal Loss for Dense Object Detection",
     "how": "DOI:10.1109/ICCV.2017.324"
+  },
+  {
+    "n": 25,
+    "status": "OK",
+    "claim": "Mistral 7B",
+    "real": "Mistral 7B",
+    "how": "arXiv:2310.06825"
+  },
+  {
+    "n": 26,
+    "status": "OK",
+    "claim": "deepset/prompt-injections",
+    "real": "prompt-injections dataset card",
+    "how": "HF Datasets: deepset/prompt-injections"
+  },
+  {
+    "n": 27,
+    "status": "LICENCE-NOT-SPECIFIED",
+    "claim": "Rubend18 ChatGPT-Jailbreak-Prompts",
+    "real": "ChatGPT-Jailbreak-Prompts (GitHub)",
+    "how": "GitHub: rubend18/ChatGPT-Jailbreak-Prompts; repository states no licence, used for internal research evaluation only"
   }
 ]
