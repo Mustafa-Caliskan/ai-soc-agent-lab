@@ -836,6 +836,7 @@ def build_masked_manuscript():
     r_app_a.font.size = Pt(9)
     r_app_a.font.color.rgb = RGBColor(30, 41, 59)
 
+    doc.add_page_break()
     add_styled_heading(doc, "APPENDIX B. Empirical Transcripts: Silent CoT Exfiltration and Autonomous Leakage", level=2)
     
     add_body_p(doc,
