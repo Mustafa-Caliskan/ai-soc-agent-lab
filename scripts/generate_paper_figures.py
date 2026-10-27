@@ -1,3 +1,4 @@
+import fitz
 """
 Script to generate publication-grade 300 DPI figures for the Computers and Informatics (C&I) manuscript.
 Figure 1: NeuralShield Defense Architecture Pipeline
@@ -28,216 +29,276 @@ plt.rcParams['legend.fontsize'] = 9.5
 plt.rcParams['figure.titlesize'] = 13
 
 
+import fitz
+import os
+
+def generate_svg_architecture():
+    svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 720" width="1600" height="720">
+  <defs>
+    <!-- Markers for arrows -->
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563EB" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#DC2626" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16A34A" />
+    </marker>
+    
+    <!-- Filter for soft professional shadow -->
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.05" />
+    </filter>
+  </defs>
+
+  <style>
+    .font-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #0F172A; }
+    .font-subtitle { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; font-weight: 600; }
+    .font-badge { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; font-weight: 600; fill: #64748B; }
+    .font-bullet { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #334155; }
+    .font-tag { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; font-weight: 700; }
+    .font-pill { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5px; font-weight: 600; fill: #334155; }
+    .font-subgraph { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+  </style>
+
+  <!-- Canvas Background -->
+  <rect width="100%" height="100%" fill="#FFFFFF" />
+
+  <!-- ===================================================================== -->
+  <!-- 1. SUBGRAPH CONTAINERS (INGRESS & EGRESS)                             -->
+  <!-- ===================================================================== -->
+  <!-- Ingress Container -->
+  <rect x="260" y="45" width="655" height="630" rx="16" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="6,4" />
+  <rect x="280" y="32" width="410" height="24" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1" />
+  <text x="290" y="48" class="font-subgraph" fill="#1D4ED8">INGRESS SECURITY GATEWAY (Pre-LLM Inspection Pipeline)</text>
+
+  <!-- Egress Container -->
+  <rect x="1195" y="315" width="375" height="345" rx="16" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5" stroke-dasharray="6,4" />
+  <rect x="1215" y="302" width="280" height="24" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="1" />
+  <text x="1225" y="318" class="font-subgraph" fill="#15803D">EGRESS DLP GATEWAY (Output Sanitization)</text>
+
+  <!-- ===================================================================== -->
+  <!-- 2. CONNECTING ARROWS (ORTHOGONAL / STEP, DRAWN FIRST BEHIND PILLS)   -->
+  <!-- ===================================================================== -->
+  <!-- (1) Input -> L0 -->
+  <path d="M 225 350 L 285 350" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow-slate)" />
+
+  <!-- (2) L0 -> L1 (Step Up) -->
+  <path d="M 495 240 L 518 240 L 518 190 L 538 190" fill="none" stroke="#2563EB" stroke-width="1.8" marker-end="url(#arrow-blue)" />
+
+  <!-- (3) L0 -> L2 (Step Down) -->
+  <path d="M 495 470 L 518 470 L 518 500 L 538 500" fill="none" stroke="#2563EB" stroke-width="1.8" marker-end="url(#arrow-blue)" />
+
+  <!-- (4) L1 -> Arbiter (Step Down) -->
+  <path d="M 755 190 L 780 190 L 780 310 L 800 310" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#arrow-slate)" />
+
+  <!-- (5) L2 -> Arbiter (Step Up) -->
+  <path d="M 755 500 L 780 500 L 780 400 L 800 400" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#arrow-slate)" />
+
+  <!-- (6) Arbiter -> Safe Refusal (Branch 1: Threat Detected / Red Path) -->
+  <path d="M 890 310 L 925 310 L 925 200 L 955 200" fill="none" stroke="#DC2626" stroke-width="2.2" marker-end="url(#arrow-red)" />
+
+  <!-- (7) Arbiter -> Target LLM (Branch 2: Clean / Green Path) -->
+  <path d="M 890 400 L 925 400 L 925 500 L 955 500" fill="none" stroke="#16A34A" stroke-width="2.2" marker-end="url(#arrow-green)" />
+
+  <!-- (8) Target LLM -> Layer 3 Egress DLP (Straight) -->
+  <path d="M 1150 500 L 1215 500" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow-slate)" />
+
+  <!-- (9) Layer 3 DLP -> Sanitized Delivery (Straight) -->
+  <path d="M 1395 500 L 1420 500" fill="none" stroke="#16A34A" stroke-width="2" marker-end="url(#arrow-green)" />
+
+  <!-- ===================================================================== -->
+  <!-- 3. ARROW PILL LABELS (WITH WHITE BACKGROUND, NO OVERLAPS)             -->
+  <!-- ===================================================================== -->
+  <!-- Pill: Input to L0 -->
+  <rect x="230" y="338" width="50" height="22" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+  <text x="255" y="353" class="font-pill" text-anchor="middle">Payload</text>
+
+  <!-- Pill: S_reg -->
+  <rect x="760" y="240" width="40" height="20" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+  <text x="780" y="254" class="font-pill" fill="#D97706" text-anchor="middle">S_reg</text>
+
+  <!-- Pill: P_malicious -->
+  <rect x="760" y="445" width="40" height="20" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+  <text x="780" y="459" class="font-pill" fill="#7C3AED" text-anchor="middle">P_ml</text>
+
+  <!-- Pill: Threat Detected -->
+  <rect x="888" y="240" width="74" height="26" rx="5" fill="#FEF2F2" stroke="#F87171" stroke-width="1" />
+  <text x="925" y="256" class="font-tag" fill="#DC2626" text-anchor="middle">D_in = 1 (Threat)</text>
+
+  <!-- Pill: Clean Passed -->
+  <rect x="888" y="445" width="74" height="26" rx="5" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1" />
+  <text x="925" y="461" class="font-tag" fill="#16A34A" text-anchor="middle">D_in = 0 (Clean)</text>
+
+  <!-- Pill: Raw Streams -->
+  <rect x="1153" y="488" width="58" height="22" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+  <text x="1182" y="503" class="font-pill" text-anchor="middle">Streams</text>
+
+  <!-- ===================================================================== -->
+  <!-- 4. NODE CARDS (CLEAN MERMAID CARDS WITH EXACT COORDINATES)           -->
+  <!-- ===================================================================== -->
+
+  <!-- CARD 1: Untrusted Input Channel -->
+  <g filter="url(#card-shadow)">
+    <rect x="35" y="210" width="190" height="280" rx="8" fill="#FFFFFF" stroke="#64748B" stroke-width="1.5" />
+    <rect x="35" y="210" width="190" height="36" rx="8" fill="#F1F5F9" />
+    <path d="M 35 246 L 225 246" stroke="#E2E8F0" stroke-width="1" />
+    <text x="130" y="233" class="font-title" text-anchor="middle">Untrusted Input</text>
+    <text x="130" y="263" class="font-subtitle" fill="#475569" text-anchor="middle">[Ingress Channel]</text>
+    
+    <text x="50" y="300" class="font-bullet">• User Chat Prompts</text>
+    <text x="50" y="330" class="font-bullet">• RAG Knowledge Passages</text>
+    <text x="50" y="360" class="font-bullet">• Web / Tool Payloads</text>
+    <text x="50" y="390" class="font-bullet">• Adversarial Injections</text>
+    <text x="50" y="420" class="font-bullet">• Multi-turn Dialogues</text>
+    <text x="50" y="450" class="font-bullet">• Untrusted Files / PDFs</text>
+  </g>
+
+  <!-- CARD 2: Layer 0 (L0) Structural Normalizer -->
+  <g filter="url(#card-shadow)">
+    <rect x="285" y="140" width="210" height="420" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="2" />
+    <rect x="285" y="140" width="210" height="42" rx="8" fill="#EFF6FF" />
+    <path d="M 285 182 L 495 182" stroke="#DBEAFE" stroke-width="1" />
+    <text x="390" y="165" class="font-title" fill="#1D4ED8" text-anchor="middle">Layer 0 (L0)</text>
+    <text x="390" y="202" class="font-subtitle" fill="#2563EB" text-anchor="middle">Structural Normalizer</text>
+    <text x="390" y="222" class="font-badge" text-anchor="middle">Fast Pre-Filter (&lt;1 ms)</text>
+    
+    <text x="300" y="260" class="font-bullet">• Unicode NFKC Normalize</text>
+    <text x="300" y="295" class="font-bullet">• Zero-Width &amp; Tag Strip</text>
+    <text x="300" y="330" class="font-bullet">• Recursive Base64 Decode</text>
+    <text x="300" y="365" class="font-bullet">• Hex / ROT13 Deobfuscate</text>
+    <text x="300" y="400" class="font-bullet">• Cyrillic Homoglyph Fold</text>
+    <text x="300" y="435" class="font-bullet">• Stego Signature Detection</text>
+    <text x="300" y="470" class="font-bullet">• Extended Payload Emission</text>
+    <text x="300" y="505" class="font-bullet">• Control Char Scrubbing</text>
+    <text x="300" y="535" class="font-bullet">• Structural Delimiter Guard</text>
+  </g>
+
+  <!-- CARD 3: Layer 1 (L1) Deterministic Engine -->
+  <g filter="url(#card-shadow)">
+    <rect x="540" y="90" width="215" height="200" rx="8" fill="#FFFFFF" stroke="#D97706" stroke-width="1.8" />
+    <rect x="540" y="90" width="215" height="38" rx="8" fill="#FEF3C7" />
+    <path d="M 540 128 L 755 128" stroke="#FDE68A" stroke-width="1" />
+    <text x="647" y="114" class="font-title" fill="#B45309" text-anchor="middle">Layer 1 (L1): Fast Regex</text>
+    <text x="647" y="146" class="font-badge" fill="#92400E" text-anchor="middle">Compiled Rule Automata (&lt;1 ms)</text>
+    
+    <text x="555" y="175" class="font-bullet">• Multilingual Attack Regex</text>
+    <text x="555" y="202" class="font-bullet">• Persona Hijack / DAN Traps</text>
+    <text x="555" y="229" class="font-bullet">• Canary Exfiltration Traps</text>
+    <text x="555" y="256" class="font-bullet">• Fast-Path Rejection Trigger</text>
+  </g>
+
+  <!-- CARD 4: Layer 2 (L2) Semantic Classifier -->
+  <g filter="url(#card-shadow)">
+    <rect x="540" y="380" width="215" height="240" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.8" />
+    <rect x="540" y="380" width="215" height="38" rx="8" fill="#EDE9FE" />
+    <path d="M 540 418 L 755 418" stroke="#DDD6FE" stroke-width="1" />
+    <text x="647" y="404" class="font-title" fill="#6D28D9" text-anchor="middle">Layer 2 (L2): mmBERT</text>
+    <text x="647" y="436" class="font-badge" fill="#5B21B6" text-anchor="middle">Semantic Classifier (~50 ms CPU)</text>
+    
+    <text x="555" y="468" class="font-bullet">• 307M mmBERT-base ONNX</text>
+    <text x="555" y="498" class="font-bullet">• 12 Typological Languages</text>
+    <text x="555" y="528" class="font-bullet">• Calibrated P_malicious (0-100)</text>
+    <text x="555" y="558" class="font-bullet">• Decision Threshold: τ ≥ 0.70</text>
+    <text x="555" y="588" class="font-bullet">• Cross-lingual Generalization</text>
+  </g>
+
+  <!-- CARD 5: Adaptive OR-Gate Arbiter -->
+  <g filter="url(#card-shadow)">
+    <rect x="800" y="250" width="90" height="210" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" />
+    <text x="845" y="280" class="font-title" fill="#991B1B" text-anchor="middle">OR-Gate</text>
+    <text x="845" y="300" class="font-title" fill="#991B1B" text-anchor="middle">Arbiter</text>
+    
+    <line x1="810" y1="315" x2="880" y2="315" stroke="#FCA5A5" stroke-width="1" />
+    
+    <text x="845" y="338" class="font-subtitle" fill="#7F1D1D" text-anchor="middle">Policy Logic:</text>
+    <text x="845" y="362" font-family="'Segoe UI', sans-serif" font-size="9px" fill="#991B1B" text-anchor="middle">Stego == 1</text>
+    <text x="845" y="380" font-family="'Segoe UI', sans-serif" font-size="9px" fill="#991B1B" text-anchor="middle">∨ S_reg ≥ 60</text>
+    <text x="845" y="398" font-family="'Segoe UI', sans-serif" font-size="9px" fill="#991B1B" text-anchor="middle">∨ P_ml ≥ 70</text>
+    <text x="845" y="416" font-family="'Segoe UI', sans-serif" font-size="8.5px" fill="#991B1B" text-anchor="middle">∨ (Reg ∧ ML)</text>
+    
+    <rect x="812" y="432" width="66" height="18" rx="4" fill="#DC2626" />
+    <text x="845" y="445" font-family="'Segoe UI', sans-serif" font-size="9px" font-weight="700" fill="#FFFFFF" text-anchor="middle">DECISION</text>
+  </g>
+
+  <!-- CARD 6: Safe Refusal Gateway (Threat Detected) -->
+  <g filter="url(#card-shadow)">
+    <rect x="955" y="90" width="195" height="200" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" />
+    <rect x="955" y="90" width="195" height="38" rx="8" fill="#FEE2E2" />
+    <path d="M 955 128 L 1150 128" stroke="#FECACA" stroke-width="1" />
+    <text x="1052" y="114" class="font-title" fill="#991B1B" text-anchor="middle">Safe Refusal Gateway</text>
+    <text x="1052" y="146" class="font-badge" fill="#B91C1C" text-anchor="middle">Immediate Abort (Threat)</text>
+    
+    <text x="970" y="175" class="font-bullet">• HTTP 403 Forbidden</text>
+    <text x="970" y="202" class="font-bullet">• Neutral Security Advisory</text>
+    <text x="970" y="229" class="font-bullet">• Zero Target LLM Compute</text>
+    <text x="970" y="256" class="font-bullet">• SIEM Incident Logging</text>
+  </g>
+
+  <!-- CARD 7: Target LLM Execution Engine -->
+  <g filter="url(#card-shadow)">
+    <rect x="955" y="380" width="195" height="240" rx="8" fill="#FFFFFF" stroke="#334155" stroke-width="1.8" />
+    <rect x="955" y="380" width="195" height="38" rx="8" fill="#F1F5F9" />
+    <path d="M 955 418 L 1150 418" stroke="#E2E8F0" stroke-width="1" />
+    <text x="1052" y="404" class="font-title" fill="#0F172A" text-anchor="middle">Target LLM Engine</text>
+    <text x="1052" y="436" class="font-badge" fill="#475569" text-anchor="middle">Context-Isolated Runtime</text>
+    
+    <text x="970" y="468" class="font-bullet">• Enterprise / Edge LLM</text>
+    <text x="970" y="498" class="font-bullet">• System Canary Injection</text>
+    <text x="970" y="528" class="font-bullet">• Dual Generation Streams:</text>
+    <text x="980" y="554" class="font-bullet" fill="#64748B">- User Content Stream</text>
+    <text x="980" y="578" class="font-bullet" fill="#64748B">- Internal CoT Reasoning</text>
+  </g>
+
+  <!-- CARD 8: Layer 3 (L3) Egress DLP Sanitizer -->
+  <g filter="url(#card-shadow)">
+    <rect x="1215" y="375" width="180" height="250" rx="8" fill="#FFFFFF" stroke="#16A34A" stroke-width="2" />
+    <rect x="1215" y="375" width="180" height="38" rx="8" fill="#DCFCE7" />
+    <path d="M 1215 413 L 1395 413" stroke="#BBF7D0" stroke-width="1" />
+    <text x="1305" y="399" class="font-title" fill="#15803D" text-anchor="middle">Layer 3 (L3): DLP</text>
+    <text x="1305" y="431" class="font-badge" fill="#166534" text-anchor="middle">Dual-Stream Sanitizer</text>
+    
+    <text x="1227" y="462" class="font-bullet">• Real-Time Canary Masker</text>
+    <text x="1227" y="492" class="font-bullet">• Secret Credential Registry</text>
+    <text x="1227" y="522" class="font-bullet">• Luhn / PII Checksum DLP</text>
+    <text x="1227" y="552" class="font-bullet">• Dual-Stream SSE Scrub</text>
+    <text x="1227" y="582" class="font-bullet">• Suppresses Silent CoT</text>
+    <text x="1227" y="608" class="font-bullet">• [REDACTED_SECRET]</text>
+  </g>
+
+  <!-- CARD 9: Sanitized Delivery Output -->
+  <g filter="url(#card-shadow)">
+    <rect x="1420" y="375" width="140" height="250" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.6" />
+    <rect x="1420" y="375" width="140" height="38" rx="8" fill="#DCFCE7" />
+    <path d="M 1420 413 L 1560 413" stroke="#BBF7D0" stroke-width="1" />
+    <text x="1490" y="399" class="font-title" fill="#15803D" text-anchor="middle">Delivery</text>
+    <text x="1490" y="431" class="font-badge" fill="#166534" text-anchor="middle">[Client / User]</text>
+    
+    <text x="1432" y="465" class="font-bullet">• Confidentiality</text>
+    <text x="1432" y="500" class="font-bullet">• Zero Leakage</text>
+    <text x="1432" y="535" class="font-bullet">• Safe Response</text>
+    <text x="1432" y="570" class="font-bullet">• Verified Egress</text>
+    <text x="1432" y="605" class="font-bullet">• Clean Delivery</text>
+  </g>
+
+</svg>'''
+    return svg
+
 def generate_figure1():
     output_path = "docs/figures/figure1_architecture.png"
-    # High-resolution publication styling
-    plt.rcParams['font.family'] = 'sans-serif'
-    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Segoe UI', 'Helvetica']
-    
-    # 16:9 ratio, broad width for horizontal pipeline
-    fig, ax = plt.subplots(figsize=(15.5, 6.8), dpi=300)
-    ax.set_xlim(0, 15.5)
-    ax.set_ylim(0, 6.8)
-    ax.axis('off')
-
-    # Color Palette: Minimalist Mermaid-style (Corporate Slate / Clean Monochrome + Soft Branch Accents)
-    bg_canvas = '#FFFFFF'
-    
-    # Node Backgrounds
-    node_bg_default = '#F8FAFC'  # Very soft slate
-    node_bg_highlight = '#F1F5F9'
-    node_bg_block = '#FEF2F2'    # Soft muted red
-    node_bg_clean = '#F0FDF4'    # Soft muted green
-    
-    # Borders (Mermaid standard: subtle 1-1.5px lines)
-    border_default = '#64748B'   # Neutral slate
-    border_container = '#94A3B8' # Dashed container border
-    border_block = '#DC2626'     # Muted crimson
-    border_clean = '#16A34A'     # Muted forest green
-    border_accent = '#2563EB'    # Subtle tech blue
-    
-    # Typography colors
-    text_title = '#0F172A'       # Slate 900
-    text_desc = '#334155'        # Slate 700
-    text_meta = '#64748B'        # Slate 500
-
-    # Helper: Draw Container Subgraph (Mermaid subgraph box)
-    def draw_subgraph(x, y, w, h, label, bg='#F8FAFC', border='#CBD5E1'):
-        rect = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.08,rounding_size=0.15",
-                                      facecolor=bg, edgecolor=border, linewidth=1.2, linestyle='--')
-        ax.add_patch(rect)
-        # Subgraph title tag at top-left
-        ax.text(x + 0.25, y + h - 0.25, label, fontsize=9.0, fontweight='bold', color='#475569',
-                ha='left', va='top')
-
-    # Helper: Draw Mermaid Node
-    def draw_node(x, y, w, h, title, items=None, subtitle=None, bg=node_bg_default, border=border_default, title_col=text_title):
-        rect = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.05,rounding_size=0.1",
-                                      facecolor=bg, edgecolor=border, linewidth=1.4)
-        ax.add_patch(rect)
-        
-        # Center title
-        title_y = y + h - 0.25 if (items or subtitle) else y + h/2
-        va_mode = 'top' if (items or subtitle) else 'center'
-        ax.text(x + w/2, title_y, title, fontsize=9.5, fontweight='bold', color=title_col,
-                ha='center', va=va_mode)
-        
-        # Subtitle (optional badge/latency)
-        curr_y = title_y - 0.28
-        if subtitle:
-            ax.text(x + w/2, curr_y, subtitle, fontsize=7.8, fontweight='semibold', color=text_meta,
-                    ha='center', va='top')
-            curr_y -= 0.25
-            
-        # Items / bullets
-        if items:
-            item_text = "\n".join([f"• {it}" for it in items])
-            ax.text(x + 0.18, y + 0.15, item_text, fontsize=7.8, color=text_desc,
-                    ha='left', va='bottom', linespacing=1.35)
-
-    # -------------------------------------------------------------
-    # 1. MERMAID SUBGRAPHS (INGRESS & EGRESS)
-    # -------------------------------------------------------------
-    # Ingress Subgraph
-    draw_subgraph(2.35, 0.4, 6.3, 6.0, "subgraph Ingress_Security_Gateway [NeuralShield Ingress Pipeline]")
-
-    # Egress Subgraph
-    draw_subgraph(11.1, 0.4, 4.15, 3.4, "subgraph Egress_Security_Gateway [NeuralShield Egress DLP]")
-
-    # -------------------------------------------------------------
-    # 2. NODES (7 STRICT COLUMNS, NO OVERLAPS)
-    # -------------------------------------------------------------
-    # Col 1: Untrusted Input Channel (x = 0.3)
-    draw_node(0.3, 2.3, 1.7, 2.3,
-              "Untrusted Input\nChannel",
-              items=["User Chat Prompts", "RAG Documents", "Tool / Web Payloads", "Adversarial Inputs"],
-              subtitle="[Ingress Source]")
-
-    # Col 2: Layer 0: Structural Normalizer (x = 2.6)
-    draw_node(2.6, 2.0, 1.9, 2.9,
-              "Layer 0 (L0)\nStructural Normalizer",
-              items=["Unicode NFKC Normalize", "Zero-Width / Tag Stripping", "Recursive Base64/Hex/ROT",
-                     "Cyrillic Homoglyph Fold", "Stego Signature Flagging", "Extended Payload Gen."],
-              subtitle="[Fast Pre-Filter]",
-              border=border_accent)
-
-    # Col 3: Parallel Detection Engines (x = 4.85)
-    # Top: Layer 1 Regex
-    draw_node(4.85, 3.75, 2.1, 2.2,
-              "Layer 1 (L1)\nDeterministic Regex",
-              items=["Signature Rule Automata", "Jailbreak / DAN Traps", "Canary Leakage Detection", "Fast-Path Execution"],
-              subtitle="[Heuristic: < 1.0 ms]")
-
-    # Bottom: Layer 2 mmBERT Classifier
-    draw_node(4.85, 0.85, 2.1, 2.5,
-              "Layer 2 (L2)\nmmBERT Classifier",
-              items=["307M mmBERT ONNX", "12-Language Multilingual", "Calibrated P_malicious (0-100)", "Reject Threshold tau >= 0.70"],
-              subtitle="[Semantic: CPU ~50 ms]",
-              border=border_accent)
-
-    # Col 4: Adaptive OR-Gate Arbiter (x = 7.3)
-    draw_node(7.3, 2.0, 1.15, 2.8,
-              "Adaptive\nOR-Gate\nArbiter",
-              subtitle="[Decision]",
-              items=["Stego == 1\nv S_reg >= 60\nv P_ml >= 70\nv (Regex & ML)"],
-              bg='#FEF2F2', border=border_block, title_col=border_block)
-
-    # Col 5: Branches (x = 9.0)
-    # Top Branch: Safe Refusal (Blocked)
-    draw_node(9.0, 4.3, 1.8, 1.9,
-              "Safe Refusal\nGateway",
-              items=["HTTP 403 Forbidden", "Sanitized Alert Msg", "Zero LLM Compute", "Event Logged"],
-              subtitle="[THREAT DETECTED]",
-              bg=node_bg_block, border=border_block, title_col=border_block)
-
-    # Bottom Branch: Target LLM Engine (Clean / Passed)
-    draw_node(9.0, 0.9, 1.8, 2.3,
-              "Target LLM\nExecution Engine",
-              items=["Enterprise / Edge LLM", "Isolated Context Runtime", "Private Canary Secrets",
-                     "Streams Emitted:", " - User Content Stream", " - Internal CoT Reasoning"],
-              subtitle="[CLEAN / PASSED]",
-              bg=node_bg_default, border=border_default)
-
-    # Col 6: Layer 3: Egress DLP Sanitizer (x = 11.35)
-    draw_node(11.35, 0.9, 2.0, 2.3,
-              "Layer 3 (L3)\nEgress DLP Sanitizer",
-              items=["Real-Time Canary Masker", "Secret Registry Check", "Dual-Stream Scrubbing", "Suppresses Silent CoT", "Pre-Client Token Filter"],
-              subtitle="[Egress Protection]",
-              bg=node_bg_clean, border=border_clean, title_col=border_clean)
-
-    # Col 7: Sanitized Delivery Output (x = 13.65)
-    draw_node(13.65, 0.9, 1.45, 2.3,
-              "Sanitized\nDelivery",
-              items=["Confidentiality", "Zero Leakage", "Clean Response", "Client Safe"],
-              subtitle="[End User / App]",
-              bg=node_bg_clean, border=border_clean, title_col=border_clean)
-
-    # -------------------------------------------------------------
-    # 3. MERMAID CONNECTORS (CLEAN ORTHOGONAL & HORIZONTAL ARROWS)
-    # -------------------------------------------------------------
-    arrow_std = dict(arrowstyle="-|>", lw=1.5, color="#475569", mutation_scale=12)
-    arrow_red = dict(arrowstyle="-|>", lw=1.8, color=border_block, mutation_scale=13)
-    arrow_green = dict(arrowstyle="-|>", lw=1.8, color=border_clean, mutation_scale=13)
-
-    # (1) Input -> L0
-    ax.annotate("", xy=(2.6, 3.45), xytext=(2.0, 3.45), arrowprops=arrow_std)
-
-    # (2) L0 -> L1 (Step connector to top)
-    ax.annotate("", xy=(4.85, 4.85), xytext=(4.5, 4.85), arrowprops=arrow_std)
-    ax.plot([4.5, 4.5], [3.8, 4.85], color="#475569", lw=1.5)
-    ax.plot([4.5, 4.85], [4.85, 4.85], color="#475569", lw=1.5)
-
-    # (3) L0 -> L2 (Step connector to bottom)
-    ax.annotate("", xy=(4.85, 2.1), xytext=(4.5, 2.1), arrowprops=arrow_std)
-    ax.plot([4.5, 4.5], [3.1, 2.1], color="#475569", lw=1.5)
-    ax.plot([4.5, 4.85], [2.1, 2.1], color="#475569", lw=1.5)
-
-    # (4) L1 -> Arbiter (Step connector down to Arbiter)
-    ax.annotate("", xy=(7.3, 3.8), xytext=(7.05, 3.8), arrowprops=arrow_std)
-    ax.plot([6.95, 7.05], [4.85, 4.85], color="#475569", lw=1.5)
-    ax.plot([7.05, 7.05], [4.85, 3.8], color="#475569", lw=1.5)
-    ax.text(7.05, 4.4, "S_reg", fontsize=7.2, color='#475569', ha='center',
-            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#CBD5E1', lw=0.6))
-
-    # (5) L2 -> Arbiter (Step connector up to Arbiter)
-    ax.annotate("", xy=(7.3, 2.8), xytext=(7.05, 2.8), arrowprops=arrow_std)
-    ax.plot([6.95, 7.05], [2.1, 2.1], color="#475569", lw=1.5)
-    ax.plot([7.05, 7.05], [2.1, 2.8], color="#475569", lw=1.5)
-    ax.text(7.05, 2.35, "P_ml", fontsize=7.2, color='#475569', ha='center',
-            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#CBD5E1', lw=0.6))
-
-    # (6) Arbiter -> Safe Refusal (Branch 1: Threat Detected / Red Path)
-    # Right-angle elbow connector: Up from Arbiter, then Right to Safe Refusal
-    ax.annotate("", xy=(9.0, 5.25), xytext=(8.7, 5.25), arrowprops=arrow_red)
-    ax.plot([8.45, 8.7], [3.8, 3.8], color=border_block, lw=1.8)
-    ax.plot([8.7, 8.7], [3.8, 5.25], color=border_block, lw=1.8)
-    ax.plot([8.7, 9.0], [5.25, 5.25], color=border_block, lw=1.8)
-    ax.text(8.7, 4.5, "D_in = 1\n(Threat)", fontsize=7.2, fontweight='bold', color=border_block, ha='center',
-            bbox=dict(boxstyle='round,pad=0.2', facecolor='#FEF2F2', edgecolor='#FCA5A5', lw=0.8))
-
-    # (7) Arbiter -> Target LLM (Branch 2: Clean / Passed / Green Path)
-    # Right-angle elbow connector: Down from Arbiter, then Right to Target LLM
-    ax.annotate("", xy=(9.0, 2.05), xytext=(8.7, 2.05), arrowprops=arrow_green)
-    ax.plot([8.45, 8.7], [2.8, 2.8], color=border_clean, lw=1.8)
-    ax.plot([8.7, 8.7], [2.8, 2.05], color=border_clean, lw=1.8)
-    ax.plot([8.7, 9.0], [2.05, 2.05], color=border_clean, lw=1.8)
-    ax.text(8.7, 2.45, "D_in = 0\n(Clean)", fontsize=7.2, fontweight='bold', color=border_clean, ha='center',
-            bbox=dict(boxstyle='round,pad=0.2', facecolor='#F0FDF4', edgecolor='#86EFAC', lw=0.8))
-
-    # (8) Target LLM -> Layer 3 Egress DLP (Straight horizontal arrow)
-    ax.annotate("", xy=(11.35, 2.05), xytext=(10.8, 2.05), arrowprops=arrow_std)
-    ax.text(11.08, 2.25, "Raw Streams\n(Content + CoT)", fontsize=6.8, color='#475569', ha='center',
-            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#CBD5E1', lw=0.6))
-
-    # (9) Layer 3 DLP -> Sanitized Delivery (Straight horizontal arrow)
-    ax.annotate("", xy=(13.65, 2.05), xytext=(13.35, 2.05), arrowprops=arrow_green)
-    ax.text(13.5, 2.25, "Clean\nTokens", fontsize=6.8, color=border_clean, ha='center',
-            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#86EFAC', lw=0.6))
-
-    plt.tight_layout()
-    fig.savefig(output_path, dpi=300, bbox_inches='tight', facecolor=bg_canvas)
-    plt.close()
-    print(f"Mermaid-style Figure 1 generated successfully: {output_path}")
+    svg_data = generate_svg_architecture()
+    doc = fitz.open(stream=svg_data.encode('utf-8'), filetype='svg')
+    page = doc[0]
+    # DPI 300 for crisp publication quality
+    pix = page.get_pixmap(dpi=300)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    pix.save(output_path)
+    doc.close()
+    print(f"Successfully rendered SVG to {output_path} ({pix.width}x{pix.height})")
 
 
 def generate_figure2():
