@@ -1,7 +1,7 @@
 <!-- AUTO-GENERATED from NeuralShield_CI_Manuscript.docx by scripts/docx_to_md.py.
      Do not edit by hand: edit scripts/generate_ci_docx.py and re-run both. -->
 
-NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation
+NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models
 
 | [Masked for Blind Review] * |
 |---|
@@ -20,7 +20,7 @@ Prompt injection, instruction hijacking, and confidential data extraction threat
 
 Keywords: Canary leakage, Large language models, Multilingual security, Prompt injection, Reasoning exfiltration
 
-| Cite this paper as: | [Masked for Blind Review], NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation, Computers and Informatics, 2026; https://doi.org/10.62189/ci.0000000 |
+| Cite this paper as: | [Masked for Blind Review], NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models, Computers and Informatics, 2026; https://doi.org/10.62189/ci.0000000 |
 |---|---|
 
 ## 1. INTRODUCTION

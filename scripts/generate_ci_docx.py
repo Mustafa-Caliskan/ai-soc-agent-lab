@@ -272,7 +272,7 @@ def build_title_page():
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.paragraph_format.space_before = Pt(18)
     p_title.paragraph_format.space_after = Pt(18)
-    r_title = p_title.add_run("NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation")
+    r_title = p_title.add_run("NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models")
     r_title.font.name = 'Times New Roman'
     r_title.font.size = Pt(16)
     r_title.bold = True
@@ -357,7 +357,7 @@ def build_masked_manuscript():
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.paragraph_format.space_before = Pt(12)
     p_title.paragraph_format.space_after = Pt(14)
-    r_title = p_title.add_run("NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation")
+    r_title = p_title.add_run("NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models")
     r_title.font.name = 'Times New Roman'
     r_title.font.size = Pt(16)
     r_title.bold = True
@@ -445,7 +445,7 @@ def build_masked_manuscript():
     c_c0 = tbl_cite.rows[0].cells[0]
     format_cell_text(c_c0, "Cite this paper as:", bold=True, size=8)
     c_c1 = tbl_cite.rows[0].cells[1]
-    format_cell_text(c_c1, "[Masked for Blind Review], NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation, Computers and Informatics, 2026; https://doi.org/10.62189/ci.0000000", size=8)
+    format_cell_text(c_c1, "[Masked for Blind Review], NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models, Computers and Informatics, 2026; https://doi.org/10.62189/ci.0000000", size=8)
     set_cell_borders(c_c0, top={'val': 'single', 'sz': 4, 'color': '94A3B8'}, bottom={'val': 'single', 'sz': 4, 'color': '94A3B8'})
     set_cell_borders(c_c1, top={'val': 'single', 'sz': 4, 'color': '94A3B8'}, bottom={'val': 'single', 'sz': 4, 'color': '94A3B8'})
     set_cell_margins(c_c0, top=40, bottom=40, left=60, right=60)

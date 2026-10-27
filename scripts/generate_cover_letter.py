@@ -67,7 +67,7 @@ def build_cover_letter():
     p_sub.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p_sub.paragraph_format.space_after = Pt(12)
     p_sub.paragraph_format.space_before = Pt(4)
-    r_sub = p_sub.add_run("SUBJECT: Submission of Original Research Article — \"NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation\"")
+    r_sub = p_sub.add_run("SUBJECT: Submission of Original Research Article — \"NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models\"")
     r_sub.font.name = 'Times New Roman'
     r_sub.font.size = Pt(11)
     r_sub.bold = True
@@ -76,7 +76,7 @@ def build_cover_letter():
     add_p("Dear Editor-in-Chief and Esteemed Members of the Editorial Board,", space_after=8, align=WD_ALIGN_PARAGRAPH.LEFT)
 
     # Body Paragraph 1: Submission statement
-    add_p("On behalf of my co-author Prof. Dr. Ali Hakan IŞIK and myself, I am pleased to submit our original research manuscript entitled \"NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation\" for consideration for publication as a Research Article in Computers and Informatics (C&I).")
+    add_p("On behalf of my co-author Prof. Dr. Ali Hakan IŞIK and myself, I am pleased to submit our original research manuscript entitled \"NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models\" for consideration for publication as a Research Article in Computers and Informatics (C&I).")
 
     # Body Paragraph 2: Core Motivation & Novelty
     add_p("In this paper we show that locally deployed and API-served LLMs disclose secrets embedded in their system prompts, that a non-trivial share of this disclosure occurs only in the reasoning channel and is therefore invisible to output-only inspection, and that a four-layer peripheral gateway removes the leak without touching the model. This is significant because enterprises increasingly delegate operational credentials to LLM assistants while measuring safety on the final response alone.")
@@ -141,11 +141,11 @@ def build_cover_letter():
 *Computers and Informatics* (C&I), DergiPark Academic Publishing  
 ISSN: 2757-8259 | https://dergipark.org.tr/en/pub/ci  
 
-**SUBJECT: Submission of Original Research Article — "NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation"**
+**SUBJECT: Submission of Original Research Article — "NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models"**
 
 Dear Editor-in-Chief and Esteemed Members of the Editorial Board,
 
-On behalf of my co-author Prof. Dr. Ali Hakan IŞIK and myself, I am pleased to submit our original research manuscript entitled **"NeuralShield: A Multilingual Multi-Layer Application Security Gateway for Large Language Models and Source-Disjoint Fair Evaluation"** for consideration for publication as a Research Article in *Computers and Informatics* (C&I).
+On behalf of my co-author Prof. Dr. Ali Hakan IŞIK and myself, I am pleased to submit our original research manuscript entitled **"NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injection and Data Exfiltration in Large Language Models"** for consideration for publication as a Research Article in *Computers and Informatics* (C&I).
 
 In this paper we show that locally deployed and API-served LLMs disclose secrets embedded in their system prompts, that a non-trivial share of this disclosure occurs only in the reasoning channel and is therefore invisible to output-only inspection, and that a four-layer peripheral gateway removes the leak without touching the model. This is significant because enterprises increasingly delegate operational credentials to LLM assistants while measuring safety on the final response alone.
 
