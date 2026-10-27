@@ -326,6 +326,7 @@ def build_title_page():
     add_body_p(doc, "All experiments were conducted strictly on synthetic test prompts, sanitized open-source benchmarks, and authorized local canary variables. No unauthorized penetration testing or testing against unconsenting third-party production systems was conducted.", bold_prefix="Ethical Compliance: ")
 
     os.makedirs("docs", exist_ok=True)
+    add_footer_page_number(doc.sections[0])
     doc.save("docs/Title_Page.docx")
     print("Successfully built: docs/Title_Page.docx")
 
@@ -585,7 +586,7 @@ def build_masked_manuscript():
     ]
     create_table_from_data(doc, t3_headers, t3_rows, [3.4, 4.0, 2.2, 2.2, 2.2, 2.6])
 
-    add_body_p(doc, "While Post-Training Quantization (PTQ) to INT8 reduces storage by ~4x (from 1.23 GB to 294 MB), it reduces OOD recall by 20.80 percentage points (falling from 74.10% to 53.30% even when paired with L0 normalization). The mathematical mechanism behind this failure is activation distribution overflow: post-training dynamic quantization maps continuous activations to 8-bit integers based on calibration statistics gathered from standard text distributions. When confronted with adversarial out-of-distribution inputs (such as homoglyphs, zero-width steganography, or low-resource language shifts), intermediate transformer activations exceed the dynamic clipping thresholds. This causes severe saturation clipping, degrading logit separation. Consequently, we formulate a crucial operational guideline: LLM security classifiers should not be deployed under INT8 PTQ without rigorous OOD verification. NeuralShield is permanently standardized on FP32 ONNX execution, delivering a predictable 32–50 ms latency profile on commodity dual-core CPUs.", )
+    add_body_p(doc, "While Post-Training Quantization (PTQ) to INT8 reduces storage by ~4× (from 1.23 GB to 294 MB), it reduces OOD recall by 20.80 percentage points (falling from 74.10% to 53.30% even when paired with L0 normalization). The mathematical mechanism behind this failure is activation distribution overflow: post-training dynamic quantization maps continuous activations to 8-bit integers based on calibration statistics gathered from standard text distributions. When confronted with adversarial out-of-distribution inputs (such as homoglyphs, zero-width steganography, or low-resource language shifts), intermediate transformer activations exceed the dynamic clipping thresholds. This causes severe saturation clipping, degrading logit separation. Consequently, we formulate a crucial operational guideline: LLM security classifiers should not be deployed under INT8 PTQ without rigorous OOD verification. NeuralShield is permanently standardized on FP32 ONNX execution, delivering a predictable 32–50 ms latency profile on commodity dual-core CPUs.", )
 
     add_styled_heading(doc, "3.4. End-to-End Multi-Layer Pipeline Ablation", level=2)
     add_body_p(doc, "To quantify the individual contribution of each defensive layer, we evaluated the complete pipeline across both the source-disjoint fair set (N=2,849) and the curated red-team suite (N=161). Table 4 outlines the structural ablation.")
@@ -749,7 +750,7 @@ def build_masked_manuscript():
     t9_rows = [
         ["Mistral-7B: 4-bit -> Pure FP16", "-12.00 pp", "-10.89 pp", "Consistent direction, but non-significant (p = 0.071)"],
         ["Llama-3.1-8B: 4-bit -> Pure FP16", "-8.00 pp", "+1.98 pp", "Direction flipped! FP16 leaks more than 4-bit (p = 0.804)"],
-        ["Prompt Hardening: Std -> Hardened", "-24.00 pp", "-7.92 pp", "Effect size attenuated by 3.0x; non-significant (p = 0.115)"]
+        ["Prompt Hardening: Std -> Hardened", "-24.00 pp", "-7.92 pp", "Effect size attenuated by 3.0×; non-significant (p = 0.115)"]
     ]
     create_table_from_data(doc, t9_headers, t9_rows, [4.4, 2.6, 2.6, 6.4])
     
