@@ -29,131 +29,207 @@ plt.rcParams['figure.titlesize'] = 13
 
 
 def generate_figure1():
-    """Generates Figure 1: NeuralShield Multi-Layer Pipeline Architecture."""
-    fig, ax = plt.subplots(figsize=(10.5, 6.2), dpi=300)
+    output_path = "docs/figures/figure1_architecture.png"
+    # Set high quality academic styling
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Helvetica']
+    
+    fig, ax = plt.subplots(figsize=(14.0, 7.6), dpi=300)
+    ax.set_xlim(0, 14.5)
+    ax.set_ylim(0, 7.8)
     ax.axis('off')
 
-    # Color palette
-    c_input = '#EBF3FB'
-    c_l0 = '#E0F2FE'
-    c_l1 = '#FEF3C7'
-    c_l2 = '#EDE9FE'
-    c_gate = '#FEE2E2'
-    c_llm = '#F1F5F9'
-    c_l3 = '#DCFCE7'
-    c_out = '#F0FDF4'
-    c_block = '#FFE4E6'
+    # Color Palette: Clean, professional, high-end academic
+    # Backgrounds
+    bg_canvas = '#FFFFFF'
+    c_group_ingress = '#F8FAFC'
+    c_group_egress = '#F0FDF4'
+    c_group_exec = '#F8FAFC'
     
-    border_dark = '#334155'
-    border_blue = '#0284C7'
+    c_input_bg = '#F1F5F9'
+    c_l0_bg = '#EFF6FF'
+    c_l1_bg = '#FFFBEB'
+    c_l2_bg = '#FAF5FF'
+    c_gate_bg = '#FEF2F2'
+    c_llm_bg = '#F8FAFC'
+    c_l3_bg = '#ECFDF5'
+    c_refusal_bg = '#FEF2F2'
+    c_out_bg = '#F0FDF4'
+    
+    # Borders
+    border_slate = '#94A3B8'
+    border_blue = '#2563EB'
     border_amber = '#D97706'
     border_purple = '#7C3AED'
     border_red = '#DC2626'
-    border_green = '#16A34A'
+    border_green = '#059669'
+    border_dark = '#334155'
+    
+    # Text colors
+    tx_dark = '#0F172A'
+    tx_body = '#334155'
+    tx_sub = '#64748B'
 
-    # Box Helper
-    def draw_box(x, y, w, h, bg, border, title, desc, title_col='#0F172A', rad=0.03):
-        rect = patches.FancyBboxPatch((x, y), w, h, boxstyle=f"round,pad={rad}",
-                                      facecolor=bg, edgecolor=border, linewidth=1.5)
-        ax.add_patch(rect)
-        ax.text(x + w/2, y + h - 0.16, title, ha='center', va='top',
-                fontsize=10.5, fontweight='bold', color=title_col)
-        ax.text(x + w/2, y + 0.12, desc, ha='center', va='bottom',
-                fontsize=8.5, color='#334155', linespacing=1.35)
+    # Helper: Draw Container Group
+    def draw_container(x, y, w, h, bg, border, label, label_col='#475569'):
+        box = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.08,rounding_size=0.15",
+                                     facecolor=bg, edgecolor=border, linewidth=1.2, linestyle='--')
+        ax.add_patch(box)
+        ax.text(x + 0.25, y + h - 0.28, label, fontsize=9.5, fontweight='bold', color=label_col,
+                ha='left', va='top')
 
-    # 1. Incoming Untrusted Input
-    draw_box(0.05, 0.68, 0.22, 0.24, c_input, border_dark,
-             "Untrusted Input\nChannel",
-             "• User Chat Prompts\n• Untrusted Documents\n• Tool / Web Payloads",
-             '#0F172A')
+    # Helper: Draw Component Box
+    def draw_component(x, y, w, h, bg, border, title, items, title_col=tx_dark, badge=""):
+        box = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.06,rounding_size=0.12",
+                                     facecolor=bg, edgecolor=border, linewidth=1.4)
+        ax.add_patch(box)
+        
+        # Title
+        ax.text(x + w/2, y + h - 0.22, title, fontsize=10.0, fontweight='bold', color=title_col,
+                ha='center', va='top')
+        
+        # Optional Badge
+        if badge:
+            bx = x + w - 0.15
+            by = y + h - 0.15
+            ax.text(bx, by, badge, fontsize=7.5, fontweight='bold', color='#FFFFFF',
+                    bbox=dict(boxstyle='round,pad=0.2', facecolor=title_col, edgecolor='none'),
+                    ha='right', va='top')
+            
+        # Items / Description
+        if items:
+            item_text = "\n".join([f"•  {it}" for it in items])
+            ax.text(x + 0.2, y + 0.18, item_text, fontsize=8.2, color=tx_body,
+                    ha='left', va='bottom', linespacing=1.4)
 
-    # 2. Layer 0: Structural Normalization
-    draw_box(0.32, 0.68, 0.29, 0.24, c_l0, border_blue,
-             "Layer 0: Structural Normalizer",
-             "• NFKC Normalization\n• Zero-Width & Tag Stripping\n• Base64 / Hex / ROT13 Decode\n• Homoglyph Canonicalization",
-             border_blue)
+    # -------------------------------------------------------------
+    # 1. CONTAINERS (ZONING)
+    # -------------------------------------------------------------
+    # Ingress Gateway Container
+    draw_container(2.7, 0.4, 6.0, 7.0, c_group_ingress, '#CBD5E1',
+                   "NEURALSHIELD INGRESS SECURITY GATEWAY (Pre-LLM Inspection)", '#1E40AF')
+    
+    # -------------------------------------------------------------
+    # 2. COMPONENTS
+    # -------------------------------------------------------------
+    # [A] Untrusted Input Channel
+    draw_component(0.3, 3.1, 2.0, 2.4, c_input_bg, border_slate,
+                   "Untrusted Input\nChannel",
+                   ["User Chat Prompts", "RAG Documents", "Web / Tool Payloads", "Adversarial Prompts"],
+                   title_col=tx_dark)
 
-    # 3. Layer 1: Deterministic Pattern & Canary
-    draw_box(0.66, 0.68, 0.29, 0.24, c_l1, border_amber,
-             "Layer 1: Deterministic Engine",
-             "• Multilingual Injection Patterns\n• Persona & Jailbreak Regex\n• Canary Token Leakage Traps\n• <1 ms Fast-Path Execution",
-             border_amber)
+    # [B] Layer 0: Structural Normalizer
+    draw_component(3.0, 2.6, 2.3, 3.3, c_l0_bg, border_blue,
+                   "Layer 0 (L0)\nStructural Normalizer",
+                   ["Unicode NFKC Normalize", "Zero-Width & Tag Strip", "Recursive Base64/Hex/ROT",
+                    "Cyrillic Homoglyph Fold", "Stego Signature Flagging", "Generates Extended Text"],
+                   title_col=border_blue, badge="Fast L0")
 
-    # 4. Layer 2: Multilingual Transformer Classifier
-    draw_box(0.32, 0.36, 0.29, 0.24, c_l2, border_purple,
-             "Layer 2: Semantic Transformer",
-             "• mmBERT-base (307M) ONNX\n• 12-Language Multilingual Scope\n• Calibrated Risk Score (0-100)\n• Rejection Threshold: tau >= 0.70",
-             border_purple)
+    # [C] Layer 1: Deterministic Engine
+    draw_component(5.8, 5.0, 2.6, 2.0, c_l1_bg, border_amber,
+                   "Layer 1 (L1): Fast Regex",
+                   ["Compiled Signature Rules", "Persona / DAN Traps", "Canary Exfiltration Detect", "<1.0 ms Heuristic Gate"],
+                   title_col=border_amber, badge="< 1 ms")
 
-    # 5. OR-Gate Arbiter
-    draw_box(0.66, 0.36, 0.29, 0.24, c_gate, border_red,
-             "Deterministic OR-Gate Arbiter",
-             "hard_stego OR regex >= 60\nOR ml_risk >= 70\nOR (regex_hit AND ml_risk >= 50)",
-             border_red)
+    # [D] Layer 2: Semantic Transformer Classifier
+    draw_component(5.8, 2.7, 2.6, 2.0, c_l2_bg, border_purple,
+                   "Layer 2 (L2): mmBERT Classifier",
+                   ["307M mmBERT-base ONNX", "12-Language Multilingual", "Calibrated P_malicious (0-100)", "Threshold tau >= 0.70"],
+                   title_col=border_purple, badge="CPU ~50ms")
 
-    # 6. Target LLM Execution Barrier
-    draw_box(0.32, 0.05, 0.29, 0.22, c_llm, border_dark,
-             "Target LLM Execution",
-             "• Context-Isolated Runtime\n• Greedy / Sampling Inference\n• Internal CoT + Content Streams",
-             '#0F172A')
+    # [E] Deterministic OR-Gate Arbiter
+    draw_component(5.8, 0.6, 2.6, 1.8, c_gate_bg, border_red,
+                   "Adaptive OR-Gate Arbiter",
+                   ["D_in = 1  if: (Stego OR S_reg>=60", "OR P_ml>=70 OR (Regex & ML>=50))", "Strict Asymmetric Policy", "Zero False Dismissals"],
+                   title_col=border_red, badge="Arbiter")
 
-    # 7. Layer 3: Egress DLP Sanitizer
-    draw_box(0.66, 0.05, 0.29, 0.22, c_l3, border_green,
-             "Layer 3: Egress DLP Sanitizer",
-             "• Real-Time Canary Token Trap\n• API Key & Credential Masking\n• Luhn / TCKN Checksum DLP\n• CoT & SSE Stream Scrubbing",
-             border_green)
+    # [F] Safe Refusal Gateway (Threat Detected)
+    draw_component(9.3, 5.4, 2.3, 1.8, c_refusal_bg, border_red,
+                   "Safe Refusal Gateway\n(Threat Abort)",
+                   ["HTTP 403 Forbidden", "Sanitized Security Warning", "Zero LLM GPU Compute", "Security Event Logged"],
+                   title_col=border_red, badge="BLOCK")
 
-    # 8. Safe Refusal (Blocked)
-    draw_box(0.05, 0.36, 0.22, 0.24, c_block, border_red,
-             "Safe Refusal Gateway\n(Immediate Abort)",
-             "• HTTP 403 Forbidden\n• Sanitized Security Warning\n• Zero LLM Computation Cost",
-             border_red)
+    # [G] Target LLM Execution Engine
+    draw_component(9.3, 0.8, 2.3, 2.4, c_llm_bg, border_dark,
+                   "Target LLM Engine\n(Context Isolated)",
+                   ["Enterprise / Edge LLM", "Greedy / Sampled Inference", "Private System Canary",
+                    "Dual Generation Streams:", " - Final Content Stream", " - Internal CoT Reasoning"],
+                   title_col=tx_dark, badge="LLM RUN")
 
-    # 9. Clean Output
-    draw_box(0.05, 0.05, 0.22, 0.22, c_out, border_green,
-             "Sanitized Output\nto User / System",
-             "• Confidentiality Guaranteed\n• Neutralized Injections\n• Zero Data Exfiltration",
-             border_green)
+    # [H] Layer 3: Egress DLP Sanitizer
+    draw_component(9.3, 3.4, 2.3, 1.8, c_l3_bg, border_green,
+                   "Layer 3 (L3): Egress DLP\nDual-Stream Sanitizer",
+                   ["Real-Time Canary Masker", "Secret Registry [REDACTED]", "Dual-Stream SSE Scrubbing", "Suppresses Silent CoT Leak"],
+                   title_col=border_green, badge="POST-DLP")
 
-    # Connective Arrows
-    arrow_style = dict(arrowstyle="->", lw=1.8, color="#475569")
-    red_arrow = dict(arrowstyle="->", lw=2.0, color="#DC2626")
-    green_arrow = dict(arrowstyle="->", lw=2.0, color="#16A34A")
+    # [I] Sanitized Output to User
+    draw_component(12.2, 3.4, 1.9, 1.8, c_out_bg, border_green,
+                   "Sanitized Delivery\nto Client / System",
+                   ["Confidentiality Preserved", "Canaries Fully Redacted", "Safe User Response", "Verified Safe Egress"],
+                   title_col=border_green, badge="CLEAN")
 
-    # Flow arrows
-    # Input -> L0
-    ax.annotate("", xy=(0.32, 0.80), xytext=(0.27, 0.80), arrowprops=arrow_style)
-    # L0 -> L1
-    ax.annotate("", xy=(0.66, 0.80), xytext=(0.61, 0.80), arrowprops=arrow_style)
-    # L0 -> L2 (normalized text)
-    ax.annotate("", xy=(0.465, 0.60), xytext=(0.465, 0.68), arrowprops=arrow_style)
-    # L1 -> OR-Gate
-    ax.annotate("", xy=(0.805, 0.60), xytext=(0.805, 0.68), arrowprops=arrow_style)
-    # L2 -> OR-Gate
-    ax.annotate("", xy=(0.66, 0.48), xytext=(0.61, 0.48), arrowprops=arrow_style)
+    # -------------------------------------------------------------
+    # 3. ROUTED ARROWS (NO OVERLAPS, STRICT CLEAN PATHS)
+    # -------------------------------------------------------------
+    arrow_gray = dict(arrowstyle="-|>", lw=1.6, color="#475569", mutation_scale=12)
+    arrow_red = dict(arrowstyle="-|>", lw=2.0, color="#DC2626", mutation_scale=14)
+    arrow_green = dict(arrowstyle="-|>", lw=2.0, color="#059669", mutation_scale=14)
 
-    # OR-Gate -> Blocked
-    ax.annotate("", xy=(0.27, 0.48), xytext=(0.66, 0.48), arrowprops=red_arrow)
-    ax.text(0.29, 0.50, "Threat Detected (Blocked)", color='#DC2626', fontsize=8.5, fontweight='bold')
+    # 1. Input -> L0
+    ax.annotate("", xy=(3.0, 4.25), xytext=(2.3, 4.25), arrowprops=arrow_gray)
+    ax.text(2.65, 4.45, "Raw Ingress\nPayload", fontsize=7.8, color=tx_sub, ha='center', fontweight='semibold')
 
-    # OR-Gate -> Target LLM
-    ax.annotate("", xy=(0.465, 0.27), xytext=(0.75, 0.36),
-                arrowprops=dict(arrowstyle="->", lw=1.8, color="#16A34A",
-                                connectionstyle="arc3,rad=-0.2"))
-    ax.text(0.56, 0.30, "Clean (Passed)", color='#16A34A', fontsize=8.5, fontweight='bold')
+    # 2. L0 -> L1 (Top branch inside Ingress)
+    ax.annotate("", xy=(5.8, 6.0), xytext=(5.3, 5.0),
+                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=border_blue, mutation_scale=12,
+                                connectionstyle="angle,angleA=0,angleB=90,rad=4"))
+    ax.text(5.52, 5.75, "Text", fontsize=7.5, color=border_blue, ha='center', backgroundcolor='#FFFFFF')
 
-    # Target LLM -> Layer 3 DLP
-    ax.annotate("", xy=(0.66, 0.16), xytext=(0.61, 0.16), arrowprops=arrow_style)
-    ax.text(0.62, 0.18, "Raw Stream", color='#475569', fontsize=8, ha='center')
+    # 3. L0 -> L2 (Direct branch inside Ingress)
+    ax.annotate("", xy=(5.8, 3.7), xytext=(5.3, 3.7), arrowprops=dict(arrowstyle="-|>", lw=1.5, color=border_blue, mutation_scale=12))
+    ax.text(5.55, 3.9, "Normalized", fontsize=7.5, color=border_blue, ha='center', backgroundcolor='#FFFFFF')
 
-    # Layer 3 DLP -> Clean Output
-    ax.annotate("", xy=(0.27, 0.16), xytext=(0.66, 0.16), arrowprops=green_arrow)
-    ax.text(0.465, 0.18, "DLP Masked & Sanitized", color='#16A34A', fontsize=8.5, fontweight='bold', ha='center')
+    # 4. L1 -> Arbiter (Downwards)
+    ax.annotate("", xy=(7.1, 2.4), xytext=(7.1, 5.0),
+                arrowprops=dict(arrowstyle="-|>", lw=1.4, color=border_amber, mutation_scale=12, linestyle=':'))
+    ax.text(7.1, 4.75, "Regex Score S_reg", fontsize=7.2, color=border_amber, ha='center',
+            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#FCD34D', lw=0.8))
+
+    # 5. L2 -> Arbiter (Downwards)
+    ax.annotate("", xy=(6.5, 2.4), xytext=(6.5, 2.7),
+                arrowprops=dict(arrowstyle="-|>", lw=1.4, color=border_purple, mutation_scale=12))
+    ax.text(6.5, 2.55, "P_malicious", fontsize=7.2, color=border_purple, ha='center', backgroundcolor='#FFFFFF')
+
+    # 6. Arbiter Branch A: Threat Detected -> Safe Refusal (Red Path)
+    # Routes out right of Arbiter, curves up to Safe Refusal
+    ax.annotate("", xy=(9.3, 6.3), xytext=(8.4, 1.5),
+                arrowprops=dict(arrowstyle="-|>", lw=2.0, color=border_red, mutation_scale=14,
+                                connectionstyle="arc3,rad=-0.35"))
+    ax.text(8.85, 4.3, "THREAT DETECTED\n(D_in = 1 : Abort)", fontsize=8.0, fontweight='bold', color=border_red,
+            ha='center', va='center',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#FEF2F2', edgecolor='#FCA5A5', lw=1.0))
+
+    # 7. Arbiter Branch B: Clean / Passed -> Target LLM (Green Path)
+    ax.annotate("", xy=(9.3, 1.5), xytext=(8.4, 1.2),
+                arrowprops=dict(arrowstyle="-|>", lw=2.0, color=border_green, mutation_scale=14))
+    ax.text(8.85, 1.45, "CLEAN (Passed)\nD_in = 0", fontsize=7.8, fontweight='bold', color=border_green,
+            ha='center', va='bottom',
+            bbox=dict(boxstyle='round,pad=0.2', facecolor='#F0FDF4', edgecolor='#86EFAC', lw=0.8))
+
+    # 8. Target LLM -> Layer 3 DLP (Upwards flow from LLM to DLP Sanitizer)
+    ax.annotate("", xy=(10.45, 3.4), xytext=(10.45, 3.2),
+                arrowprops=dict(arrowstyle="-|>", lw=1.8, color="#0284C7", mutation_scale=12))
+    ax.text(10.45, 3.3, "Raw Generation Streams (Content + CoT)", fontsize=7.2, color='#0369A1',
+            ha='center', va='center', backgroundcolor='#FFFFFF', fontweight='semibold')
+
+    # 9. Layer 3 DLP -> Sanitized Delivery (Out to client)
+    ax.annotate("", xy=(12.2, 4.3), xytext=(11.6, 4.3), arrowprops=arrow_green)
+    ax.text(11.9, 4.5, "Dual-Sanitized\nEgress Stream", fontsize=7.5, color=border_green, ha='center', fontweight='semibold')
 
     plt.tight_layout()
-    fig.savefig("docs/figures/figure1_architecture.png", dpi=300, bbox_inches='tight')
+    fig.savefig(output_path, dpi=300, bbox_inches='tight', facecolor=bg_canvas)
     plt.close()
-    print("Figure 1 generated successfully: docs/figures/figure1_architecture.png")
+    print(f"Academic Figure 1 generated successfully: {output_path}")
 
 
 def generate_figure2():

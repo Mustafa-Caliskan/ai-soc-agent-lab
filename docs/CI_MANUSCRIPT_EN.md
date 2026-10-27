@@ -103,12 +103,14 @@ We first benchmark the semantic classifier layer (L2) on the source-disjoint fai
 
 *Table 1. Evaluation on the Source-Disjoint Fair Multilingual Benchmark (N=2,849 at decision threshold tau=0.70). Confidence intervals denote 95% cluster-bootstrap bounds.*
 
-| Model Backbone | Params | Recall (%. Macro-F1 values are E2E pipeline estimates; the cluster-bootstrap point estimate for mmBERT is 84.82) | FP (%) | Macro-F1 [95% CI] | ROC-AUC [95% CI] | Recall @ FP=1% |
+| Model Backbone | Params | Recall (%)* | FP (%) | Macro-F1 [95% CI] | ROC-AUC [95% CI] | Recall @ FP=1% |
 |---|---|---|---|---|---|---|
 | XLM-RoBERTa-base | 278M | 47.50 | 2.20 | 70.63 [0.656, 0.752] | 0.8916 [0.840, 0.931] | 0.3958 |
 | BGE-M3 | 568M | 61.50 | 2.20 | 78.80 [0.738, 0.826] | 0.9347 [0.892, 0.963] | 0.5257 |
 | NeuralShield (mmBERT) | 307M | 74.10 | 3.83 | 84.86 [0.809, 0.880] | 0.9494 [0.919, 0.972] | 0.5854 |
 | Patronus Wolf Defender | 307M | 70.10 | 0.80 | 84.23 [0.804, 0.881] | 0.9767 [0.967, 0.986] | 0.7222 |
+
+* Note: Recall and FP reflect end-to-end gateway pipeline estimates; the isolated cluster-bootstrap point estimate for standalone mmBERT is 84.82%.
 
 As demonstrated in Table 1, mmBERT-base achieved the highest Macro-F1 (84.86%) among open models, decisively outperforming XLM-RoBERTa-base [15] (+14.23 F1 points) and the substantially larger BGE-M3 [17] (+6.06 F1 points). Crucially, comparison with Patronus Wolf Defender reveals that the 95% cluster-bootstrap confidence intervals for Macro-F1 overlap completely ([0.809, 0.880] vs. [0.804, 0.881]). This provides mathematical proof of statistical parity in overall F1 between NeuralShield and the premier commercial defense. While Patronus maintains an advantage in conservative low-false-alarm regions (ROC-AUC 0.9767 vs. 0.9494; Recall@FP=1% 72.22% vs. 58.54%), NeuralShield achieves higher uncalibrated attack recall (74.10% vs. 70.10%).
 
