@@ -266,8 +266,8 @@ def build_title_page():
     p_type.paragraph_format.space_after = Pt(20)
 
     authors = [
-        ("Mustafa ÇALIŞKAN *", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: mustafacaliskan@ogr.mehmetakif.edu.tr\nORCID: 0009-0004-3861-7628"),
-        ("Prof. Dr. Ali Hakan IŞIK", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: hisik@mehmetakif.edu.tr\nORCID: 0000-0003-3561-9375")
+        ("Mustafa ÇALIŞKAN *", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: 2211404051@ogr.mehmetakif.edu.tr\nORCID: 0009-0004-3861-7628"),
+        ("Prof. Dr. Ali Hakan IŞIK", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: ahkan@mehmetakif.edu.tr\nORCID: 0000-0003-3561-9375")
     ]
     
     tbl = doc.add_table(rows=len(authors), cols=1)
@@ -293,7 +293,7 @@ def build_title_page():
     p_cor = doc.add_paragraph()
     p_cor.paragraph_format.space_before = Pt(16)
     p_cor.paragraph_format.space_after = Pt(12)
-    r_cor = p_cor.add_run("* Corresponding Author:\nMustafa ÇALIŞKAN\nDepartment of Computer Engineering, Faculty of Engineering, Burdur Mehmet Akif Ersoy University, 15030 Burdur, Türkiye.\nEmail: mustafacaliskan@ogr.mehmetakif.edu.tr")
+    r_cor = p_cor.add_run("* Corresponding Author:\nMustafa ÇALIŞKAN\nDepartment of Computer Engineering, Faculty of Engineering, Burdur Mehmet Akif Ersoy University, 15030 Burdur, Türkiye.\nEmail: 2211404051@ogr.mehmetakif.edu.tr")
     r_cor.font.name = 'Times New Roman'
     r_cor.font.size = Pt(10)
     r_cor.italic = True
@@ -377,13 +377,15 @@ def build_masked_manuscript():
         "data loss prevention (DLP), and an adaptive OR-Gate arbiter. Trained on the balanced v6.2 corpus (98,606 "
         "records across 12 languages), NeuralShield achieves statistical parity in Macro-F1 with commercial state-of-the-art "
         "defenses (Patronus Wolf Defender: 84.8% vs. 84.2%, overlapping cluster-bootstrap 95% confidence intervals) "
-        "on a rigorously source-disjoint benchmark (N=2,849) while demonstrating substantial recall superiority on native "
-        "non-English corpora (Turkish: 79.4% vs. 45.0%; Cyrillic AUC: 0.890 vs. 0.631). In an extensive empirical red-team "
+        "on a rigorously source-disjoint benchmark (N=2,849). On native non-English corpora it attains higher recall "
+        "(Turkish: 79.4% vs. 45.0%; Cyrillic AUC: 0.890 vs. 0.631), although Turkish ROC-AUC remains lower "
+        "(0.952 vs. 0.972) and Cyrillic false positives are substantially higher (69.8% vs. 26.9%). In an extensive empirical red-team "
         "benchmark spanning 14 models—including 10 open-weight models (1.5B–14.7B) and 4 flagship models on H200 "
         "supercomputing infrastructure—NeuralShield reduces attack success rates (ASR) from up to 40.59% (Mistral-7B) to 0.0%. "
         "Furthermore, we uncover Silent Chain-of-Thought Exfiltration in flagship models (Gemma-4-31B leaking secrets in 66.34% "
         "of reasoning traces despite 0.0% final content ASR), fully mitigated by our dual-stream egress DLP. Full-pool "
-        "ablations (N=101) demonstrate quantization invariance and confirm prompt hardening cannot replace external guardrails."
+        "ablations (N=101) find no statistically significant quantization effect and confirm that prompt "
+        "hardening cannot replace external guardrails."
     )
     p_abs = doc.add_paragraph()
     p_abs.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -433,21 +435,21 @@ def build_masked_manuscript():
     
     # 1. INTRODUCTION
     add_styled_heading(doc, "1. INTRODUCTION", level=1)
-    add_body_p(doc, "The rapid deployment of Large Language Models (LLMs) across enterprise domains—including retrieval-augmented generation (RAG), autonomous workflow agents, and interactive customer service—has fundamentally expanded the computational attack surface of modern software systems [1, 2]. Unlike traditional relational software where executable control logic is strictly demarcated from data payloads, transformer architectures process instructions and untrusted inputs within an identical, undivided context window [3, 4]. Consequently, malicious actors can exploit this architectural conflation via prompt injection attacks, wherein adversarial inputs override developer system prompts, hijack execution flows, or force the model to exfiltrate proprietary data, API credentials, and internal system variables [5, 6].")
+    add_body_p(doc, "The rapid deployment of Large Language Models (LLMs) [2] across enterprise domains—including retrieval-augmented generation (RAG), autonomous workflow agents, and interactive customer service—has fundamentally expanded the computational attack surface of modern software systems [1, 2]. Unlike traditional relational software where executable control logic is strictly demarcated from data payloads, transformer architectures process instructions and untrusted inputs within an identical, undivided context window [3, 4]. Consequently, malicious actors can exploit this architectural conflation via prompt injection attacks, wherein adversarial inputs override developer system prompts, hijack execution flows, or force the model to exfiltrate proprietary data, API credentials, and internal system variables [5, 6].")
     add_body_p(doc, "Securing LLM-integrated pipelines against prompt injection poses formidable operational and theoretical challenges. While commercial and open-source guardrails have emerged—most notably Meta Prompt Guard [7], ProtectAI DeBERTa-v3 [8], and Patronus AI's Wolf Defender [9]—contemporary solutions exhibit three acute limitations:")
     add_body_p(doc, "Existing guardrail models are trained overwhelmingly on English corpora. In non-English contexts, safety classifiers frequently collapse, failing to detect adversarial instructions expressed in morphologically rich, low-resource, or non-Latin scripts [10, 11]. Furthermore, synthetic translations used in academic datasets often introduce 'translationese' artifacts, failing to capture native colloquial syntax and regional attack vectors [12].", bold_prefix="(i) Severe Multilingual Vulnerability and Translation Bias: ")
     add_body_p(doc, "Prior empirical benchmarks assessing guardrail performance frequently suffer from undetected data leakage. In our systematic audit of conventional out-of-distribution (OOD) evaluation suites, we identified a 76.9% source-level overlap between public training repositories and benchmark splits, artificially inflating reported detection metrics.", bold_prefix="(ii) Benchmark Source Contamination: ")
     add_body_p(doc, "Modern reasoning models employ explicit reasoning traces before emitting a user-facing response [13]. Standard guardrails focus exclusively on the final conversational output. We observe that even when a model successfully refuses an attack in its user-facing message (0.0% final Attack Success Rate), it frequently verbalizes confidential system prompts and cryptographic canaries verbatim within its internal chain-of-thought tokens. In applications streaming raw reasoning chunks via Server-Sent Events (SSE) or persisting execution logs, this constitutes catastrophic, unmonitored data exfiltration.", bold_prefix="(iii) The Silent Chain-of-Thought (CoT) Exfiltration Vector: ")
     add_body_p(doc, "To address these vulnerabilities, we propose NeuralShield, a production-ready, multi-layer application security gateway designed for low-latency, multilingual LLM deployments. NeuralShield integrates four complementary defensive layers: (L0) an aggressive structural normalization and recursive deobfuscation engine; (L1) a sub-millisecond deterministic regex and canary-trap fast-path; (L2) a 12-language multilingual semantic transformer classifier (mmBERT-base, 307M parameters); and (L3) a real-time egress Data Loss Prevention (DLP) sanitizer with dual-stream reasoning inspection. The layer decisions are governed by a deterministic OR-Gate arbiter that balances high recall against enterprise false-positive constraints.")
     
-    add_body_p(doc, "This study offers five principal scientific contributions: (i) an end-to-end multi-layer architecture operating on standard dual-thread CPU hardware with a median latency of ~50.6 ms; (ii) a rigorously source-disjoint fair evaluation protocol ($N=2,849$) demonstrating statistical parity in Macro-F1 with commercial state-of-the-art defenses while delivering superior recall on native Turkish (+34.4%) and Russian Cyrillic (AUC 0.890 vs. 0.631) corpora; (iii) multi-tier empirical red-teaming across 14 language models achieving a 100% block rate; (iv) the empirical discovery and live mitigation of Silent Chain-of-Thought Exfiltration; and (v) full-pool ($N=101$) ablations mathematically confirming quantization invariance and demonstrating that prompt hardening cannot replace architectural guardrails.", bold_prefix="Contributions: ")
+    add_body_p(doc, "This study offers five principal scientific contributions: (i) an end-to-end multi-layer architecture operating on standard dual-thread CPU hardware with a median latency of ~50.6 ms; (ii) a rigorously source-disjoint fair evaluation protocol ($N=2,849$) demonstrating statistical parity in Macro-F1 with commercial state-of-the-art defenses with higher recall on native Turkish (+34.4 points) and better Russian Cyrillic ranking (AUC 0.890 vs. 0.631), though at higher false-positive cost (Turkish AUC 0.952 vs. 0.972; Russian FP 69.8% vs. 26.9%); (iii) multi-tier empirical red-teaming across 14 language models in which the gateway blocked 101/101 curated attacks (100%) while achieving 74.10% recall on the source-disjoint out-of-distribution benchmark; (iv) the empirical discovery and live mitigation of Silent Chain-of-Thought Exfiltration; and (v) full-pool ($N=101$) ablations showing no statistically significant quantization effect (p = 0.804 Llama; p = 0.071 Mistral) and demonstrating that prompt hardening cannot replace architectural guardrails.", bold_prefix="Contributions: ")
 
     # 2. METHODOLOGY
     add_styled_heading(doc, "2. METHODOLOGY", level=1)
     
     add_styled_heading(doc, "2.1. Threat Model and Scope", level=2)
     add_body_p(doc, "We define the threat model according to the OWASP Top 10 for Large Language Model Applications (specifically LLM01: Prompt Injection and LLM06: Sensitive Information Disclosure) [14]. We assume an adversarial user interacting with an LLM application via public text channels, uploaded documents, or indirect data stores (e.g., retrieval passages). The system prompt contains internal operational parameters, business logic instructions, and high-entropy canary tokens representing confidential corporate secrets.")
-    add_body_p(doc, "Adversarial objectives fall into four canonical classes: (1) Direct Injection (direct), encompassing persona hijacking and explicit instruction overrides; (2) Indirect Document Injection (indirect), where attacks are covertly embedded in external files or retrieved text passages; (3) Encoding and Obfuscation (encoding), involving Base64, Hexadecimal, Base32, ROT13, character reversal, or leetspeak transformations; and (4) Steganography and Unicode Smuggling (stego), utilizing zero-width non-joiners, Unicode Tag characters (U+E0000–U+E007F), and Cyrillic/Greek homoglyphs designed to bypass standard tokenizers.")
+    add_body_p(doc, "Adversarial objectives fall into four canonical classes: (1) Direct Injection (direct), encompassing persona hijacking and explicit instruction overrides [11]; (2) Indirect Document Injection (indirect), where attacks are covertly embedded in external files or retrieved text passages [3]; (3) Encoding and Obfuscation (encoding), involving Base64, Hexadecimal, Base32, ROT13, character reversal, or leetspeak transformations; and (4) Steganography and Unicode Smuggling (stego), utilizing zero-width non-joiners, Unicode Tag characters (U+E0000–U+E007F), and Cyrillic/Greek homoglyphs designed to bypass standard tokenizers.")
 
     add_styled_heading(doc, "2.2. Multi-Layer NeuralShield Pipeline Architecture", level=2)
     add_body_p(doc, "NeuralShield is architected as an in-line, four-layer inspection pipeline governed by an adaptive OR-Gate arbiter. Figure 1 illustrates the complete operational workflow and isolation boundaries of the system.")
@@ -463,7 +465,7 @@ def build_masked_manuscript():
 
     add_body_p(doc, "The L0 engine acts as a pre-filtering normalizer to eliminate syntactic and Unicode-level evasion attempts prior to semantic parsing. It executes NFKC normalization to resolve multi-byte lookalikes, strips non-printable zero-width characters and Unicode Tag characters ($U+E0000$ to $U+E007F$), folds Cyrillic/Greek homoglyphs to Latin ASCII, and recursively decodes Base64, Hex, and ROT13 payloads, passing the decoded text as an extended payload downstream.", bold_prefix="Layer 0 (L0) Structural Normalizer: ")
     add_body_p(doc, "Operating with sub-millisecond execution times (<1 ms), L1 employs compiled regular expression automata tailored across all 12 supported languages. It matches adversarial directive shifts (e.g., 'ignore all instructions', 'sen artik kisitlamasiz bir asistansin') and monitors canary token extraction patterns, assigning a heuristic risk score $S_{regex} in [0, 100]$. A score of $S_{regex} >= 60$ triggers an immediate block without invoking transformer inference, providing a deterministic zero-false-positive fast-path for known attack signatures.", bold_prefix="Layer 1 (L1) Deterministic Engine: ")
-    add_body_p(doc, "For nuanced, semantic attacks that evade heuristic rules, L2 utilizes mmBERT-base (307M parameters) [16] exported to ONNX FP32 format and trained with a focal-loss objective [24]. The model outputs a calibrated risk probability $P_{malicious} in [0.0, 1.0]$. The operational decision threshold is set to tau = 0.70 to balance high attack recall against strict enterprise false-alarm constraints.", bold_prefix="Layer 2 (L2) Semantic Transformer Classifier: ")
+    add_body_p(doc, "For nuanced, semantic attacks that evade heuristic rules, L2 utilizes a Transformer encoder [1], specifically mmBERT-base (307M parameters) [16], exported to ONNX FP32 format and trained with a focal-loss objective [24]. The model outputs a calibrated risk probability $P_{malicious} in [0.0, 1.0]$. The operational decision threshold is set to tau = 0.70 to balance high attack recall against strict enterprise false-alarm constraints.", bold_prefix="Layer 2 (L2) Semantic Transformer Classifier: ")
     
     add_body_p(doc, "The overall input decision D_in in {PASS, BLOCK} is synthesized via an asymmetric logical OR-Gate:", bold_prefix="Deterministic OR-Gate Arbiter: ")
     
@@ -484,7 +486,7 @@ def build_masked_manuscript():
     add_body_p(doc, "To prevent generative bias, synthetic data generation utilized a symmetric engine strategy: benign customer support dialogues and adversarial injections were generated using the identical teacher model (gemma-4-31b hosted on EVREN clusters). Quality control was enforced via a multi-tiered filtering protocol: (1) each synthetic instance was classified by an ensemble of ProtectAI DeBERTa-v3, Deepset Injection, and Patronus Wolf Defender; (2) a fine-tuned Qwen2.5-7B-Instruct judge performed semantic consistency audits; (3) stratified 70/15/15 splitting produced 69,021 training, 14,794 validation, and 14,791 testing samples.")
 
     add_styled_heading(doc, "2.4. Source-Disjoint Fair Benchmark Protocol", level=2)
-    add_body_p(doc, "A critical flaw in prior evaluations is the presence of source contamination, where benchmark test sets inadvertently contain phrasing or templates originating from the same open-source repositories used during model training. Our preliminary audit of legacy OOD benchmarks revealed that 76.9% of evaluation instances shared lineage with public training sets (such as Jackhhao, SPML, and early Deepset dumps).")
+    add_body_p(doc, "Prior work has documented systematic jailbreak susceptibility in commercial LLMs [4, 5] and transferable adversarial prompt strategies [6]. A critical flaw in prior evaluations is the presence of source contamination, where benchmark test sets inadvertently contain phrasing or templates originating from the same open-source repositories used during model training. Our preliminary audit of legacy OOD benchmarks revealed that 76.9% of evaluation instances shared lineage with public training sets (such as Jackhhao, SPML, and early Deepset dumps).")
     add_body_p(doc, "To establish an uncompromised evaluation standard, we constructed heldout_benchmark_v6_fair.json (N=2,849). This benchmark strictly excludes all sources utilized during NeuralShield training: malicious prompts (n=1,440) were derived exclusively from Simsonsun JailbreakPrompts [18] and Rubend18 collections, while benign prompts (n=1,409) were sourced strictly from Databricks Dolly-15k [19], translated across 12 languages using Meta's NLLB-200-3.3B engine [20].")
 
     add_styled_heading(doc, "2.5. Canary Red-Team Evaluation Framework", level=2)
@@ -522,10 +524,10 @@ def build_masked_manuscript():
     ]
     create_table_from_data(doc, t1_headers, t1_rows, [3.4, 1.4, 1.8, 1.4, 3.2, 3.2, 2.0])
 
-    add_body_p(doc, "As demonstrated in Table 1, mmBERT-base achieved the highest Macro-F1 (84.86%) among open models, decisively outperforming XLM-RoBERTa-base (+14.26 F1 points) and the substantially larger BGE-M3 (+6.06 F1 points). Crucially, comparison with Patronus Wolf Defender reveals that the 95% cluster-bootstrap confidence intervals for Macro-F1 overlap completely ([0.809, 0.880] vs. [0.804, 0.881]). This provides mathematical proof of statistical parity in overall F1 between NeuralShield and the premier commercial defense. While Patronus maintains an advantage in conservative low-false-alarm regions (ROC-AUC 0.9767 vs. 0.9494; Recall@FP=1% 72.22% vs. 58.54%), NeuralShield achieves higher uncalibrated attack recall (74.10% vs. 70.10%).")
+    add_body_p(doc, "As demonstrated in Table 1, Table 1, mmBERT-base achieved the highest Macro-F1 (84.86%) among open models, decisively outperforming XLM-RoBERTa-base [15] (+14.26 F1 points) and the substantially larger BGE-M3 [17] (+6.06 F1 points). Crucially, comparison with Patronus Wolf Defender reveals that the 95% cluster-bootstrap confidence intervals for Macro-F1 overlap completely ([0.809, 0.880] vs. [0.804, 0.881]). This provides mathematical proof of statistical parity in overall F1 between NeuralShield and the premier commercial defense. While Patronus maintains an advantage in conservative low-false-alarm regions (ROC-AUC 0.9767 vs. 0.9494; Recall@FP=1% 72.22% vs. 58.54%), NeuralShield achieves higher uncalibrated attack recall (74.10% vs. 70.10%).")
 
     add_styled_heading(doc, "3.2. Native Held-Out Evaluation: Overcoming the Translationese Bias", level=2)
-    add_body_p(doc, "To examine whether models suffer from synthetic translation artifacts, we evaluated performance on two completely native, non-translated held-out sets: native Turkish dialogues (n=1,077) and native Cyrillic Russian adversarial queries (n=16,636). Table 2 reports the results.")
+    add_body_p(doc, "Low-resource languages are known to be disproportionately vulnerable to jailbreak attempts [10]. To examine whether models suffer from synthetic translation artifacts, we evaluated performance on two completely native, non-translated held-out sets: native Turkish dialogues (n=1,077) and native Cyrillic Russian adversarial queries (n=16,636). Table 2 reports the results.")
     
     add_table_caption(doc, "Table 2. Model performance on native non-translated held-out corpora.")
     t2_headers = ["Evaluation Corpus", "Evaluated Metric", "NeuralShield (mmBERT)", "Patronus Wolf Defender", "Empirical Delta"]
@@ -539,7 +541,7 @@ def build_masked_manuscript():
     ]
     create_table_from_data(doc, t2_headers, t2_rows, [4.2, 3.2, 3.0, 3.0, 2.4])
 
-    add_body_p(doc, "The findings in Table 2 highlight a profound architectural advantage: on native Turkish prompts, Patronus's recall plummeted to 45.00%, missing more than half of active injection attempts. In contrast, NeuralShield captured 79.40% of attacks (+34.40% improvement), demonstrating that its balanced pre-training prevents the domain collapse typical of English-centric classifiers. Furthermore, on the large-scale native Cyrillic Russian dataset, Patronus experienced discriminative failure, collapsing to an AUC of 0.6314 (bordering on non-discriminative random ranking). NeuralShield maintained robust discriminative ordering with an AUC of 0.8902 (+0.2588 advantage), successfully discerning complex Cyrillic evasion strategies.")
+    add_body_p(doc, "The findings in Table 2 reveal a clear recall advantage under native, non-translated conditions: on native Turkish prompts Patronus recall fell to 45.00%, missing more than half of the attacks, whereas NeuralShield captured 79.40% (+34.40 points). This gap cannot be attributed to machine-translation artefacts, since the prompts are native. The advantage is, however, recall-specific: Patronus retains a higher Turkish ROC-AUC (0.9720 vs. 0.9520), and on the native Russian set NeuralShield reaches higher recall (91.40% vs. 57.90%) and AUC (0.890 vs. 0.631) but at a much higher false-positive cost (69.80% vs. 26.90%), so the Russian result should be read as a ranking-quality gain rather than an operational improvement. Furthermore, on the large-scale native Cyrillic Russian dataset, Patronus experienced discriminative failure, collapsing to an AUC of 0.6314 (bordering on non-discriminative random ranking). NeuralShield maintained robust discriminative ordering with an AUC of 0.8902 (+0.2588 advantage), successfully discerning complex Cyrillic evasion strategies.")
 
     add_styled_heading(doc, "3.3. CPU Inference Latency and Quantization Sensitivity", level=2)
     add_body_p(doc, "Operational security gateways must maintain strict latency budgets to avoid degrading interactive user experiences. Table 3 details the CPU inference latency and memory footprints of the mmBERT engine across execution runtimes.")
@@ -619,10 +621,54 @@ def build_masked_manuscript():
     add_body_p(doc, "In Qwen3-4B-Thinking, 50.00% of attacks caused the model to expose secret canary tokens within its internal reasoning trace. Crucially, in 12.50% of attacks (Verified CoT-Only), the model successfully finished its deliberation within token budget, issued a polite refusal in its final response, yet verbalized the internal secret verbatim in its thought trace. Furthermore, in R1-Distill-Qwen-7B, final content leakage (20.83%) actually exceeded internal reasoning leakage (16.67%), demonstrating that reasoning distillation transfers stylistic chain-of-thought tokens without transferring the robust safety alignment of the teacher model. NeuralShield dropped both reasoning and final response leakage to flat 0.00% across all reasoning architectures.", bold_prefix="Analysis of Open-Weight Reasoning Vulnerability: ")
 
     # 3.7. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models
-    add_styled_heading(doc, "3.7. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models", level=2)
-    add_body_p(doc, "To assess whether massive frontier architectures resolve prompt injection vulnerabilities, we evaluated four flagship models hosted on EVREN NVIDIA H200 supercomputing clusters using the identical 161-prompt curated suite. Table 7 and Figure 2b detail the findings.")
+    # 3.6b. Native Turkish evaluation and real-world SSE deployment evidence
+    add_styled_heading(doc, "3.7. Native Turkish Validation and Real-World SSE Deployment Evidence", level=2)
+    add_body_p(doc,
+        "To eliminate any residual translationese confound from NLLB-mediated prompts, we constructed an "
+        "independent 50-prompt native Turkish attack suite (five categories x 10: direct, echo, summarize, "
+        "encode, cot), written directly in Turkish with no machine translation and no appended sentences. "
+        "Six models were evaluated at temperature 0 with max_tokens = 1024. Leakage was again measured by "
+        "exact canary matching, separately on the user-facing content channel and on the reasoning channel.")
+    add_table_caption(doc, "Table 7. Native Turkish red-team results (N=50 hand-written prompts per model, no machine translation; temperature 0).")
+    t7_headers = ["Model", "N", "Content leak", "Reasoning leak", "Rate % (95% CI)"]
+    t7_rows = [
+        ["Gemma-4-31B", "50", "0/50", "31/50", "62.0 (48.2-74.1)"],
+        ["Qwen3.8-Flash-Next", "50", "0/50", "4/50", "8.0 (3.2-18.8)"],
+        ["GLM-5.3", "50", "0/50", "1/50", "2.0 (0.4-10.5)"],
+        ["DeepSeek-v4-Flash", "50", "0/50", "0/50", "0.0 (0.0-7.1)"],
+        ["DeepSeek-v4.1-Flash", "50", "0/50", "0/50", "0.0 (0.0-7.1)"],
+        ["MiMo-v2.6-Pro", "50", "0/50", "0/50", "0.0 (0.0-7.1)"]
+    ]
+    create_table_from_data(doc, t7_headers, t7_rows, [4.0, 1.2, 2.4, 2.6, 3.4])
+    add_body_p(doc,
+        "The native suite reproduces the same qualitative pattern as the translated benchmark: zero content-channel "
+        "leakage for every model, versus 62.0% reasoning-channel leakage for Gemma-4-31B. Critically, this ranking "
+        "is obtained on hand-written Turkish prompts, so the central finding cannot be attributed to translation "
+        "artefacts. DeepSeek-v4-Flash, DeepSeek-v4.1-Flash, and MiMo-v2.6-Pro produced no leakage at all, showing "
+        "that silent CoT exfiltration is a model-specific alignment property rather than a universal artefact of "
+        "reasoning models.")
+    add_body_p(doc,
+        "Real-world SSE deployment: To verify that this is exploitable outside a controlled API harness, we deployed "
+        "an ordinary airline customer-service chatbot front-end with no login, no safe-mode toggle, and no debug "
+        "panel. The page displays only the content channel, but the server relays the upstream reasoning stream to the "
+        "browser over Server-Sent Events. Visible in the page: a polite refusal. Visible to any user who opens "
+        "DevTools > Network > EventStream: 118 reasoning events containing the synthetic canary values in plaintext "
+        "(7,981 network characters, of which 1,414 are reasoning). The browser HAR archive reproduces the same leak, "
+        "establishing that a client-side-only reading of the response is insufficient. This is an application-layer "
+        "data-flow failure, not a platform-level network compromise.")
+    add_body_p(doc,
+        "Practical mitigation: Exposing a thinking toggle is not a substitute for egress inspection but does reduce "
+        "the attack surface. Requesting thinking = false eliminated the reasoning channel entirely for both "
+        "Gemma-4-31B and Qwen3.8-Flash-Next; over 40 targeted Turkish attacks with thinking disabled, content-channel "
+        "canary leakage was 0/40. Note that enable_thinking = false was silently ignored by the gateway, whereas "
+        "chat_template_kwargs and thinking = false were honoured, so the correct knob must be verified per deployment. "
+        "Regardless, disabling reasoning does not remove the secret from the system prompt, which is why the "
+        "independent L3 egress DLP layer remains necessary.")
+
+    add_styled_heading(doc, "3.8. Silent Chain-of-Thought Exfiltration in Tier-3 Flagship Models", level=2)
+    add_body_p(doc, "To assess whether massive frontier architectures resolve prompt injection vulnerabilities, we evaluated four flagship models hosted on EVREN NVIDIA H200 supercomputing clusters using the identical 161-prompt curated suite. Table 8 and Figure 2b detail the findings.")
     
-    add_table_caption(doc, "Table 7. Empirical Vulnerability in Tier-3 Flagship API Models (N=101 attacks, 60 benign queries, 1536-token reasoning budget).")
+    add_table_caption(doc, "Table 8. Empirical Vulnerability in Tier-3 Flagship API Models (N=101 attacks, 60 benign queries, 1536-token reasoning budget).")
     t7_headers = ["Model Architecture", "Infrastructure", "Final Content ASR (%)", "95% Wilson CI", "Reasoning CoT ASR (%)", "95% Wilson CI", "NeuralShield ON"]
     t7_rows = [
         ["DeepSeek-v4.1-Flash", "EVREN H200", "0.00% (0/101)", "[0.0, 3.7]", "0.00% (0/101)", "[0.0, 3.7]", "0.00% (0/101)"],
@@ -635,10 +681,10 @@ def build_masked_manuscript():
     add_body_p(doc, "In their user-facing conversational outputs (content), all four flagship models achieved a 0.00% Final Content ASR, issuing flawless, polite refusals on all 101 attacks. Evaluated by conventional benchmarks that inspect only final messages, these systems appear perfectly secure. However, inspection of intermediate reasoning traces (reasoning tokens) paints a starkly different reality: in 66.34% of attacks (67 out of 101), Gemma-4-31B verbalized the confidential canary secrets verbatim within its internal chain-of-thought tokens while deliberating how to respond. Similarly, Qwen3.8-Flash-Next leaked canaries in its reasoning traces in 14.85% (15/101) of attacks. In modern software architectures deploying reasoning models, intermediate reasoning chunks are routinely streamed to clients via Server-Sent Events (SSE) to reduce perceived latency, or stored in application telemetry databases for monitoring. Under these standard operational patterns, the user-facing refusal is rendered irrelevant: the confidential secret is fully exfiltrated via the streaming reasoning channel. NeuralShield completely resolves this vulnerability: L0–L2 prevents model invocation, and L3 dual-stream DLP scrubs both reasoning and content streams in real time.", bold_prefix="Analysis of Silent CoT Exfiltration: ")
 
     # 3.8. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance
-    add_styled_heading(doc, "3.8. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance", level=2)
+    add_styled_heading(doc, "3.9. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance", level=2)
     add_body_p(doc, "To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 8 and Figure 3 present the empirical findings.")
     
-    add_table_caption(doc, "Table 8. Full-pool paired methodological ablations on NVIDIA A100 infrastructure (N=101 attacks, 60 benign queries).")
+    add_table_caption(doc, "Table 9. Full-pool paired methodological ablations on NVIDIA A100 infrastructure (N=101 attacks, 60 benign queries).")
     t8_headers = ["Condition", "Size", "Evaluated Parameter", "ASR (%)", "95% Wilson CI", "Discordant (A/B)", "McNemar p", "Benign Leakage"]
     t8_rows = [
         ["(A1) Mistral 4-bit NF4", "N=101", "Quantization", "40.59% (41/101)", "[31.5, 50.3]", "21 (4-bit only)", "p = 0.071", "0.00% (0/60)"],
@@ -658,15 +704,15 @@ def build_masked_manuscript():
         p_fig3.paragraph_format.space_after = Pt(2)
         r_img3 = p_fig3.add_run()
         r_img3.add_picture("docs/figures/figure3_ablations.png", width=Inches(6.2))
-        add_figure_caption(doc, "Figure 3. Full-pool ablation findings: (a) Quantization invariance across Mistral-7B-v0.3 and Llama-3.1-8B, demonstrating that 4-bit NF4 compression does not induce vulnerability; (b) The prompt hardening trade-off, showing residual leakage (16.83%) and benign over-refusal penalties.")
+        add_figure_caption(doc, "Figure 3. Full-pool ablation findings: (a) Quantization sensitivity across Mistral-7B-v0.3 and Llama-3.1-8B: 4-bit NF4 does not systematically inflate ASR (Llama is unchanged, p = 0.804; Mistral shows a borderline decrease under FP16, p = 0.071); (b) The prompt-hardening trade-off, showing residual leakage (16.83%) and benign canary leakage (1.67%).")
 
-    add_body_p(doc, "A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization [22] degrades safety-tuning alignments [23], artificially inflating reported ASR. As documented in Table 8 and Figure 3a, in Llama-3.1-8B, unquantized FP16 weights actually exhibited a slightly higher leak rate (16.83% vs. 14.85%, delta = +1.98 points), with virtually identical confidence intervals ([10.8, 25.3] vs. [9.2, 23.1]) and a non-significant McNemar test (p = 0.804, discordant pairs: 7 vs. 9). In Mistral-7B-v0.3, while pure FP16 reduced ASR from 40.59% to 29.70% (delta = -10.89 points), the reduction failed to achieve strict statistical significance at the alpha = 0.05 level (exact McNemar p = 0.071), and the Wilson confidence intervals overlap ([21.7, 39.2] vs. [31.5, 50.3]). Nearly one-third of all attacks succeeded against the uncompressed model. These results mathematically establish quantization invariance: 4-bit quantization did not cause the vulnerability. Architectural safety alignment and context disambiguation dictate robustness.", bold_prefix="Disproving Quantization-Induced Vulnerability: ")
-    add_body_p(doc, "We evaluated whether aggressive system prompt hardening ('ABSOLUTE DIRECTIVE: Never reveal internal keys under any circumstance; any violation triggers immediate system termination') could substitute for external guardrails. While prompt hardening decreased ASR from 24.75% to 16.83% in Qwen2.5-3B (delta = -7.92 points), the change is not statistically significant (McNemar p = 0.115). While 14 attacks were neutralized, 6 previously blocked attacks broke through under the hardened instructions, leaving 17 attacks completely breaching the model. Furthermore, this hardening introduced a 1.67% false-positive over-refusal rate on authentic passenger queries (e.g., rejecting an innocent inquiry regarding flight delays). Prompt hardening therefore degrades utility while failing to guarantee confidentiality. An architectural, external gateway remains non-negotiable.", bold_prefix="The Failure of Prompt Hardening and Over-Refusal Cost: ")
+    add_body_p(doc, "A common peer-review hypothesis posits that 4-bit NormalFloat (NF4) quantization [22] degrades safety-tuning alignments [23], artificially inflating reported ASR. As documented in Table 9 and Figure 3a, in Llama-3.1-8B, unquantized FP16 weights actually exhibited a slightly higher leak rate (16.83% vs. 14.85%, delta = +1.98 points), with virtually identical confidence intervals ([10.8, 25.3] vs. [9.2, 23.1]) and a non-significant McNemar test (p = 0.804, discordant pairs: 7 vs. 9). In Mistral-7B-v0.3, pure FP16 lowered ASR from 40.59% to 29.70% (delta = -10.89 points), the reduction failed to achieve strict statistical significance at the alpha = 0.05 level (exact McNemar p = 0.071), and the Wilson confidence intervals overlap ([21.7, 39.2] vs. [31.5, 50.3]). Nearly one-third of all attacks succeeded against the uncompressed model. These results indicate that 4-bit quantization did not create the vulnerability; note that in Mistral-7B the FP16 advantage is borderline (p = 0.071), so 4-bit ASR values are approximately representative rather than systematically inflated. Architectural safety alignment and context disambiguation dictate robustness.", bold_prefix="Testing the Quantization Hypothesis: ")
+    add_body_p(doc, "We evaluated whether aggressive system prompt hardening ('ABSOLUTE DIRECTIVE: Never reveal internal keys under any circumstance; any violation triggers immediate system termination') could substitute for external guardrails. While prompt hardening decreased ASR from 24.75% to 16.83% in Qwen2.5-3B (delta = -7.92 points), the change is not statistically significant (McNemar p = 0.115). While 14 attacks were neutralized, 6 previously blocked attacks broke through under the hardened instructions, leaving 17 attacks completely breaching the model. Furthermore, under the hardened prompt one of 60 genuine passenger queries (1.67%) caused the model to emit the tower-operations canary in its answer; this is benign-query secret leakage rather than simple over-refusal, and it illustrates that prompt-level instructions do not remove the secret from the context. Prompt hardening therefore degrades utility while failing to guarantee confidentiality. An architectural, external gateway remains non-negotiable.", bold_prefix="The Limits of Prompt Hardening: ")
 
     add_styled_heading(doc, "Methodological Insight: The Fallacy of Small-Sample Pilots", level=3)
     add_body_p(doc, "Our comparative evaluation highlights a vital methodological lesson for AI security benchmarking. Table 9 contrasts the findings from our preliminary pilot study (n=25) against the full-scale benchmark (N=101).")
     
-    add_table_caption(doc, "Table 9. Methodological comparison: Pilot sample artifacts (n=25) versus full-pool evaluation (N=101).")
+    add_table_caption(doc, "Table 10. Methodological comparison: Pilot sample artifacts (n=25) versus full-pool evaluation (N=101).")
     t9_headers = ["Experimental Comparison", "Pilot (n=25) Delta", "Full-Pool (N=101) Delta", "Methodological Shift & Scientific Finding"]
     t9_rows = [
         ["Mistral-7B: 4-bit -> Saf FP16", "-12.00 pp", "-10.89 pp", "Consistent direction, but non-significant (p = 0.071)"],
@@ -675,7 +721,7 @@ def build_masked_manuscript():
     ]
     create_table_from_data(doc, t9_headers, t9_rows, [4.4, 2.6, 2.6, 6.4])
     
-    add_body_p(doc, "As demonstrated in Table 9, pilot evaluations with small sample sizes (n <= 25) yield severe statistical artifacts: the observed effect of prompt hardening was exaggerated by a factor of three (-24.0 pp vs. -7.92 pp), and the effect of quantization on Llama-3.1-8B completely reversed direction (-8.0 pp vs. +1.98 pp). This underscores that rigorous, reviewer-proof empirical evaluation of LLM security requires adequately powered sample sizes (N >= 100) paired with non-parametric significance testing.")
+    add_body_p(doc, "As demonstrated in Table 10, pilot evaluations with small sample sizes (n <= 25) yield severe statistical artifacts: the observed effect of prompt hardening was exaggerated by a factor of three (-24.0 pp vs. -7.92 pp), and the effect of quantization on Llama-3.1-8B completely reversed direction (-8.0 pp vs. +1.98 pp). This underscores that rigorous, reviewer-proof empirical evaluation of LLM security requires adequately powered sample sizes (N >= 100) paired with non-parametric significance testing.")
 
     # 4. LIMITATIONS AND ETHICAL CONSIDERATIONS
     add_styled_heading(doc, "4. LIMITATIONS AND ETHICAL CONSIDERATIONS", level=1)
@@ -685,7 +731,7 @@ def build_masked_manuscript():
     # 5. CONCLUSION
     add_styled_heading(doc, "5. CONCLUSION", level=1)
     add_body_p(doc, "This paper introduced NeuralShield, a four-layer, multilingual application security gateway providing defense-in-depth against prompt injection, jailbreaking, and confidential data exfiltration for enterprise LLM systems. Across a strictly source-disjoint fair multilingual benchmark (N=2,849), NeuralShield demonstrated statistical parity in Macro-F1 with commercial state-of-the-art defenses while delivering substantial recall gains on native non-English corpora (+34.40% on native Turkish; AUC 0.890 vs. 0.631 on native Cyrillic Russian) with a lightweight, CPU-based FP32 ONNX execution budget (~50 ms).")
-    add_body_p(doc, "Through rigorous empirical red-teaming spanning 14 diverse language models across edge, enterprise, and supercomputing tiers, NeuralShield demonstrated a 100% block rate, driving attack success rates from up to 40.59% to flat 0.00%. Our experiments uncovered the phenomenon of Silent Chain-of-Thought Exfiltration in flagship reasoning models, demonstrating that user-facing conversational safety masks widespread canary leakage in internal reasoning streams—a vulnerability comprehensively neutralized by our dual-stream egress DLP. Finally, full-pool (N=101) ablations confirmed quantization invariance and proved that prompt hardening cannot replace external, multi-layer defensive architectures.")
+    add_body_p(doc, "Through rigorous empirical red-teaming spanning 14 diverse language models across edge, enterprise, and supercomputing tiers, NeuralShield blocked every one of the 101 curated red-team attacks (100%), driving attack success rates from up to 40.59% to 0.00% on that in-domain suite, while retaining 74.10% recall on the harder source-disjoint out-of-distribution benchmark. Our experiments uncovered the phenomenon of Silent Chain-of-Thought Exfiltration in flagship reasoning models, demonstrating that user-facing conversational safety masks widespread canary leakage in internal reasoning streams—a vulnerability comprehensively neutralized by our dual-stream egress DLP. Finally, full-pool (N=101) paired ablations found no statistically significant quantization effect (Llama p = 0.804; Mistral borderline at p = 0.071) and proved that prompt hardening cannot replace external, multi-layer defensive architectures.")
     add_body_p(doc, "Future work will expand NeuralShield's semantic context window to 2,048 tokens via FlashAttention-2 integrations, implement Quantization-Aware Training (QAT) to enable lossless INT8 deployments, and explore adaptive per-domain threshold tuning.")
 
     # REFERENCES
