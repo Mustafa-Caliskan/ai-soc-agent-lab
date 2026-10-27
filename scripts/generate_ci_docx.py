@@ -319,6 +319,15 @@ def build_title_page():
     r_cor.font.size = Pt(10)
     r_cor.italic = True
     
+    p_rh = doc.add_paragraph()
+    p_rh.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p_rh.paragraph_format.space_before = Pt(10)
+    p_rh.paragraph_format.space_after = Pt(2)
+    r_rh = p_rh.add_run("Running head: NEURALSHIELD: MULTILINGUAL APPLICATION SECURITY GATEWAY")
+    r_rh.font.name = 'Times New Roman'
+    r_rh.font.size = Pt(10)
+    r_rh.bold = True
+
     add_styled_heading(doc, "DECLARATIONS AND STATEMENTS", level=1)
     add_body_p(doc, "This research received computational GPU resource allocations from the TÜBİTAK ULAKBİM High Performance Computing and Artificial Intelligence Center (SSYZ / EVREN H200 Supercomputing Infrastructure). The authors gratefully acknowledge the technical support provided.", bold_prefix="Funding & Acknowledgments: ")
     add_body_p(doc, "The authors declare that they have no competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.", bold_prefix="Conflict of Interest: ")
@@ -681,12 +690,12 @@ def build_masked_manuscript():
         "reasoning models.")
     add_body_p(doc,
         "Real-world SSE deployment: To verify that this is exploitable outside a controlled API harness, we deployed "
-        "an ordinary airline customer-service chatbot front-end with no login, no safe-mode toggle, and no debug "
+        "a locally hosted reference front-end for an airline customer-service chatbot, built by the authors for this study, with no login, no safe-mode toggle, and no debug "
         "panel. The page displays only the content channel, but the server relays the upstream reasoning stream to the "
         "browser over Server-Sent Events. Visible in the page: a polite refusal. Visible to any user who opens "
         "DevTools > Network > EventStream: 118 reasoning events containing the synthetic canary values in plaintext "
         "(7,981 network characters, of which 1,414 are reasoning). The browser HAR archive reproduces the same leak, "
-        "establishing that a client-side-only reading of the response is insufficient. This is an application-layer "
+        "establishing that a client-side-only reading of the response is insufficient. No third-party service, account, or production deployment was accessed: the front-end ran on localhost, used only synthetic canaries, and the upstream API was called through the authors' own credentials and within its published terms of use. This is an application-layer "
         "data-flow failure, not a platform-level network compromise.")
     add_body_p(doc,
         "Practical mitigation: Exposing a thinking toggle is not a substitute for egress inspection but does reduce "
@@ -761,7 +770,7 @@ def build_masked_manuscript():
     add_styled_heading(doc, "4.1. Technical Limitations", level=2)
     add_body_p(doc, "We acknowledge three principal technical limitations of this study: (1) The mmBERT-base semantic classifier operates within a 512-token context window. While sufficient for single-turn user queries, RAG scenarios involving large multi-page documents (2,048+ tokens) require chunking or sliding-window tokenization, whereas commercial models like Patronus Wolf Defender natively support 2,048 tokens. (2) While native verification was completed for Turkish (n=1,077) and Russian (n=16,636), our held-out benchmarks for Arabic, German, Korean, and Japanese rely on NLLB neural translations. Future research will curate localized native red-team suites for these typological families. (3) On the curated operational red-team set, NeuralShield exhibited a 6.67% false-positive rate (4/60) driven by ambiguous, out-of-domain short queries (e.g., 'What is the Wi-Fi password?' scoring P=0.99). Refining calibration for short, password-seeking benign queries is an active engineering priority.", )
     add_styled_heading(doc, "4.2. Responsible Disclosure and Ethical Considerations", level=2)
-    add_body_p(doc, "In line with responsible vulnerability disclosure practice, our findings regarding Silent Chain-of-Thought Exfiltration were systematically compiled and reported to the engineering teams of the affected platforms. The platform providers formally acknowledged the vulnerability and initiated revisions to their production streaming and logging telemetry pipelines. All adversarial datasets and attack prompts evaluated in this paper were restricted to synthetic airport operational domains and authorized canary secrets; no private user information, live production infrastructure, or operational networks were targeted.", )
+    add_body_p(doc, "In line with responsible vulnerability disclosure practice, our findings regarding Silent Chain-of-Thought Exfiltration were systematically compiled and reported to the engineering teams of the affected platforms. The provider's engineering team acknowledged the observed behaviour, added a security note to the API documentation, and escalated the issue to the model developer. We make no claim that the provider's production pipelines were modified as a result of this report. All adversarial datasets and attack prompts evaluated in this paper were restricted to synthetic airport operational domains and authorized canary secrets; no private user information, live production infrastructure, or operational networks were targeted.", )
 
     # 5. CONCLUSION
     add_styled_heading(doc, "5. CONCLUSION", level=1)
