@@ -148,6 +148,7 @@ def add_table_caption(doc, caption_text):
     p.paragraph_format.space_before = Pt(8)
     p.paragraph_format.space_after = Pt(3)
     p.paragraph_format.keep_with_next = True
+    p.paragraph_format.keep_together = True
     
     run = p.add_run(caption_text)
     run.font.name = 'Times New Roman'
@@ -161,6 +162,7 @@ def add_figure_caption(doc, caption_text):
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p.paragraph_format.space_before = Pt(4)
     p.paragraph_format.space_after = Pt(10)
+    p.paragraph_format.keep_together = True
     
     run = p.add_run(caption_text)
     run.font.name = 'Times New Roman'
@@ -225,6 +227,25 @@ def create_table_from_data(doc, headers, rows, col_widths=None):
                 row.cells[idx].width = Cm(w)
                 
     doc.add_paragraph().paragraph_format.space_after = Pt(4)
+    # --- Mizanpaj: satirlari bolme + baslik satirini tekrar et ---
+    from docx.oxml import OxmlElement
+    for r_i, row in enumerate(tbl.rows):
+        trPr = row._tr.get_or_add_trPr()
+        cant = OxmlElement('w:cantSplit')
+        trPr.append(cant)
+        if r_i == 0:
+            hdr = OxmlElement('w:tblHeader')
+            trPr.append(hdr)
+        # satir icerigi bolunmesin
+        for cell in row.cells:
+            for pgh in cell.paragraphs:
+                pgh.paragraph_format.keep_together = True
+                # son satir haric: tablo satirlari birbirine bagli kalsin
+                if r_i < len(tbl.rows) - 1:
+                    pgh.paragraph_format.keep_with_next = True
+    # son satirdan sonra gelen bos paragraf tabloya yapismasin
+    tbl.autofit = False
+
     return tbl
 
 
@@ -459,6 +480,7 @@ def build_masked_manuscript():
         p_fig1.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_fig1.paragraph_format.space_before = Pt(8)
         p_fig1.paragraph_format.space_after = Pt(2)
+        p_fig1.paragraph_format.keep_with_next = True
         r_img1 = p_fig1.add_run()
         r_img1.add_picture("docs/figures/figure1_architecture.png", width=Inches(6.2))
         add_figure_caption(doc, "Figure 1. End-to-end architectural workflow of the NeuralShield application security gateway, illustrating L0 normalization, L1 deterministic pattern matching, L2 multilingual transformer classification, OR-Gate arbitration, and L3 dual-stream egress DLP sanitization.")
@@ -597,6 +619,7 @@ def build_masked_manuscript():
         p_fig2.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_fig2.paragraph_format.space_before = Pt(8)
         p_fig2.paragraph_format.space_after = Pt(2)
+        p_fig2.paragraph_format.keep_with_next = True
         r_img2 = p_fig2.add_run()
         r_img2.add_picture("docs/figures/figure2_scale_vulnerability.png", width=Inches(6.2))
         add_figure_caption(doc, "Figure 2. Empirical Attack Success Rates across model scale: (a) 10 open-weight models under unprotected (Shield OFF) versus protected (NeuralShield ON) states; (b) 4 flagship supercomputing models showing apparent safety in user content versus catastrophic Silent CoT exfiltration.")
@@ -682,7 +705,7 @@ def build_masked_manuscript():
 
     # 3.8. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance
     add_styled_heading(doc, "3.9. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance", level=2)
-    add_body_p(doc, "To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 8 and Figure 3 present the empirical findings.")
+    add_body_p(doc, "To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 9 and Figure 3 present the empirical findings.")
     
     add_table_caption(doc, "Table 9. Full-pool paired methodological ablations on NVIDIA A100 infrastructure (N=101 attacks, 60 benign queries).")
     t8_headers = ["Condition", "Size", "Evaluated Parameter", "ASR (%)", "95% Wilson CI", "Discordant (A/B)", "McNemar p", "Benign Leakage"]
@@ -702,6 +725,7 @@ def build_masked_manuscript():
         p_fig3.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_fig3.paragraph_format.space_before = Pt(8)
         p_fig3.paragraph_format.space_after = Pt(2)
+        p_fig3.paragraph_format.keep_with_next = True
         r_img3 = p_fig3.add_run()
         r_img3.add_picture("docs/figures/figure3_ablations.png", width=Inches(6.2))
         add_figure_caption(doc, "Figure 3. Full-pool ablation findings: (a) Quantization sensitivity across Mistral-7B-v0.3 and Llama-3.1-8B: 4-bit NF4 does not systematically inflate ASR (Llama is unchanged, p = 0.804; Mistral shows a borderline decrease under FP16, p = 0.071); (b) The prompt-hardening trade-off, showing residual leakage (16.83%) and benign canary leakage (1.67%).")

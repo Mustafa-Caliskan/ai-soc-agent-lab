@@ -238,7 +238,7 @@ Analysis of Silent CoT Exfiltration: In their user-facing conversational outputs
 
 ### 3.9. Full-Pool (N=101) Reviewer-Proof Ablations and Statistical Significance
 
-To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 8 and Figure 3 present the empirical findings.
+To address potential methodological critiques regarding quantization artifacts and prompt engineering efficacy, we executed full-pool (N=101) paired ablations on NVIDIA A100 SXM4 infrastructure. Each model condition was evaluated on the exact same 101 adversarial attack prompts and 60 benign queries under identical greedy decoding settings. Statistical significance was evaluated using the exact two-sided McNemar test for paired binary proportions. Table 9 and Figure 3 present the empirical findings.
 
 *Table 9. Full-pool paired methodological ablations on NVIDIA A100 infrastructure (N=101 attacks, 60 benign queries).*
 
