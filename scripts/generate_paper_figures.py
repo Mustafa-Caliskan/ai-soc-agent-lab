@@ -30,206 +30,214 @@ plt.rcParams['figure.titlesize'] = 13
 
 def generate_figure1():
     output_path = "docs/figures/figure1_architecture.png"
-    # Set high quality academic styling
+    # High-resolution publication styling
     plt.rcParams['font.family'] = 'sans-serif'
-    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Helvetica']
+    plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Segoe UI', 'Helvetica']
     
-    fig, ax = plt.subplots(figsize=(14.0, 7.6), dpi=300)
-    ax.set_xlim(0, 14.5)
-    ax.set_ylim(0, 7.8)
+    # 16:9 ratio, broad width for horizontal pipeline
+    fig, ax = plt.subplots(figsize=(15.5, 6.8), dpi=300)
+    ax.set_xlim(0, 15.5)
+    ax.set_ylim(0, 6.8)
     ax.axis('off')
 
-    # Color Palette: Clean, professional, high-end academic
-    # Backgrounds
+    # Color Palette: Minimalist Mermaid-style (Corporate Slate / Clean Monochrome + Soft Branch Accents)
     bg_canvas = '#FFFFFF'
-    c_group_ingress = '#F8FAFC'
-    c_group_egress = '#F0FDF4'
-    c_group_exec = '#F8FAFC'
     
-    c_input_bg = '#F1F5F9'
-    c_l0_bg = '#EFF6FF'
-    c_l1_bg = '#FFFBEB'
-    c_l2_bg = '#FAF5FF'
-    c_gate_bg = '#FEF2F2'
-    c_llm_bg = '#F8FAFC'
-    c_l3_bg = '#ECFDF5'
-    c_refusal_bg = '#FEF2F2'
-    c_out_bg = '#F0FDF4'
+    # Node Backgrounds
+    node_bg_default = '#F8FAFC'  # Very soft slate
+    node_bg_highlight = '#F1F5F9'
+    node_bg_block = '#FEF2F2'    # Soft muted red
+    node_bg_clean = '#F0FDF4'    # Soft muted green
     
-    # Borders
-    border_slate = '#94A3B8'
-    border_blue = '#2563EB'
-    border_amber = '#D97706'
-    border_purple = '#7C3AED'
-    border_red = '#DC2626'
-    border_green = '#059669'
-    border_dark = '#334155'
+    # Borders (Mermaid standard: subtle 1-1.5px lines)
+    border_default = '#64748B'   # Neutral slate
+    border_container = '#94A3B8' # Dashed container border
+    border_block = '#DC2626'     # Muted crimson
+    border_clean = '#16A34A'     # Muted forest green
+    border_accent = '#2563EB'    # Subtle tech blue
     
-    # Text colors
-    tx_dark = '#0F172A'
-    tx_body = '#334155'
-    tx_sub = '#64748B'
+    # Typography colors
+    text_title = '#0F172A'       # Slate 900
+    text_desc = '#334155'        # Slate 700
+    text_meta = '#64748B'        # Slate 500
 
-    # Helper: Draw Container Group
-    def draw_container(x, y, w, h, bg, border, label, label_col='#475569'):
-        box = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.08,rounding_size=0.15",
-                                     facecolor=bg, edgecolor=border, linewidth=1.2, linestyle='--')
-        ax.add_patch(box)
-        ax.text(x + 0.25, y + h - 0.28, label, fontsize=9.5, fontweight='bold', color=label_col,
+    # Helper: Draw Container Subgraph (Mermaid subgraph box)
+    def draw_subgraph(x, y, w, h, label, bg='#F8FAFC', border='#CBD5E1'):
+        rect = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.08,rounding_size=0.15",
+                                      facecolor=bg, edgecolor=border, linewidth=1.2, linestyle='--')
+        ax.add_patch(rect)
+        # Subgraph title tag at top-left
+        ax.text(x + 0.25, y + h - 0.25, label, fontsize=9.0, fontweight='bold', color='#475569',
                 ha='left', va='top')
 
-    # Helper: Draw Component Box
-    def draw_component(x, y, w, h, bg, border, title, items, title_col=tx_dark, badge=""):
-        box = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.06,rounding_size=0.12",
-                                     facecolor=bg, edgecolor=border, linewidth=1.4)
-        ax.add_patch(box)
+    # Helper: Draw Mermaid Node
+    def draw_node(x, y, w, h, title, items=None, subtitle=None, bg=node_bg_default, border=border_default, title_col=text_title):
+        rect = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.05,rounding_size=0.1",
+                                      facecolor=bg, edgecolor=border, linewidth=1.4)
+        ax.add_patch(rect)
         
-        # Title
-        ax.text(x + w/2, y + h - 0.22, title, fontsize=10.0, fontweight='bold', color=title_col,
-                ha='center', va='top')
+        # Center title
+        title_y = y + h - 0.25 if (items or subtitle) else y + h/2
+        va_mode = 'top' if (items or subtitle) else 'center'
+        ax.text(x + w/2, title_y, title, fontsize=9.5, fontweight='bold', color=title_col,
+                ha='center', va=va_mode)
         
-        # Optional Badge
-        if badge:
-            bx = x + w - 0.15
-            by = y + h - 0.15
-            ax.text(bx, by, badge, fontsize=7.5, fontweight='bold', color='#FFFFFF',
-                    bbox=dict(boxstyle='round,pad=0.2', facecolor=title_col, edgecolor='none'),
-                    ha='right', va='top')
+        # Subtitle (optional badge/latency)
+        curr_y = title_y - 0.28
+        if subtitle:
+            ax.text(x + w/2, curr_y, subtitle, fontsize=7.8, fontweight='semibold', color=text_meta,
+                    ha='center', va='top')
+            curr_y -= 0.25
             
-        # Items / Description
+        # Items / bullets
         if items:
-            item_text = "\n".join([f"•  {it}" for it in items])
-            ax.text(x + 0.2, y + 0.18, item_text, fontsize=8.2, color=tx_body,
-                    ha='left', va='bottom', linespacing=1.4)
+            item_text = "\n".join([f"• {it}" for it in items])
+            ax.text(x + 0.18, y + 0.15, item_text, fontsize=7.8, color=text_desc,
+                    ha='left', va='bottom', linespacing=1.35)
 
     # -------------------------------------------------------------
-    # 1. CONTAINERS (ZONING)
+    # 1. MERMAID SUBGRAPHS (INGRESS & EGRESS)
     # -------------------------------------------------------------
-    # Ingress Gateway Container
-    draw_container(2.7, 0.4, 6.0, 7.0, c_group_ingress, '#CBD5E1',
-                   "NEURALSHIELD INGRESS SECURITY GATEWAY (Pre-LLM Inspection)", '#1E40AF')
-    
-    # -------------------------------------------------------------
-    # 2. COMPONENTS
-    # -------------------------------------------------------------
-    # [A] Untrusted Input Channel
-    draw_component(0.3, 3.1, 2.0, 2.4, c_input_bg, border_slate,
-                   "Untrusted Input\nChannel",
-                   ["User Chat Prompts", "RAG Documents", "Web / Tool Payloads", "Adversarial Prompts"],
-                   title_col=tx_dark)
+    # Ingress Subgraph
+    draw_subgraph(2.35, 0.4, 6.3, 6.0, "subgraph Ingress_Security_Gateway [NeuralShield Ingress Pipeline]")
 
-    # [B] Layer 0: Structural Normalizer
-    draw_component(3.0, 2.6, 2.3, 3.3, c_l0_bg, border_blue,
-                   "Layer 0 (L0)\nStructural Normalizer",
-                   ["Unicode NFKC Normalize", "Zero-Width & Tag Strip", "Recursive Base64/Hex/ROT",
-                    "Cyrillic Homoglyph Fold", "Stego Signature Flagging", "Generates Extended Text"],
-                   title_col=border_blue, badge="Fast L0")
-
-    # [C] Layer 1: Deterministic Engine
-    draw_component(5.8, 5.0, 2.6, 2.0, c_l1_bg, border_amber,
-                   "Layer 1 (L1): Fast Regex",
-                   ["Compiled Signature Rules", "Persona / DAN Traps", "Canary Exfiltration Detect", "<1.0 ms Heuristic Gate"],
-                   title_col=border_amber, badge="< 1 ms")
-
-    # [D] Layer 2: Semantic Transformer Classifier
-    draw_component(5.8, 2.7, 2.6, 2.0, c_l2_bg, border_purple,
-                   "Layer 2 (L2): mmBERT Classifier",
-                   ["307M mmBERT-base ONNX", "12-Language Multilingual", "Calibrated P_malicious (0-100)", "Threshold tau >= 0.70"],
-                   title_col=border_purple, badge="CPU ~50ms")
-
-    # [E] Deterministic OR-Gate Arbiter
-    draw_component(5.8, 0.6, 2.6, 1.8, c_gate_bg, border_red,
-                   "Adaptive OR-Gate Arbiter",
-                   ["D_in = 1  if: (Stego OR S_reg>=60", "OR P_ml>=70 OR (Regex & ML>=50))", "Strict Asymmetric Policy", "Zero False Dismissals"],
-                   title_col=border_red, badge="Arbiter")
-
-    # [F] Safe Refusal Gateway (Threat Detected)
-    draw_component(9.3, 5.4, 2.3, 1.8, c_refusal_bg, border_red,
-                   "Safe Refusal Gateway\n(Threat Abort)",
-                   ["HTTP 403 Forbidden", "Sanitized Security Warning", "Zero LLM GPU Compute", "Security Event Logged"],
-                   title_col=border_red, badge="BLOCK")
-
-    # [G] Target LLM Execution Engine
-    draw_component(9.3, 0.8, 2.3, 2.4, c_llm_bg, border_dark,
-                   "Target LLM Engine\n(Context Isolated)",
-                   ["Enterprise / Edge LLM", "Greedy / Sampled Inference", "Private System Canary",
-                    "Dual Generation Streams:", " - Final Content Stream", " - Internal CoT Reasoning"],
-                   title_col=tx_dark, badge="LLM RUN")
-
-    # [H] Layer 3: Egress DLP Sanitizer
-    draw_component(9.3, 3.4, 2.3, 1.8, c_l3_bg, border_green,
-                   "Layer 3 (L3): Egress DLP\nDual-Stream Sanitizer",
-                   ["Real-Time Canary Masker", "Secret Registry [REDACTED]", "Dual-Stream SSE Scrubbing", "Suppresses Silent CoT Leak"],
-                   title_col=border_green, badge="POST-DLP")
-
-    # [I] Sanitized Output to User
-    draw_component(12.2, 3.4, 1.9, 1.8, c_out_bg, border_green,
-                   "Sanitized Delivery\nto Client / System",
-                   ["Confidentiality Preserved", "Canaries Fully Redacted", "Safe User Response", "Verified Safe Egress"],
-                   title_col=border_green, badge="CLEAN")
+    # Egress Subgraph
+    draw_subgraph(11.1, 0.4, 4.15, 3.4, "subgraph Egress_Security_Gateway [NeuralShield Egress DLP]")
 
     # -------------------------------------------------------------
-    # 3. ROUTED ARROWS (NO OVERLAPS, STRICT CLEAN PATHS)
+    # 2. NODES (7 STRICT COLUMNS, NO OVERLAPS)
     # -------------------------------------------------------------
-    arrow_gray = dict(arrowstyle="-|>", lw=1.6, color="#475569", mutation_scale=12)
-    arrow_red = dict(arrowstyle="-|>", lw=2.0, color="#DC2626", mutation_scale=14)
-    arrow_green = dict(arrowstyle="-|>", lw=2.0, color="#059669", mutation_scale=14)
+    # Col 1: Untrusted Input Channel (x = 0.3)
+    draw_node(0.3, 2.3, 1.7, 2.3,
+              "Untrusted Input\nChannel",
+              items=["User Chat Prompts", "RAG Documents", "Tool / Web Payloads", "Adversarial Inputs"],
+              subtitle="[Ingress Source]")
 
-    # 1. Input -> L0
-    ax.annotate("", xy=(3.0, 4.25), xytext=(2.3, 4.25), arrowprops=arrow_gray)
-    ax.text(2.65, 4.45, "Raw Ingress\nPayload", fontsize=7.8, color=tx_sub, ha='center', fontweight='semibold')
+    # Col 2: Layer 0: Structural Normalizer (x = 2.6)
+    draw_node(2.6, 2.0, 1.9, 2.9,
+              "Layer 0 (L0)\nStructural Normalizer",
+              items=["Unicode NFKC Normalize", "Zero-Width / Tag Stripping", "Recursive Base64/Hex/ROT",
+                     "Cyrillic Homoglyph Fold", "Stego Signature Flagging", "Extended Payload Gen."],
+              subtitle="[Fast Pre-Filter]",
+              border=border_accent)
 
-    # 2. L0 -> L1 (Top branch inside Ingress)
-    ax.annotate("", xy=(5.8, 6.0), xytext=(5.3, 5.0),
-                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=border_blue, mutation_scale=12,
-                                connectionstyle="angle,angleA=0,angleB=90,rad=4"))
-    ax.text(5.52, 5.75, "Text", fontsize=7.5, color=border_blue, ha='center', backgroundcolor='#FFFFFF')
+    # Col 3: Parallel Detection Engines (x = 4.85)
+    # Top: Layer 1 Regex
+    draw_node(4.85, 3.75, 2.1, 2.2,
+              "Layer 1 (L1)\nDeterministic Regex",
+              items=["Signature Rule Automata", "Jailbreak / DAN Traps", "Canary Leakage Detection", "Fast-Path Execution"],
+              subtitle="[Heuristic: < 1.0 ms]")
 
-    # 3. L0 -> L2 (Direct branch inside Ingress)
-    ax.annotate("", xy=(5.8, 3.7), xytext=(5.3, 3.7), arrowprops=dict(arrowstyle="-|>", lw=1.5, color=border_blue, mutation_scale=12))
-    ax.text(5.55, 3.9, "Normalized", fontsize=7.5, color=border_blue, ha='center', backgroundcolor='#FFFFFF')
+    # Bottom: Layer 2 mmBERT Classifier
+    draw_node(4.85, 0.85, 2.1, 2.5,
+              "Layer 2 (L2)\nmmBERT Classifier",
+              items=["307M mmBERT ONNX", "12-Language Multilingual", "Calibrated P_malicious (0-100)", "Reject Threshold tau >= 0.70"],
+              subtitle="[Semantic: CPU ~50 ms]",
+              border=border_accent)
 
-    # 4. L1 -> Arbiter (Downwards)
-    ax.annotate("", xy=(7.1, 2.4), xytext=(7.1, 5.0),
-                arrowprops=dict(arrowstyle="-|>", lw=1.4, color=border_amber, mutation_scale=12, linestyle=':'))
-    ax.text(7.1, 4.75, "Regex Score S_reg", fontsize=7.2, color=border_amber, ha='center',
-            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#FCD34D', lw=0.8))
+    # Col 4: Adaptive OR-Gate Arbiter (x = 7.3)
+    draw_node(7.3, 2.0, 1.15, 2.8,
+              "Adaptive\nOR-Gate\nArbiter",
+              subtitle="[Decision]",
+              items=["Stego == 1\nv S_reg >= 60\nv P_ml >= 70\nv (Regex & ML)"],
+              bg='#FEF2F2', border=border_block, title_col=border_block)
 
-    # 5. L2 -> Arbiter (Downwards)
-    ax.annotate("", xy=(6.5, 2.4), xytext=(6.5, 2.7),
-                arrowprops=dict(arrowstyle="-|>", lw=1.4, color=border_purple, mutation_scale=12))
-    ax.text(6.5, 2.55, "P_malicious", fontsize=7.2, color=border_purple, ha='center', backgroundcolor='#FFFFFF')
+    # Col 5: Branches (x = 9.0)
+    # Top Branch: Safe Refusal (Blocked)
+    draw_node(9.0, 4.3, 1.8, 1.9,
+              "Safe Refusal\nGateway",
+              items=["HTTP 403 Forbidden", "Sanitized Alert Msg", "Zero LLM Compute", "Event Logged"],
+              subtitle="[THREAT DETECTED]",
+              bg=node_bg_block, border=border_block, title_col=border_block)
 
-    # 6. Arbiter Branch A: Threat Detected -> Safe Refusal (Red Path)
-    # Routes out right of Arbiter, curves up to Safe Refusal
-    ax.annotate("", xy=(9.3, 6.3), xytext=(8.4, 1.5),
-                arrowprops=dict(arrowstyle="-|>", lw=2.0, color=border_red, mutation_scale=14,
-                                connectionstyle="arc3,rad=-0.35"))
-    ax.text(8.85, 4.3, "THREAT DETECTED\n(D_in = 1 : Abort)", fontsize=8.0, fontweight='bold', color=border_red,
-            ha='center', va='center',
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='#FEF2F2', edgecolor='#FCA5A5', lw=1.0))
+    # Bottom Branch: Target LLM Engine (Clean / Passed)
+    draw_node(9.0, 0.9, 1.8, 2.3,
+              "Target LLM\nExecution Engine",
+              items=["Enterprise / Edge LLM", "Isolated Context Runtime", "Private Canary Secrets",
+                     "Streams Emitted:", " - User Content Stream", " - Internal CoT Reasoning"],
+              subtitle="[CLEAN / PASSED]",
+              bg=node_bg_default, border=border_default)
 
-    # 7. Arbiter Branch B: Clean / Passed -> Target LLM (Green Path)
-    ax.annotate("", xy=(9.3, 1.5), xytext=(8.4, 1.2),
-                arrowprops=dict(arrowstyle="-|>", lw=2.0, color=border_green, mutation_scale=14))
-    ax.text(8.85, 1.45, "CLEAN (Passed)\nD_in = 0", fontsize=7.8, fontweight='bold', color=border_green,
-            ha='center', va='bottom',
+    # Col 6: Layer 3: Egress DLP Sanitizer (x = 11.35)
+    draw_node(11.35, 0.9, 2.0, 2.3,
+              "Layer 3 (L3)\nEgress DLP Sanitizer",
+              items=["Real-Time Canary Masker", "Secret Registry Check", "Dual-Stream Scrubbing", "Suppresses Silent CoT", "Pre-Client Token Filter"],
+              subtitle="[Egress Protection]",
+              bg=node_bg_clean, border=border_clean, title_col=border_clean)
+
+    # Col 7: Sanitized Delivery Output (x = 13.65)
+    draw_node(13.65, 0.9, 1.45, 2.3,
+              "Sanitized\nDelivery",
+              items=["Confidentiality", "Zero Leakage", "Clean Response", "Client Safe"],
+              subtitle="[End User / App]",
+              bg=node_bg_clean, border=border_clean, title_col=border_clean)
+
+    # -------------------------------------------------------------
+    # 3. MERMAID CONNECTORS (CLEAN ORTHOGONAL & HORIZONTAL ARROWS)
+    # -------------------------------------------------------------
+    arrow_std = dict(arrowstyle="-|>", lw=1.5, color="#475569", mutation_scale=12)
+    arrow_red = dict(arrowstyle="-|>", lw=1.8, color=border_block, mutation_scale=13)
+    arrow_green = dict(arrowstyle="-|>", lw=1.8, color=border_clean, mutation_scale=13)
+
+    # (1) Input -> L0
+    ax.annotate("", xy=(2.6, 3.45), xytext=(2.0, 3.45), arrowprops=arrow_std)
+
+    # (2) L0 -> L1 (Step connector to top)
+    ax.annotate("", xy=(4.85, 4.85), xytext=(4.5, 4.85), arrowprops=arrow_std)
+    ax.plot([4.5, 4.5], [3.8, 4.85], color="#475569", lw=1.5)
+    ax.plot([4.5, 4.85], [4.85, 4.85], color="#475569", lw=1.5)
+
+    # (3) L0 -> L2 (Step connector to bottom)
+    ax.annotate("", xy=(4.85, 2.1), xytext=(4.5, 2.1), arrowprops=arrow_std)
+    ax.plot([4.5, 4.5], [3.1, 2.1], color="#475569", lw=1.5)
+    ax.plot([4.5, 4.85], [2.1, 2.1], color="#475569", lw=1.5)
+
+    # (4) L1 -> Arbiter (Step connector down to Arbiter)
+    ax.annotate("", xy=(7.3, 3.8), xytext=(7.05, 3.8), arrowprops=arrow_std)
+    ax.plot([6.95, 7.05], [4.85, 4.85], color="#475569", lw=1.5)
+    ax.plot([7.05, 7.05], [4.85, 3.8], color="#475569", lw=1.5)
+    ax.text(7.05, 4.4, "S_reg", fontsize=7.2, color='#475569', ha='center',
+            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#CBD5E1', lw=0.6))
+
+    # (5) L2 -> Arbiter (Step connector up to Arbiter)
+    ax.annotate("", xy=(7.3, 2.8), xytext=(7.05, 2.8), arrowprops=arrow_std)
+    ax.plot([6.95, 7.05], [2.1, 2.1], color="#475569", lw=1.5)
+    ax.plot([7.05, 7.05], [2.1, 2.8], color="#475569", lw=1.5)
+    ax.text(7.05, 2.35, "P_ml", fontsize=7.2, color='#475569', ha='center',
+            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#CBD5E1', lw=0.6))
+
+    # (6) Arbiter -> Safe Refusal (Branch 1: Threat Detected / Red Path)
+    # Right-angle elbow connector: Up from Arbiter, then Right to Safe Refusal
+    ax.annotate("", xy=(9.0, 5.25), xytext=(8.7, 5.25), arrowprops=arrow_red)
+    ax.plot([8.45, 8.7], [3.8, 3.8], color=border_block, lw=1.8)
+    ax.plot([8.7, 8.7], [3.8, 5.25], color=border_block, lw=1.8)
+    ax.plot([8.7, 9.0], [5.25, 5.25], color=border_block, lw=1.8)
+    ax.text(8.7, 4.5, "D_in = 1\n(Threat)", fontsize=7.2, fontweight='bold', color=border_block, ha='center',
+            bbox=dict(boxstyle='round,pad=0.2', facecolor='#FEF2F2', edgecolor='#FCA5A5', lw=0.8))
+
+    # (7) Arbiter -> Target LLM (Branch 2: Clean / Passed / Green Path)
+    # Right-angle elbow connector: Down from Arbiter, then Right to Target LLM
+    ax.annotate("", xy=(9.0, 2.05), xytext=(8.7, 2.05), arrowprops=arrow_green)
+    ax.plot([8.45, 8.7], [2.8, 2.8], color=border_clean, lw=1.8)
+    ax.plot([8.7, 8.7], [2.8, 2.05], color=border_clean, lw=1.8)
+    ax.plot([8.7, 9.0], [2.05, 2.05], color=border_clean, lw=1.8)
+    ax.text(8.7, 2.45, "D_in = 0\n(Clean)", fontsize=7.2, fontweight='bold', color=border_clean, ha='center',
             bbox=dict(boxstyle='round,pad=0.2', facecolor='#F0FDF4', edgecolor='#86EFAC', lw=0.8))
 
-    # 8. Target LLM -> Layer 3 DLP (Upwards flow from LLM to DLP Sanitizer)
-    ax.annotate("", xy=(10.45, 3.4), xytext=(10.45, 3.2),
-                arrowprops=dict(arrowstyle="-|>", lw=1.8, color="#0284C7", mutation_scale=12))
-    ax.text(10.45, 3.3, "Raw Generation Streams (Content + CoT)", fontsize=7.2, color='#0369A1',
-            ha='center', va='center', backgroundcolor='#FFFFFF', fontweight='semibold')
+    # (8) Target LLM -> Layer 3 Egress DLP (Straight horizontal arrow)
+    ax.annotate("", xy=(11.35, 2.05), xytext=(10.8, 2.05), arrowprops=arrow_std)
+    ax.text(11.08, 2.25, "Raw Streams\n(Content + CoT)", fontsize=6.8, color='#475569', ha='center',
+            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#CBD5E1', lw=0.6))
 
-    # 9. Layer 3 DLP -> Sanitized Delivery (Out to client)
-    ax.annotate("", xy=(12.2, 4.3), xytext=(11.6, 4.3), arrowprops=arrow_green)
-    ax.text(11.9, 4.5, "Dual-Sanitized\nEgress Stream", fontsize=7.5, color=border_green, ha='center', fontweight='semibold')
+    # (9) Layer 3 DLP -> Sanitized Delivery (Straight horizontal arrow)
+    ax.annotate("", xy=(13.65, 2.05), xytext=(13.35, 2.05), arrowprops=arrow_green)
+    ax.text(13.5, 2.25, "Clean\nTokens", fontsize=6.8, color=border_clean, ha='center',
+            bbox=dict(boxstyle='square,pad=0.15', facecolor='#FFFFFF', edgecolor='#86EFAC', lw=0.6))
 
     plt.tight_layout()
     fig.savefig(output_path, dpi=300, bbox_inches='tight', facecolor=bg_canvas)
     plt.close()
-    print(f"Academic Figure 1 generated successfully: {output_path}")
+    print(f"Mermaid-style Figure 1 generated successfully: {output_path}")
 
 
 def generate_figure2():
