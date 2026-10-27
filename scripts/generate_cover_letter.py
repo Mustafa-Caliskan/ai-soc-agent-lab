@@ -88,7 +88,7 @@ def build_cover_letter():
     add_p("On a rigorously source-disjoint fair 12-language benchmark (N=2,849), NeuralShield demonstrates statistical parity in Macro-F1 with the premier commercial guardrail (Patronus Wolf Defender: 84.86% vs. 84.23%, overlapping 95% cluster-bootstrap confidence intervals), while achieving decisive recall superiority on native non-translated corpora (+34.4 pp on native Turkish; AUC 0.890 vs. 0.631 on native Cyrillic Russian).", bold_prefix="• Source-Disjoint Fair Parity: ")
     add_p("Empirical red-teaming across 14 diverse LLMs (from 1.5B edge models to Tier-2 enterprise models and Tier-3 flagship models evaluated on TÜBİTAK ULAKBİM EVREN H200 supercomputing infrastructure) demonstrates a 100% block rate, driving attack success rates (ASR) from up to 40.59% (Mistral-7B-v0.3) to flat 0.00%.", bold_prefix="• 14-Model Empirical Red-Teaming: ")
     add_p("We document the phenomenon of 'Silent Chain-of-Thought Exfiltration', showing that flagship reasoning models (Gemma-4-31B and Qwen3.8-Flash-Next) achieve 0.00% user-facing ASR but verbalize confidential system canary secrets verbatim in 66.34% and 14.85% of internal reasoning traces—creating a critical exfiltration vector for SSE streaming architectures that is completely neutralized by NeuralShield's dual-stream egress DLP.", bold_prefix="• Discovery of Silent CoT Exfiltration: ")
-    add_p("Full-sample (N=101) paired McNemar tests prove quantization invariance (4-bit NF4 vs. uncompressed FP16 exhibit overlapping CIs, p=0.804 on Llama-3.1-8B), while demonstrating that aggressive system prompt hardening leaves 16.83% residual leakage and imposes an unacceptable 1.67% over-refusal penalty on legitimate user traffic.", bold_prefix="• Reviewer-Proof Full-Pool Ablations: ")
+    add_p("Full-sample (N=101) paired McNemar tests prove quantization invariance (4-bit NF4 vs. uncompressed FP16 exhibit overlapping CIs, p=0.804 on Llama-3.1-8B), while demonstrating that aggressive system prompt hardening leaves 16.83% residual leakage and imposes an unacceptable 1.67% benign canary leakage on legitimate user traffic.", bold_prefix="• Reviewer-Proof Full-Pool Ablations: ")
 
     # Body Paragraph 4: Fit for C&I
     add_p("We believe this manuscript is ideally suited for Computers and Informatics, as it addresses core intersections of computer science, applied machine learning, software security, and robust computational engineering. The work presents both rigorous theoretical evaluation (cluster-bootstrap resampling, exact McNemar tests, Wilson score intervals) and practical systems engineering validated under real-world operational constraints.")
@@ -119,10 +119,10 @@ def build_cover_letter():
         "Burdur Mehmet Akif Ersoy University\n"
         "15030 Burdur, Türkiye\n"
         "Email: mustafacaliskan@ogr.mehmetakif.edu.tr\n"
-        "ORCID: 0009-0004-9407-7424\n\n"
+        "ORCID: 0009-0004-3861-7628\n\n"
         "On behalf of:\n"
         "Prof. Dr. Ali Hakan IŞIK (Co-Author & Academic Advisor)\n"
-        "Email: hisik@mehmetakif.edu.tr | ORCID: 0000-0001-8473-7717"
+        "Email: hisik@mehmetakif.edu.tr | ORCID: 0000-0003-3561-9375"
     )
     r_sig.font.name = 'Times New Roman'
     r_sig.font.size = Pt(10.5)
@@ -153,7 +153,7 @@ In this work, we propose NeuralShield, a production-grade, four-layer applicatio
 - **Source-Disjoint Fair Parity:** On a rigorously source-disjoint fair 12-language benchmark ($N=2,849$), NeuralShield demonstrates statistical parity in Macro-F1 with the premier commercial guardrail (Patronus Wolf Defender: 84.86% vs. 84.23%, overlapping 95% cluster-bootstrap confidence intervals), while achieving decisive recall superiority on native non-translated corpora (+34.4 pp on native Turkish; AUC 0.890 vs. 0.631 on native Cyrillic Russian).
 - **14-Model Empirical Red-Teaming:** Empirical red-teaming across 14 diverse LLMs (from 1.5B edge models to Tier-2 enterprise models and Tier-3 flagship models evaluated on TÜBİTAK ULAKBİM EVREN H200 supercomputing infrastructure) demonstrates a 100% block rate, driving attack success rates (ASR) from up to 40.59% (Mistral-7B-v0.3) to flat 0.00%.
 - **Discovery of Silent CoT Exfiltration:** We document the phenomenon of "Silent Chain-of-Thought Exfiltration", showing that flagship reasoning models (Gemma-4-31B and Qwen3.8-Flash-Next) achieve 0.00% user-facing ASR but verbalize confidential system canary secrets verbatim in 66.34% and 14.85% of internal reasoning traces—creating a critical exfiltration vector for SSE streaming architectures that is completely neutralized by NeuralShield's dual-stream egress DLP.
-- **Reviewer-Proof Full-Pool Ablations:** Full-sample ($N=101$) paired McNemar tests prove quantization invariance (4-bit NF4 vs. uncompressed FP16 exhibit overlapping CIs, $p=0.804$ on Llama-3.1-8B), while demonstrating that aggressive system prompt hardening leaves 16.83% residual leakage and imposes an unacceptable 1.67% over-refusal penalty on legitimate user traffic.
+- **Reviewer-Proof Full-Pool Ablations:** Full-sample ($N=101$) paired McNemar tests prove quantization invariance (4-bit NF4 vs. uncompressed FP16 exhibit overlapping CIs, $p=0.804$ on Llama-3.1-8B), while demonstrating that aggressive system prompt hardening leaves 16.83% residual leakage and imposes an unacceptable 1.67% benign canary leakage on legitimate user traffic.
 
 ### Relevance to Computers and Informatics
 We believe this manuscript is ideally suited for *Computers and Informatics*, as it addresses core intersections of computer science, applied machine learning, software security, and robust computational engineering. The work presents both rigorous theoretical evaluation (cluster-bootstrap resampling, exact McNemar tests, Wilson score intervals) and practical systems engineering validated under real-world operational constraints.
@@ -173,11 +173,11 @@ Sincerely yours,
 **Mustafa ÇALIŞKAN** (Corresponding Author)  
 Department of Computer Engineering, Faculty of Engineering  
 Burdur Mehmet Akif Ersoy University, 15030 Burdur, Türkiye  
-Email: mustafacaliskan@ogr.mehmetakif.edu.tr | ORCID: 0009-0004-9407-7424  
+Email: mustafacaliskan@ogr.mehmetakif.edu.tr | ORCID: 0009-0004-3861-7628  
 
 *On behalf of:*  
 **Prof. Dr. Ali Hakan IŞIK** (Co-Author & Academic Advisor)  
-Email: hisik@mehmetakif.edu.tr | ORCID: 0000-0001-8473-7717  
+Email: hisik@mehmetakif.edu.tr | ORCID: 0000-0003-3561-9375  
 """
     with open("docs/CI_COVER_LETTER.md", "w", encoding="utf-8") as f:
         f.write(md_content)

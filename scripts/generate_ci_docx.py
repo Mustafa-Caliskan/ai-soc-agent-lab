@@ -266,8 +266,8 @@ def build_title_page():
     p_type.paragraph_format.space_after = Pt(20)
 
     authors = [
-        ("Mustafa ÇALIŞKAN *", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: mustafacaliskan@ogr.mehmetakif.edu.tr\nORCID: [to be supplied by author 1]"),
-        ("Prof. Dr. Ali Hakan IŞIK", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: hisik@mehmetakif.edu.tr\nORCID: [to be supplied by author 2]")
+        ("Mustafa ÇALIŞKAN *", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: mustafacaliskan@ogr.mehmetakif.edu.tr\nORCID: 0009-0004-3861-7628"),
+        ("Prof. Dr. Ali Hakan IŞIK", "Burdur Mehmet Akif Ersoy University, Faculty of Engineering, Department of Computer Engineering, Burdur, Türkiye\nEmail: hisik@mehmetakif.edu.tr\nORCID: 0000-0003-3561-9375")
     ]
     
     tbl = doc.add_table(rows=len(authors), cols=1)

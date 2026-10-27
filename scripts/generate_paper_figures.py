@@ -258,7 +258,7 @@ def generate_figure3():
     ax1.bar(xq - wq/2, asr_4bit, wq, yerr=ci_4bit, capsize=4,
             label='4-bit NF4 Quantized', color='#6366F1', alpha=0.85, edgecolor='#4338CA')
     ax1.bar(xq + wq/2, asr_fp16, wq, yerr=ci_fp16, capsize=4,
-            label='Unquantized Saf FP16', color='#06B6D4', alpha=0.85, edgecolor='#0891B2')
+            label='Unquantized Pure FP16', color='#06B6D4', alpha=0.85, edgecolor='#0891B2')
 
     ax1.set_ylabel('Attack Success Rate (ASR %)', fontweight='bold')
     ax1.set_title('(a) Quantization Invariance (N=101 Full Set)', fontweight='bold')
@@ -278,7 +278,7 @@ def generate_figure3():
     conditions = ['Standard Prompt', 'Hardened Prompt', 'NeuralShield (ON)']
     asr_p = [24.75, 16.83, 0.0]
     asr_p_ci = [[24.75 - 17.4, 16.83 - 10.8, 0.0], [34.0 - 24.75, 25.3 - 16.83, 3.7]]
-    fp_benign = [0.0, 1.67, 0.0]  # Over-refusal on benign queries
+    fp_benign = [0.0, 1.67, 0.0]  # Benign canary leakage (secret leak, not over-refusal)
 
     xp = np.arange(len(conditions))
     wp = 0.35
@@ -288,10 +288,10 @@ def generate_figure3():
     bar_asr = ax2.bar(xp - wp/2, asr_p, wp, yerr=asr_p_ci, capsize=4,
                       label='Attack ASR % (N=101)', color='#EF4444', alpha=0.85, edgecolor='#B91C1C')
     bar_fp = ax2_twin.bar(xp + wp/2, fp_benign, wp,
-                          label='Benign FP % (Over-Refusal, N=60)', color='#F59E0B', alpha=0.85, edgecolor='#D97706')
+                          label='Benign Canary Leakage % (N=60)', color='#F59E0B', alpha=0.85, edgecolor='#D97706')
 
     ax2.set_ylabel('Attack Success Rate (ASR %)', color='#B91C1C', fontweight='bold')
-    ax2_twin.set_ylabel('Benign Over-Refusal (% False Positive)', color='#D97706', fontweight='bold')
+    ax2_twin.set_ylabel('Benign Canary Leakage (%)', color='#D97706', fontweight='bold')
     ax2.set_title('(b) System Prompt Hardening Cost (Qwen2.5-3B)', fontweight='bold')
     ax2.set_xticks(xp)
     ax2.set_xticklabels(conditions, fontsize=9.0)
@@ -304,7 +304,7 @@ def generate_figure3():
     lines2, labels2 = ax2_twin.get_legend_handles_labels()
     ax2.legend(lines + lines2, labels + labels2, loc='upper right', framealpha=0.95)
 
-    ax2.annotate('Residual Leak: 16.83%\nOver-Refusal: +1.67%',
+    ax2.annotate('Residual Leak: 16.83%\nBenign Leakage: +1.67%',
                  xy=(1 - wp/2, 16.83), xytext=(1.2, 28),
                  arrowprops=dict(facecolor='#B91C1C', shrink=0.08, width=1, headwidth=4),
                  fontsize=8, bbox=dict(boxstyle='round,pad=0.3', facecolor='#FEF2F2', edgecolor='#FCA5A5'))
