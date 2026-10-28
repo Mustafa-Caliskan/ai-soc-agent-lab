@@ -4,7 +4,7 @@
 **Journal:** Computers and Informatics (C&I)
 **Decision addressed:** Major Revision
 
-We thank the reviewer for an unusually detailed and technically accurate report. Every critical finding was reproducible in our own archive, and three of them were more serious than stated: the Table 1 row mixed three different runs, the Mistral/FP16 discordant labels in Table 9 were swapped, and the "adaptive" threshold the manuscript called "deterministic" did in fact exist in the code but was never described.
+We thank the reviewer for an unusually detailed and technically accurate report. Every critical finding was reproducible in our own archive, and two of them were more serious than stated: the Table 1 row mixed three different runs, and the "adaptive" threshold that the manuscript called "deterministic" did in fact exist in the code but was never described. During the revision we also verified the Llama-3.1-8B discordant bookkeeping in Table 9 against the per-item rows; it is internally consistent (8 + 7 = 15 under 4-bit, 8 + 9 = 17 under FP16), and a build gate now enforces that identity.
 
 The governing rule for this revision was set before any edit: **the data rules the number, the number never rules the data.** Where a reported value could not be tied to a released artefact we removed it or re-measured it, and where a re-measurement produced a different value we report the new one. The retired figures (76.9%, 89.11%, 95.50%, 98.12%, 49.03, 32–50 ms) are now blocked by an automated gate.
 
@@ -80,6 +80,16 @@ A note on the bootstrap point estimate: 84.82% versus the full-sample 84.86% is 
 
 The adjective conflict is also resolved, and it revealed an omission: the arbiter is deterministic *given a request history* but the classifier threshold is genuinely adaptive in `backend/security_layer.py` (`ml_effective = max(20, 70 − penalty)`). Section 2.2 now describes this mechanism and adds it as Eq. 3.
 
+## O1 addendum: the DeepSeek-v4-Flash alias
+
+While checking the endpoint catalogue for this revision we found that the provider no longer serves
+`deepseek-v4-flash`: requests addressed to it are routed to `deepseek-v4.1-flash`
+(`data/evren_model_catalog_2026-10-28.json`). Table 7 therefore reports **19 endpoint entries over 18
+distinct checkpoints**, and the retired alias is labelled as such. Both rows returned 0/50, so no
+conclusion depends on the alias; removing the duplicate row would change the table's row count but not
+a single result. The corpus-wide model count in the abstract, Section 2.5 and Section 5 has been
+corrected from 19 to 18 distinct checkpoints.
+
 ## O3. Section 3.7 numbers are not traceable
 
 **Accepted; softened rather than fabricated.** We searched the archive: there is no per-item file for the 50-prompt native Turkish suite, no HAR capture, and no artefact for the 0/40 thinking-disabled count. `run_evren_redteam_v6_2.py` produces only the 161-prompt set, and this environment has no API key, so an honest re-run was not possible.
@@ -135,9 +145,9 @@ Covered by K4: Rubend18 is now [27], Jackhhao/SPML are removed, and `reference_v
 | 7 | ISSN vs e-ISSN | Cover letter now says e-ISSN |
 | 8 | Secret scan | `git ls-files` checked; no key or service-account file is tracked |
 
-## A finding the reviewer did not mention
+## Discordant bookkeeping in Table 9
 
-While recomputing the McNemar tests we found that Table 9's discordant labels for Llama-3.1-8B were **swapped**: 9 attacks leaked only under 4-bit and 7 only under FP16, not the reverse (the p-value, 0.804, is unaffected). Corrected; the underlying per-item rows are in `data/redteam/quant_and_prompt_ablation_n101.json`.
+Table 9 reports the Llama-3.1-8B pair with b = 7 attacks leaking only under 4-bit NF4 and c = 9 only under FP16, against a common set of 8 that leak under both. The two ASR numerators (15 for 4-bit, 17 for FP16) and the two discordant counts therefore describe the same 2x2 table: 8 + 7 = 15 and 8 + 9 = 17, so FP16 - 4-bit = 2 = 9 - 7. The build gate now recomputes this marginal identity on every build, which prevents the two labels from being exchanged in either direction.
 
 ## Verification now enforced at build time
 

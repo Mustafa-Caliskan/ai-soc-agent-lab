@@ -1,0 +1,32 @@
+{
+  "snapshot_date": "2026-10-28",
+  "endpoint": "https://evren-llmapi.ssyz.org.tr/v1",
+  "purpose": "Model catalogue captured to document that deepseek-v4-flash is no longer served and that its requests are routed to deepseek-v4.1-flash. Referenced from Table 7.",
+  "model_ids": [
+    "auto",
+    "clef",
+    "deepseek-ocr-2",
+    "deepseek-v4.1-flash",
+    "dots-ocr",
+    "gemma-4-31b",
+    "glm-5.3",
+    "laya",
+    "mimo-v2.6-pro",
+    "qwen3-asr-1.7b",
+    "qwen3-embedding-8b",
+    "qwen3-guard-4b",
+    "qwen3-reranker-8b",
+    "qwen3-vl-30b",
+    "qwen3.8-flash-next",
+    "voxcpm2"
+  ],
+  "checks": {
+    "deepseek-v4.1-flash_listed": true,
+    "deepseek-v4-flash_listed": false,
+    "mimo-v2.6-pro_listed": true,
+    "gemma-4-31b_listed": true,
+    "qwen3.8-flash-next_listed": true,
+    "glm-5.3_listed": true
+  },
+  "note": "The alias deepseek-v4-flash was retired by the provider; requests addressed to it are served by deepseek-v4.1-flash. Table 7 therefore reports 19 endpoint entries over 18 distinct checkpoints."
+}

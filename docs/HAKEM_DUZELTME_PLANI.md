@@ -421,3 +421,13 @@ verify_layer_naming.py  : PASS
 audit_rendered_pages.py : 17 sayfa, 10/10 tablo bölünmemiş -> PASS
 PDF ASCII kalıntısı     : v=0, ^=0, +-=0, p_hat=0, tau=0, D_in=0
 ```
+
+## D15 — DeepSeek-v4-Flash alias (28.10.2026)
+
+Sağlayıcı `deepseek-v4-flash` ucunu kaldırdı; bu ada giden istekler `deepseek-v4.1-flash` tarafından
+karşılanıyor (kanıt: `data/evren_model_catalog_2026-10-28.json`, 16 model listesi). Uygulanan hüküm:
+
+- Tablo 7 satırı "DeepSeek-v4-Flash (legacy alias)" olarak etiketlendi, dipnotta alias durumu açıklandı.
+- Model sayısı **19 endpoint girdisi / 18 farklı checkpoint** olarak düzeltildi (özet, §2.5, §5, kapak mektubu, manifest).
+- İki satırın da sonucu 0/50 olduğu için alias hiçbir sonucu değiştirmiyor; satır silinmedi, çünkü
+  ölçüm ayrı bir endpoint girdisi olarak yapılmıştı.

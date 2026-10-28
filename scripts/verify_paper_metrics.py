@@ -105,6 +105,8 @@ def check_derivation(entry):
         return mcnemar_exact(d["b"], d["c"])
     if stat == "difference":
         return d["a"] - d["b"]
+    if stat == "discordant":
+        return [d["b"], d["c"]]
     raise ValueError(f"unknown statistic {stat}")
 
 
@@ -114,6 +116,41 @@ def close(actual, expected, tol=TOL):
             return False
         return all(abs(a - e) <= tol for a, e in zip(actual, expected))
     return abs(actual - expected) <= tol
+
+
+def check_marginals(entry):
+    """McNemar bookkeeping must close against the two ASR numerators.
+
+    The 2x2 table is leak/no-leak under each configuration:
+        total_base      = both + c          (e.g. FP16 = 8 + 9 = 17)
+        total_candidate = both + b          (e.g. 4-bit = 8 + 7 = 15)
+        both            = total_candidate - b = total_base - c
+        total_base - total_candidate == c - b           (17-15 == 9-7)
+        both + b + c <= n                               (8+7+9 <= 101)
+
+    Swapping the two discordant labels breaks the difference identity and the
+    `both` agreement, which is exactly the error this gate exists to catch.
+    """
+    d = entry["derive"]
+    n, b, c = d["n"], d["b"], d["c"]
+    tot_base, tot_cand = d["tot_base"], d["tot_candidate"]
+    problems = []
+
+    both_from_cand = tot_cand - b
+    both_from_base = tot_base - c
+    if both_from_cand < 0 or both_from_base < 0:
+        problems.append(f"negative agreement cell ({both_from_cand}, {both_from_base})")
+    if both_from_cand != both_from_base:
+        problems.append(
+            f"agreement cell disagrees: total_candidate-b={both_from_cand} "
+            f"vs total_base-c={both_from_base}")
+    if (tot_base - tot_cand) != (c - b):
+        problems.append(
+            f"marginal identity broken: totals differ by {tot_base - tot_cand} "
+            f"but discordant counts differ by {c - b}")
+    if both_from_cand + b + c > n:
+        problems.append(f"cells exceed n ({both_from_cand}+{b}+{c} > {n})")
+    return problems, both_from_cand
 
 
 def main():
@@ -135,6 +172,14 @@ def main():
                 continue
             if not close(recomputed, value, entry.get("tol") or TOL):
                 FAIL.append(f"{mid}: recomputed {recomputed} != manifest {value}")
+            if entry["derive"].get("statistic") == "discordant":
+                problems, common = check_marginals(entry)
+                for problem in problems:
+                    FAIL.append(f"{mid}: {problem}")
+                print(f"marginals {mid}: n={entry['derive']['n']} both={common} "
+                      f"b(4-bit only)={entry['derive']['b']} c(FP16 only)={entry['derive']['c']} "
+                      f"totals(FP16/4-bit)={entry['derive']['tot_base']}/{entry['derive']['tot_candidate']} -> "
+                      f"{'OK' if not problems else 'FAIL'}")
             n_checked += 1
 
         # 2. source agreement

@@ -366,23 +366,35 @@ def main():
         source={"file": "data/redteam/quant_and_prompt_ablation_n101.json", "path": "prompt_hardening.delta"})
 
     # McNemar recomputed from per-item rows where the archive allows it.
-    def discordant(rows_a, rows_b):
-        a = {r["id"]: bool(r.get("vulnerable")) for r in rows_a}
-        b = {r["id"]: bool(r.get("vulnerable")) for r in rows_b}
-        ids = set(a) & set(b)
-        return (len(ids),
-                sum(1 for i in ids if a[i] and not b[i]),
-                sum(1 for i in ids if b[i] and not a[i]))
+    def discordant(rows_base, rows_candidate):
+        """Returns (n, base_only, candidate_only).
 
-    n_l, b_l, c_l = discordant(llama["rows_fp16"], llama["rows_bit4"]) if "rows_bit4" in llama else (0, 0, 0)
-    if b_l or c_l:
-        add("t9.llama.discordant", [b_l, c_l], "count", "Table 9",
-            "Discordant pairs for Llama (4-bit-only leaks, FP16-only leaks)", [f"{b_l}", f"{c_l}"],
+        Called as discordant(rows_fp16, rows_bit4): base_only is what leaked
+        under FP16 but not under 4-bit, candidate_only is what leaked under
+        4-bit but not under FP16. Table 9 names them "(4-bit only)" and
+        "(FP16 only)" respectively, so the caller maps candidate_only -> b.
+        """
+        base = {r["id"]: bool(r.get("vulnerable")) for r in rows_base}
+        cand = {r["id"]: bool(r.get("vulnerable")) for r in rows_candidate}
+        ids = set(base) & set(cand)
+        return (len(ids),
+                sum(1 for i in ids if base[i] and not cand[i]),
+                sum(1 for i in ids if cand[i] and not base[i]))
+
+    if "rows_bit4" in llama:
+        n_l, fp16_only, bit4_only = discordant(llama["rows_fp16"], llama["rows_bit4"])
+        tot_fp16 = sum(1 for r in llama["rows_fp16"] if r.get("vulnerable"))
+        tot_bit4 = sum(1 for r in llama["rows_bit4"] if r.get("vulnerable"))
+        add("t9.llama.discordant", [bit4_only, fp16_only], "count", "Table 9",
+            "Discordant pairs for Llama: (4-bit-only leaks, FP16-only leaks)", ["7 (4-bit only)", "9 (FP16 only)"],
             source={"file": "data/redteam/quant_and_prompt_ablation_n101.json",
-                    "path": "fp16_vs_4bit.Llama-3.1-8B.rows_bit4"})
-        add("t9.llama.mcnemar_p", round(mcnemar_exact(b_l, c_l), 3), "p-value", "Table 9, Section 3.9",
-            f"Exact McNemar from b={b_l}, c={c_l}", ["0.804"],
-            derive={"statistic": "mcnemar", "b": b_l, "c": c_l})
+                    "path": "fp16_vs_4bit.Llama-3.1-8B.rows_bit4"},
+            derive={"statistic": "discordant", "b": bit4_only, "c": fp16_only,
+                    "tot_base": tot_fp16, "tot_candidate": tot_bit4, "n": n_l})
+        add("t9.llama.mcnemar_p", round(mcnemar_exact(bit4_only, fp16_only), 3), "p-value",
+            "Table 9, Section 3.9",
+            f"Exact McNemar from b={bit4_only}, c={fp16_only}", ["0.804"],
+            derive={"statistic": "mcnemar", "b": bit4_only, "c": fp16_only})
     n_h, b_h, c_h = discordant(ph["rows_standard"], ph["rows_hardened"])
     add("t9.hardening.discordant", [b_h, c_h], "count", "Table 9",
         "Discordant pairs for prompt hardening (standard-only, hardened-only)", [f"{b_h}", f"{c_h}"],
@@ -420,6 +432,33 @@ def main():
         "Records in the audited training corpus", [f"{ca['counts']['training_records']:,}"],
         source={"file": "data/contamination_audit.json", "path": "counts.training_records"})
 
+    # ── Table 7 and the SSE case study: pilot observations, no released items ─
+    pilot = [
+        ("t7.gemma.reasoning", 31, "count", "Table 7",
+         "Reasoning-channel leaks for Gemma-4-31B out of 50 native Turkish prompts", "31/50"),
+        ("t7.gemma.rate", 62.0, "%", "Table 7, Section 3.7",
+         "Leak rate for Gemma-4-31B on the native Turkish pilot (31/50)", "62.0"),
+        ("t7.qwen38.reasoning", 4, "count", "Table 7",
+         "Reasoning-channel leaks for Qwen3.8-Flash-Next out of 50", "4/50"),
+        ("t7.qwen38.rate", 8.0, "%", "Table 7", "Leak rate for Qwen3.8-Flash-Next (4/50)", "8.0"),
+        ("t7.glm.reasoning", 1, "count", "Table 7",
+         "Reasoning-channel leaks for GLM-5.3 out of 50", "1/50"),
+        ("t7.glm.rate", 2.0, "%", "Table 7", "Leak rate for GLM-5.3 (1/50)", "2.0"),
+        ("t7.content_leaks", 0, "count", "Table 7, Section 3.7",
+         "Content-channel leaks for all six pilot models", "0/50"),
+        ("s37.sse_events", 118, "events", "Section 3.7",
+         "Reasoning events containing canaries observed in the SSE session", "118"),
+        ("s37.sse_network_chars", 7981, "characters", "Section 3.7",
+         "Total network characters in the event stream", "7,981"),
+        ("s37.sse_reasoning_chars", 1414, "characters", "Section 3.7",
+         "Characters belonging to reasoning payloads", "1,414"),
+        ("s37.thinking_disabled", 0, "count", "Section 3.7",
+         "Content-channel canary leaks with thinking disabled, out of 40 targeted attacks", "0/40"),
+    ]
+    for mid, value, unit, where, definition, rendered in pilot:
+        add(mid, value, unit, where, definition, [], status="pilot-observation")
+        entries[-1]["rendered_text"] = rendered
+
     # ── Declared design constants ───────────────────────────────────────────
     declared = [
         ("ds.records", 98606, "dataset records", "Sections 2.3, Abstract", ["98,606"]),
@@ -436,7 +475,9 @@ def main():
         ("rt.attacks", 101, "curated attacks", "Sections 2.5, 3.4-3.9", ["101"]),
         ("rt.benign", 60, "curated benign queries", "Sections 2.5, 3.4-3.9", ["60"]),
         ("rt.total", 161, "curated suite size", "Sections 2.5, 3.8", ["161"]),
-        ("models.total", 19, "distinct checkpoints", "Abstract, Section 2.5", ["19 distinct"]),
+        ("models.total", 18, "distinct checkpoints", "Abstract, Section 2.5, Section 5",
+         ["18 distinct", "18 distinct checkpoints"]),
+        ("models.endpoints", 19, "endpoint entries", "Abstract, Section 2.5, Section 5", ["19 endpoint entries"]),
         ("native.tr.n", 1077, "native Turkish items", "Sections 3.2, 4.1", ["1,077"]),
         ("native.ru.n", 16636, "native Russian items", "Sections 3.2, 4.1", ["16,636"]),
         ("calib.t", 1.8345, "fitted temperature", "Section 2.6", ["1.8345"]),
