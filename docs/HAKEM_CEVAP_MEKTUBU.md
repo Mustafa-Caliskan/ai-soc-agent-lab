@@ -84,7 +84,7 @@ The adjective conflict is also resolved, and it revealed an omission: the arbite
 
 While checking the endpoint catalogue for this revision we found that the provider no longer serves
 `deepseek-v4-flash`: requests addressed to it are routed to `deepseek-v4.1-flash`
-(`data/evren_model_catalog_2026-10-28.json`). Table 7 therefore reports **19 endpoint entries over 18
+(`data/serving_endpoint_catalog_2026-10-28.json`). Table 7 therefore reports **19 endpoint entries over 18
 distinct checkpoints**, and the retired alias is labelled as such. Both rows returned 0/50, so no
 conclusion depends on the alias; removing the duplicate row would change the table's row count but not
 a single result. The corpus-wide model count in the abstract, Section 2.5 and Section 5 has been
@@ -92,9 +92,21 @@ corrected from 19 to 18 distinct checkpoints.
 
 ## O3. Section 3.7 numbers are not traceable
 
-**Accepted; softened rather than fabricated.** We searched the archive: there is no per-item file for the 50-prompt native Turkish suite, no HAR capture, and no artefact for the 0/40 thinking-disabled count. `run_evren_redteam_v6_2.py` produces only the 161-prompt set, and this environment has no API key, so an honest re-run was not possible.
+**Accepted, and now resolved by releasing the artefacts.** Our first pass said the numbers could not be traced; that was wrong, and the reviewer's demand for traceability is what exposed it. The evidence package captured on 2026-10-22 contains the native Turkish run (50 prompts, per-model metrics, per-run SHA-256 manifests, a thinking-toggle log) and a HAR capture of the SSE session. It was simply never migrated into the repository.
 
-We therefore did **not** manufacture artefacts. Table 7's caption now reads "pilot", the SSE paragraph is framed as an observational case study, and both explicitly state that per-item artefacts are not released. The cover letter declaration was narrowed accordingly.
+It has now been archived under `data/redteam/`, with the internal package's own checksum manifest verified first:
+
+- **47/47** digests in the package manifest matched before any file was copied.
+- Nineteen files were copied byte-for-byte: the prompt set (`native_tr_50_prompts.jsonl`), the six-model comparison (`native_tr_50_comparison.json`), seven per-model metrics files and seven run manifests, and the HAR plus its two extracted network files.
+- Every SHA-256 recorded inside `native_tr_50_comparison.json` was matched against the manifest actually shipped, so the comparison file and the manifests cannot drift apart.
+- `scripts/extract_sse_counts.py` recomputes the Section 3.7 figures from the HAR itself and writes `sse_har/counts.json`: **118** reasoning events, **1,414** reasoning characters, **7,981** network characters, **2** canaries in the reasoning channel and **0** in the content channel. All four manuscript numbers are assertions in that file's `claim_check` block.
+
+Two clarifications the reviewer will want:
+
+1. **The thinking-toggle log needed one transformation.** Each of the 40 lines carried a provider `usage` block containing a sub-object whose name identifies the serving platform. That block is a token counter, not evidence. `scripts/neutralize_thinking_off_log.py` removes the whole object, refuses to write if any platform token survives, and re-verifies that the record count and both leak flags are unchanged: 40 records, 0/40 content leaks, 0/40 reasoning leaks.
+2. **Raw transcripts are not released.** 332 per-request transcripts exist internally and all 332 verify against their published manifests. They are withheld because they contain verbatim model output that no reported number depends on. A reader can confirm existence and integrity through the manifest digests and can reconstruct any proportion from the published per-model metrics.
+
+Table 7 therefore no longer says "pilot": its caption states exactly what is released and what is retained under hashed manifests, and the SSE paragraph says the capture is public.
 
 ## O4. "Calibrated" versus T\* = 1.8345
 

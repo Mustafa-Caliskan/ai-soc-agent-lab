@@ -1,0 +1,115 @@
+{
+  "zip_sha256": "5040338c9da1f1e336daeadb21427b1159afcf5c7cebfa60c0daacac8b505679",
+  "files": [
+    {
+      "path": "data/redteam/native_tr_50_comparison.json",
+      "bytes": 2806,
+      "sha256": "e9d5be1bfe59d5c66f45a7fdf3bc5a09eb051dbd7a331989b38969c7872789c8"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_deepseek-v4-flash.json",
+      "bytes": 10492,
+      "sha256": "a545bd73aabfd40ffbc62065dec93517e761370dd060df39032ad6f2e2f99867"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_deepseek-v4.1-flash.json",
+      "bytes": 10490,
+      "sha256": "8b245f83eeb816cb828fd1da957b661204ad26968621b2884b566a9495d20a72"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_deepseek-v4.1-flash_retry.json",
+      "bytes": 5660,
+      "sha256": "9dd5b643b3454ea75683e2bdb3435ee0c03d1dd5271ad1a936a2c042dadbd892"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_gemma-4-31b.json",
+      "bytes": 10869,
+      "sha256": "10c77de971df6fce115086e018e72ecdf41c23117c7eb67ce56398ce75a9bf46"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_glm-5.3.json",
+      "bytes": 10607,
+      "sha256": "fe24157c1d4a67cd0f05dffa82f80c40157f3751434886e3944530dbbaf35a77"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_mimo-v2.6-pro.json",
+      "bytes": 10469,
+      "sha256": "56f4d06bc426a2de92e4cb58f93bc52b21c43d952e8f37bb13a6936eef5929d3"
+    },
+    {
+      "path": "data/redteam/native_tr_50_metrics_qwen3.8-flash-next.json",
+      "bytes": 10797,
+      "sha256": "b724c2bb4a2c9675e0fc715d2785ece93c49cda34505fcf287d42fb846809ea9"
+    },
+    {
+      "path": "data/redteam/native_tr_50_prompts.jsonl",
+      "bytes": 10288,
+      "sha256": "7a31329a74bf11c99456d892f7c2c7e92d37e4da8cb00a9faf1283d4410e0a2b"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/deepseek-v4-flash.json",
+      "bytes": 10774,
+      "sha256": "8e648da73b7cba811949fae6fbdfab10e287ed353aea84a705127d9c97ad8c30"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/deepseek-v4.1-flash.json",
+      "bytes": 10894,
+      "sha256": "8ffb5cd0acc46f52f02be41aea9813bbb531d613b06eb068fad1fa83b78297cd"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/deepseek-v4.1-flash_retry.json",
+      "bytes": 1458,
+      "sha256": "f3f4f1167d90f084133ae95fc2adcb73687edc466a92d48f239ecd40d6200808"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/gemma-4-31b.json",
+      "bytes": 10484,
+      "sha256": "d7ba95b1f14ee9d64c33fae00a52065d01aad883b421041f2d0b3851a3f415ba"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/glm-5.3.json",
+      "bytes": 10277,
+      "sha256": "00d5758fa0022b0c13c3bb1f9ce4ac4c85be6a7a0170877245f3f56df15eae8e"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/mimo-v2.6-pro.json",
+      "bytes": 10574,
+      "sha256": "392e9784d708c198b1d1d11071a60f40c5c0ef3304eb49196d213ef5aaa913e1"
+    },
+    {
+      "path": "data/redteam/native_tr_50_manifests/qwen3.8-flash-next.json",
+      "bytes": 10829,
+      "sha256": "e52e3b554a40f549feda8f3fff70ccd8ee6447333f848e82c912971162131061"
+    },
+    {
+      "path": "data/redteam/sse_har/05_customer_site.har",
+      "bytes": 35172,
+      "sha256": "5debe4dff38e33ce62137758cf4b622d8b0dff67cb49072ef1d31521e3a77715"
+    },
+    {
+      "path": "data/redteam/sse_har/06_customer_network_stream.txt",
+      "bytes": 8294,
+      "sha256": "a58be252b78335e4f1f024e9bf10a31083b11afc8db661ea57a9b5dd0909ee6a"
+    },
+    {
+      "path": "data/redteam/sse_har/07_customer_network_reasoning.txt",
+      "bytes": 1435,
+      "sha256": "aac612ee601ececd1a8e50258bf9ff03653bd6d0f906b655bce14e325e3d2b87"
+    },
+    {
+      "path": "data/redteam/sse_har/counts.json",
+      "bytes": 769,
+      "sha256": "2f7f67cfe5e15cd2088a511847cbcc4d51270c0fbd88ef262a0fe5478d1f8790"
+    },
+    {
+      "path": "data/redteam/thinking_off_40.jsonl",
+      "bytes": 20443,
+      "sha256": "38e440ed07f8e70cdf52a1f45c23bbfd8a30d0e935b022db0574ff1d8e96a8bd"
+    },
+    {
+      "path": "data/redteam/thinking_off_40.meta.json",
+      "bytes": 621,
+      "sha256": "6617495e48c58313bdef8c0fdd8afa9aa7f71a3e3158eef8f1b2a92b64b1a438"
+    }
+  ]
+}

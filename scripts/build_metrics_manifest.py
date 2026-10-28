@@ -432,32 +432,81 @@ def main():
         "Records in the audited training corpus", [f"{ca['counts']['training_records']:,}"],
         source={"file": "data/contamination_audit.json", "path": "counts.training_records"})
 
-    # ── Table 7 and the SSE case study: pilot observations, no released items ─
-    pilot = [
-        ("t7.gemma.reasoning", 31, "count", "Table 7",
-         "Reasoning-channel leaks for Gemma-4-31B out of 50 native Turkish prompts", "31/50"),
-        ("t7.gemma.rate", 62.0, "%", "Table 7, Section 3.7",
-         "Leak rate for Gemma-4-31B on the native Turkish pilot (31/50)", "62.0"),
-        ("t7.qwen38.reasoning", 4, "count", "Table 7",
-         "Reasoning-channel leaks for Qwen3.8-Flash-Next out of 50", "4/50"),
-        ("t7.qwen38.rate", 8.0, "%", "Table 7", "Leak rate for Qwen3.8-Flash-Next (4/50)", "8.0"),
-        ("t7.glm.reasoning", 1, "count", "Table 7",
-         "Reasoning-channel leaks for GLM-5.3 out of 50", "1/50"),
-        ("t7.glm.rate", 2.0, "%", "Table 7", "Leak rate for GLM-5.3 (1/50)", "2.0"),
-        ("t7.content_leaks", 0, "count", "Table 7, Section 3.7",
-         "Content-channel leaks for all six pilot models", "0/50"),
-        ("s37.sse_events", 118, "events", "Section 3.7",
-         "Reasoning events containing canaries observed in the SSE session", "118"),
-        ("s37.sse_network_chars", 7981, "characters", "Section 3.7",
-         "Total network characters in the event stream", "7,981"),
-        ("s37.sse_reasoning_chars", 1414, "characters", "Section 3.7",
-         "Characters belonging to reasoning payloads", "1,414"),
-        ("s37.thinking_disabled", 0, "count", "Section 3.7",
-         "Content-channel canary leaks with thinking disabled, out of 40 targeted attacks", "0/40"),
+    # ── Table 7: native Turkish suite, sourced from the released comparison ──
+    cmp_path = "data/redteam/native_tr_50_comparison.json"
+    comparison = load(cmp_path)
+    runs = comparison["runs"]
+    idx_by_model = {r["model"]: i for i, r in enumerate(runs)}
+    t7_models = [
+        ("gemma", "gemma-4-31b", "62.0", "48.2-74.1"),
+        ("qwen38", "qwen3.8-flash-next", "8.0", "3.2-18.8"),
+        ("deepseek_v4", "deepseek-v4-flash", "0.0", "0.0-7.1"),
+        ("deepseek_v41", "deepseek-v4.1-flash", "0.0", "0.0-7.1"),
+        ("glm", "glm-5.3", "2.0", "0.4-10.5"),
+        ("mimo", "mimo-v2.6-pro", "0.0", "0.0-7.1"),
     ]
-    for mid, value, unit, where, definition, rendered in pilot:
-        add(mid, value, unit, where, definition, [], status="pilot-observation")
-        entries[-1]["rendered_text"] = rendered
+    for key, model, rate_text, ci_text in t7_models:
+        i = idx_by_model[model]
+        run = runs[i]
+        add(f"t7.{key}.rate", round(run["rate"] * 100, 2), "%", "Table 7, Section 3.7",
+            f"Reasoning-channel leak rate for {model} over {run['n']} native Turkish prompts",
+            [rate_text],
+            source={"file": cmp_path, "path": f"runs[{i}].rate"}, source_scale=100)
+        add(f"t7.{key}.cot_leaks", run["cot_leaks"], "count", "Table 7",
+            f"Reasoning-channel leaks for {model} out of {run['n']}",
+            [f"{run['cot_leaks']}/{run['n']}"],
+            source={"file": cmp_path, "path": f"runs[{i}].cot_leaks"})
+        lo = round(run["ci"][0] * 100, 1)
+        hi = round(run["ci"][1] * 100, 1)
+        add(f"t7.{key}.ci", [lo, hi], "%", "Table 7",
+            f"95% interval for the {model} leak rate, as recorded in the comparison file",
+            [ci_text],
+            source={"file": cmp_path, "path": f"runs[{i}].ci"}, source_scale=100, tol=0.06)
+        add(f"t7.{key}.content_leaks", run["content_leaks"], "count", "Table 7, Section 3.7",
+            f"Content-channel leaks for {model}; must be zero",
+            [f"0/{run['n']}"],
+            source={"file": cmp_path, "path": f"runs[{i}].content_leaks"})
+    add("t7.v41.errors", runs[idx_by_model["deepseek-v4.1-flash"]]["errors"], "count",
+        "Table 7 note", "Transport errors in the main DeepSeek-v4.1-Flash run, replaced by retries",
+        ["4 retry completions"],
+        source={"file": cmp_path, "path": f"runs[{idx_by_model['deepseek-v4.1-flash']}].errors"})
+    add("t7.n_models", len(runs), "count", "Table 7", "Endpoints evaluated in the native Turkish suite",
+        ["six endpoints"], status="declared")
+
+    # ── Section 3.7: SSE capture, recomputed from the released HAR ──────────
+    sse_path = "data/redteam/sse_har/counts.json"
+    add("s37.sse_events", 118, "events", "Section 3.7",
+        "Reasoning events carrying deltas in the captured SSE stream", ["118"],
+        source={"file": sse_path, "path": "reasoning_events"})
+    add("s37.sse_reasoning_chars", 1414, "characters", "Section 3.7",
+        "Characters of reasoning payload across those events", ["1,414"],
+        source={"file": sse_path, "path": "reasoning_chars"})
+    add("s37.sse_network_chars", 7981, "characters", "Section 3.7",
+        "Total characters of the captured event stream", ["7,981"],
+        source={"file": sse_path, "path": "network_chars"})
+    add("s37.sse_canaries", 2, "count", "Section 3.7",
+        "Canary values appearing verbatim in the reasoning channel", ["two canaries"],
+        source={"file": sse_path, "path": "canaries_in_reasoning"})
+    add("s37.sse_content_canaries", 0, "count", "Section 3.7",
+        "Canary values appearing in the content channel", [],
+        source={"file": sse_path, "path": "canaries_in_content"})
+
+    # ── Section 3.7: thinking-toggle log, aggregated from the released JSONL ─
+    add("s37.thinking_disabled", 0, "count", "Section 3.7",
+        "Content-channel canary leaks with thinking disabled, over 40 targeted attacks (0/40)",
+        ["0/40"],
+        source={"file": "data/redteam/thinking_off_40.jsonl", "format": "jsonl",
+                "aggregate": "count_true", "field": "content_has_canary"},
+        derive={"statistic": "pct", "k": 0, "n": 40})
+    add("s37.thinking_reasoning", 0, "count", "Section 3.7",
+        "Reasoning-channel canary leaks with thinking disabled, over 40 targeted attacks",
+        [],
+        source={"file": "data/redteam/thinking_off_40.jsonl", "format": "jsonl",
+                "aggregate": "count_true", "field": "reasoning_has_canary"})
+    add("s37.thinking_records", 40, "records", "Section 3.7",
+        "Records in the released thinking-toggle log", [],
+        source={"file": "data/redteam/thinking_off_40.jsonl", "format": "jsonl",
+                "aggregate": "records"})
 
     # ── Declared design constants ───────────────────────────────────────────
     declared = [

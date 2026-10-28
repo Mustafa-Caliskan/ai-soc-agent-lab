@@ -1,7 +1,7 @@
 {
   "generated_by": "scripts/build_metrics_manifest.py",
   "rule": "data rules the number; the number never rules the data",
-  "entry_count": 174,
+  "entry_count": 197,
   "entries": [
     {
       "id": "t1.xlmr.f1",
@@ -2887,158 +2887,634 @@
       "tol": null
     },
     {
-      "id": "t7.gemma.reasoning",
-      "value": 31,
-      "unit": "count",
-      "where": "Table 7",
-      "definition": "Reasoning-channel leaks for Gemma-4-31B out of 50 native Turkish prompts",
-      "renders": [],
-      "source": null,
-      "source_scale": 1.0,
-      "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "31/50"
-    },
-    {
       "id": "t7.gemma.rate",
       "value": 62.0,
       "unit": "%",
       "where": "Table 7, Section 3.7",
-      "definition": "Leak rate for Gemma-4-31B on the native Turkish pilot (31/50)",
-      "renders": [],
-      "source": null,
-      "source_scale": 1.0,
+      "definition": "Reasoning-channel leak rate for gemma-4-31b over 50 native Turkish prompts",
+      "renders": [
+        "62.0"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[0].rate"
+      },
+      "source_scale": 100,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "62.0"
+      "status": "measured",
+      "tol": null
     },
     {
-      "id": "t7.qwen38.reasoning",
-      "value": 4,
+      "id": "t7.gemma.cot_leaks",
+      "value": 31,
       "unit": "count",
       "where": "Table 7",
-      "definition": "Reasoning-channel leaks for Qwen3.8-Flash-Next out of 50",
-      "renders": [],
-      "source": null,
+      "definition": "Reasoning-channel leaks for gemma-4-31b out of 50",
+      "renders": [
+        "31/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[0].cot_leaks"
+      },
       "source_scale": 1.0,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "4/50"
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.gemma.ci",
+      "value": [
+        48.2,
+        74.1
+      ],
+      "unit": "%",
+      "where": "Table 7",
+      "definition": "95% interval for the gemma-4-31b leak rate, as recorded in the comparison file",
+      "renders": [
+        "48.2-74.1"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[0].ci"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.06
+    },
+    {
+      "id": "t7.gemma.content_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7, Section 3.7",
+      "definition": "Content-channel leaks for gemma-4-31b; must be zero",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[0].content_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
     },
     {
       "id": "t7.qwen38.rate",
       "value": 8.0,
       "unit": "%",
-      "where": "Table 7",
-      "definition": "Leak rate for Qwen3.8-Flash-Next (4/50)",
-      "renders": [],
-      "source": null,
-      "source_scale": 1.0,
+      "where": "Table 7, Section 3.7",
+      "definition": "Reasoning-channel leak rate for qwen3.8-flash-next over 50 native Turkish prompts",
+      "renders": [
+        "8.0"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[1].rate"
+      },
+      "source_scale": 100,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "8.0"
+      "status": "measured",
+      "tol": null
     },
     {
-      "id": "t7.glm.reasoning",
-      "value": 1,
+      "id": "t7.qwen38.cot_leaks",
+      "value": 4,
       "unit": "count",
       "where": "Table 7",
-      "definition": "Reasoning-channel leaks for GLM-5.3 out of 50",
-      "renders": [],
-      "source": null,
+      "definition": "Reasoning-channel leaks for qwen3.8-flash-next out of 50",
+      "renders": [
+        "4/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[1].cot_leaks"
+      },
       "source_scale": 1.0,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "1/50"
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.qwen38.ci",
+      "value": [
+        3.2,
+        18.8
+      ],
+      "unit": "%",
+      "where": "Table 7",
+      "definition": "95% interval for the qwen3.8-flash-next leak rate, as recorded in the comparison file",
+      "renders": [
+        "3.2-18.8"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[1].ci"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.06
+    },
+    {
+      "id": "t7.qwen38.content_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7, Section 3.7",
+      "definition": "Content-channel leaks for qwen3.8-flash-next; must be zero",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[1].content_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.deepseek_v4.rate",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 7, Section 3.7",
+      "definition": "Reasoning-channel leak rate for deepseek-v4-flash over 50 native Turkish prompts",
+      "renders": [
+        "0.0"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[2].rate"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.deepseek_v4.cot_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7",
+      "definition": "Reasoning-channel leaks for deepseek-v4-flash out of 50",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[2].cot_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.deepseek_v4.ci",
+      "value": [
+        0.0,
+        7.1
+      ],
+      "unit": "%",
+      "where": "Table 7",
+      "definition": "95% interval for the deepseek-v4-flash leak rate, as recorded in the comparison file",
+      "renders": [
+        "0.0-7.1"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[2].ci"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.06
+    },
+    {
+      "id": "t7.deepseek_v4.content_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7, Section 3.7",
+      "definition": "Content-channel leaks for deepseek-v4-flash; must be zero",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[2].content_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.deepseek_v41.rate",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 7, Section 3.7",
+      "definition": "Reasoning-channel leak rate for deepseek-v4.1-flash over 50 native Turkish prompts",
+      "renders": [
+        "0.0"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[3].rate"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.deepseek_v41.cot_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7",
+      "definition": "Reasoning-channel leaks for deepseek-v4.1-flash out of 50",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[3].cot_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.deepseek_v41.ci",
+      "value": [
+        0.0,
+        7.1
+      ],
+      "unit": "%",
+      "where": "Table 7",
+      "definition": "95% interval for the deepseek-v4.1-flash leak rate, as recorded in the comparison file",
+      "renders": [
+        "0.0-7.1"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[3].ci"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.06
+    },
+    {
+      "id": "t7.deepseek_v41.content_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7, Section 3.7",
+      "definition": "Content-channel leaks for deepseek-v4.1-flash; must be zero",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[3].content_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
     },
     {
       "id": "t7.glm.rate",
       "value": 2.0,
       "unit": "%",
-      "where": "Table 7",
-      "definition": "Leak rate for GLM-5.3 (1/50)",
-      "renders": [],
-      "source": null,
-      "source_scale": 1.0,
+      "where": "Table 7, Section 3.7",
+      "definition": "Reasoning-channel leak rate for glm-5.3 over 50 native Turkish prompts",
+      "renders": [
+        "2.0"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[4].rate"
+      },
+      "source_scale": 100,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "2.0"
+      "status": "measured",
+      "tol": null
     },
     {
-      "id": "t7.content_leaks",
+      "id": "t7.glm.cot_leaks",
+      "value": 1,
+      "unit": "count",
+      "where": "Table 7",
+      "definition": "Reasoning-channel leaks for glm-5.3 out of 50",
+      "renders": [
+        "1/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[4].cot_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.glm.ci",
+      "value": [
+        0.4,
+        10.5
+      ],
+      "unit": "%",
+      "where": "Table 7",
+      "definition": "95% interval for the glm-5.3 leak rate, as recorded in the comparison file",
+      "renders": [
+        "0.4-10.5"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[4].ci"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.06
+    },
+    {
+      "id": "t7.glm.content_leaks",
       "value": 0,
       "unit": "count",
       "where": "Table 7, Section 3.7",
-      "definition": "Content-channel leaks for all six pilot models",
-      "renders": [],
+      "definition": "Content-channel leaks for glm-5.3; must be zero",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[4].content_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.mimo.rate",
+      "value": 0.0,
+      "unit": "%",
+      "where": "Table 7, Section 3.7",
+      "definition": "Reasoning-channel leak rate for mimo-v2.6-pro over 50 native Turkish prompts",
+      "renders": [
+        "0.0"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[5].rate"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.mimo.cot_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7",
+      "definition": "Reasoning-channel leaks for mimo-v2.6-pro out of 50",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[5].cot_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.mimo.ci",
+      "value": [
+        0.0,
+        7.1
+      ],
+      "unit": "%",
+      "where": "Table 7",
+      "definition": "95% interval for the mimo-v2.6-pro leak rate, as recorded in the comparison file",
+      "renders": [
+        "0.0-7.1"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[5].ci"
+      },
+      "source_scale": 100,
+      "derive": null,
+      "status": "measured",
+      "tol": 0.06
+    },
+    {
+      "id": "t7.mimo.content_leaks",
+      "value": 0,
+      "unit": "count",
+      "where": "Table 7, Section 3.7",
+      "definition": "Content-channel leaks for mimo-v2.6-pro; must be zero",
+      "renders": [
+        "0/50"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[5].content_leaks"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.v41.errors",
+      "value": 4,
+      "unit": "count",
+      "where": "Table 7 note",
+      "definition": "Transport errors in the main DeepSeek-v4.1-Flash run, replaced by retries",
+      "renders": [
+        "4 retry completions"
+      ],
+      "source": {
+        "file": "data/redteam/native_tr_50_comparison.json",
+        "path": "runs[3].errors"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "t7.n_models",
+      "value": 6,
+      "unit": "count",
+      "where": "Table 7",
+      "definition": "Endpoints evaluated in the native Turkish suite",
+      "renders": [
+        "six endpoints"
+      ],
       "source": null,
       "source_scale": 1.0,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "0/50"
+      "status": "declared",
+      "tol": null
     },
     {
       "id": "s37.sse_events",
       "value": 118,
       "unit": "events",
       "where": "Section 3.7",
-      "definition": "Reasoning events containing canaries observed in the SSE session",
-      "renders": [],
-      "source": null,
+      "definition": "Reasoning events carrying deltas in the captured SSE stream",
+      "renders": [
+        "118"
+      ],
+      "source": {
+        "file": "data/redteam/sse_har/counts.json",
+        "path": "reasoning_events"
+      },
       "source_scale": 1.0,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "118"
-    },
-    {
-      "id": "s37.sse_network_chars",
-      "value": 7981,
-      "unit": "characters",
-      "where": "Section 3.7",
-      "definition": "Total network characters in the event stream",
-      "renders": [],
-      "source": null,
-      "source_scale": 1.0,
-      "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "7,981"
+      "status": "measured",
+      "tol": null
     },
     {
       "id": "s37.sse_reasoning_chars",
       "value": 1414,
       "unit": "characters",
       "where": "Section 3.7",
-      "definition": "Characters belonging to reasoning payloads",
-      "renders": [],
-      "source": null,
+      "definition": "Characters of reasoning payload across those events",
+      "renders": [
+        "1,414"
+      ],
+      "source": {
+        "file": "data/redteam/sse_har/counts.json",
+        "path": "reasoning_chars"
+      },
       "source_scale": 1.0,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "1,414"
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s37.sse_network_chars",
+      "value": 7981,
+      "unit": "characters",
+      "where": "Section 3.7",
+      "definition": "Total characters of the captured event stream",
+      "renders": [
+        "7,981"
+      ],
+      "source": {
+        "file": "data/redteam/sse_har/counts.json",
+        "path": "network_chars"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s37.sse_canaries",
+      "value": 2,
+      "unit": "count",
+      "where": "Section 3.7",
+      "definition": "Canary values appearing verbatim in the reasoning channel",
+      "renders": [
+        "two canaries"
+      ],
+      "source": {
+        "file": "data/redteam/sse_har/counts.json",
+        "path": "canaries_in_reasoning"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s37.sse_content_canaries",
+      "value": 0,
+      "unit": "count",
+      "where": "Section 3.7",
+      "definition": "Canary values appearing in the content channel",
+      "renders": [],
+      "source": {
+        "file": "data/redteam/sse_har/counts.json",
+        "path": "canaries_in_content"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
     },
     {
       "id": "s37.thinking_disabled",
       "value": 0,
       "unit": "count",
       "where": "Section 3.7",
-      "definition": "Content-channel canary leaks with thinking disabled, out of 40 targeted attacks",
+      "definition": "Content-channel canary leaks with thinking disabled, over 40 targeted attacks (0/40)",
+      "renders": [
+        "0/40"
+      ],
+      "source": {
+        "file": "data/redteam/thinking_off_40.jsonl",
+        "format": "jsonl",
+        "aggregate": "count_true",
+        "field": "content_has_canary"
+      },
+      "source_scale": 1.0,
+      "derive": {
+        "statistic": "pct",
+        "k": 0,
+        "n": 40
+      },
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s37.thinking_reasoning",
+      "value": 0,
+      "unit": "count",
+      "where": "Section 3.7",
+      "definition": "Reasoning-channel canary leaks with thinking disabled, over 40 targeted attacks",
       "renders": [],
-      "source": null,
+      "source": {
+        "file": "data/redteam/thinking_off_40.jsonl",
+        "format": "jsonl",
+        "aggregate": "count_true",
+        "field": "reasoning_has_canary"
+      },
       "source_scale": 1.0,
       "derive": null,
-      "status": "pilot-observation",
-      "tol": null,
-      "rendered_text": "0/40"
+      "status": "measured",
+      "tol": null
+    },
+    {
+      "id": "s37.thinking_records",
+      "value": 40,
+      "unit": "records",
+      "where": "Section 3.7",
+      "definition": "Records in the released thinking-toggle log",
+      "renders": [],
+      "source": {
+        "file": "data/redteam/thinking_off_40.jsonl",
+        "format": "jsonl",
+        "aggregate": "records"
+      },
+      "source_scale": 1.0,
+      "derive": null,
+      "status": "measured",
+      "tol": null
     },
     {
       "id": "ds.records",

@@ -1,0 +1,45 @@
+{
+  "files": [
+    {
+      "path": "meta.json",
+      "bytes": 2088,
+      "sha256": "e8ef7645ad08d4e9a3a0231568091d9e13fb72dbaf7f55f4414102ab17c085b6"
+    },
+    {
+      "path": "metrics.json",
+      "bytes": 5660,
+      "sha256": "9dd5b643b3454ea75683e2bdb3435ee0c03d1dd5271ad1a936a2c042dadbd892"
+    },
+    {
+      "path": "requests/0001_deepseek-v4.1-flash_native_echo_08_nonstream.json",
+      "bytes": 8031,
+      "sha256": "266c8bd618419c21c074d80b9a507774d4085d6822e6ae1ed02ebc6092bd1463"
+    },
+    {
+      "path": "requests/0002_deepseek-v4.1-flash_native_echo_09_nonstream.json",
+      "bytes": 5787,
+      "sha256": "48e782a24ffedf45d5d7e56dc0b4c51ad780cccbcec4139c4e9d654f75be4197"
+    },
+    {
+      "path": "requests/0003_deepseek-v4.1-flash_native_echo_10_nonstream.json",
+      "bytes": 5307,
+      "sha256": "601d370f7df2711f9c207a104f45dc04fcae7f1409e78691884c00152abf2ec2"
+    },
+    {
+      "path": "requests/0004_deepseek-v4.1-flash_native_summarize_01_nonstream.json",
+      "bytes": 7264,
+      "sha256": "dd17d925165b51813d99e3bfab716c34607dd090d5f042c1a921efd0a87ed879"
+    },
+    {
+      "path": "results.jsonl",
+      "bytes": 3643,
+      "sha256": "84cc34543ad0ab5a256ed460ea5ba4095bbd1926d2e4bbf8352c3e171ccfe45f"
+    },
+    {
+      "path": "summary.md",
+      "bytes": 2436,
+      "sha256": "e7ba63df970a31e4e969a66a3f46f39573685d84164d98efd5ec6b1fcb89132e"
+    }
+  ],
+  "count": 8
+}

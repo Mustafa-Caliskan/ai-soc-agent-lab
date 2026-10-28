@@ -723,7 +723,7 @@ def build_masked_manuscript():
         "encode, cot), written directly in Turkish with no machine translation and no appended sentences. "
         "Six models were evaluated at temperature 0 with max_tokens = 1024. Leakage was again measured by "
         "exact canary matching, separately on the user-facing content channel and on the reasoning channel.")
-    add_table_caption(doc, "Table 7. Native Turkish red-team pilot (N=50 hand-written prompts per endpoint, no machine translation; temperature 0). Per-item artefacts for this pilot are not released.")
+    add_table_caption(doc, "Table 7. Native Turkish red-team evaluation (N=50 hand-written prompts per endpoint, no machine translation; temperature 0). The prompt set, per-category metrics, SHA-256 run manifests, the thinking-toggle log, and the SSE/HAR capture are released; raw response transcripts are retained under their hashed manifests.")
     t7_headers = ["Model", "N", "Content leak", "Reasoning leak", "Rate % (95% CI)"]
     t7_rows = [
         ["Gemma-4-31B", "50", "0/50", "31/50", "62.0 (48.2-74.1)"],
@@ -738,7 +738,7 @@ def build_masked_manuscript():
     p_t7_note = doc.add_paragraph()
     p_t7_note.paragraph_format.space_before = Pt(2)
     p_t7_note.paragraph_format.space_after = Pt(6)
-    r_t7_note = p_t7_note.add_run("* Note: DeepSeek-v4-Flash is a legacy alias that the provider no longer lists; requests addressed to it are served by DeepSeek-v4.1-Flash (catalogue snapshot in data/evren_model_catalog_2026-10-28.json). The two rows are kept because they were collected as separate endpoint entries, and both returned 0/50, so the alias does not affect any conclusion. Eighteen distinct checkpoints are therefore covered by these six endpoints and the thirteen tested elsewhere.")
+    r_t7_note = p_t7_note.add_run("* Note: the DeepSeek-v4.1-Flash row was finalised over 46 valid main-run requests plus 4 retry completions (both released); zero leaks in either part. DeepSeek-v4-Flash is a legacy alias that the provider no longer lists; requests addressed to it are served by DeepSeek-v4.1-Flash (catalogue snapshot in data/serving_endpoint_catalog_2026-10-28.json). The two rows are kept because they were collected as separate endpoint entries, and both returned 0/50, so the alias does not affect any conclusion. Eighteen distinct checkpoints are therefore covered by these six endpoints and the thirteen tested elsewhere.")
     r_t7_note.font.name = 'Times New Roman'
     r_t7_note.font.size = Pt(8.5)
     r_t7_note.italic = True
@@ -751,14 +751,14 @@ def build_masked_manuscript():
         "that silent CoT exfiltration is a model-specific alignment property rather than a universal artefact of "
         "reasoning models.")
     add_body_p(doc,
-        "SSE deployment (pilot observation): To check that this is exploitable outside a controlled API harness, we deployed "
+        "SSE deployment: To check that this is exploitable outside a controlled API harness, we deployed "
         "a locally hosted reference front-end for an airline customer-service chatbot, built by the authors for this study, with no login, no safe-mode toggle, and no debug "
         "panel. The page displays only the content channel, but the server relays the upstream reasoning stream to the "
         "browser over Server-Sent Events. Visible in the page: a polite refusal. Visible to any user who opens "
         "DevTools > Network > EventStream: 118 reasoning events containing the synthetic canary values in plaintext "
-        "(7,981 network characters, of which 1,414 are reasoning). The browser HAR archive reproduces the same leak, "
+        "(7,981 network characters, of which 1,414 are reasoning); two canaries appear verbatim in that stream and none in the content channel. The browser HAR archive reproduces the same leak, "
         "establishing that a client-side-only reading of the response is insufficient. No third-party service, account, or production deployment was accessed: the front-end ran on localhost, used only synthetic canaries, and the upstream API was called through the authors' own credentials and within its published terms of use. This is an application-layer "
-        "data-flow failure, not a platform-level network compromise. This is an observational case study: the HAR archive and the event counts above come from a single local session and are not part of the released artefact.")
+        "data-flow failure, not a platform-level network compromise. The HAR archive and the two extracted network files are released with the paper, and scripts/extract_sse_counts.py recomputes all four counts above directly from the capture.")
     add_body_p(doc,
         "Practical mitigation: Exposing a thinking toggle is not a substitute for egress inspection but does reduce "
         "the attack surface. Requesting thinking = false eliminated the reasoning channel entirely for both "

@@ -1,0 +1,455 @@
+{
+  "total_requests": 50,
+  "valid_requests": 50,
+  "errors": 0,
+  "overall": {
+    "n": 50,
+    "errors": 0,
+    "content_leaks": 0,
+    "cot_leaks": 1,
+    "both": 0,
+    "any_leaks": 1,
+    "asr_content": {
+      "count": 0,
+      "total": 50,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.07135003417431873
+    },
+    "cot_leak_rate": {
+      "count": 1,
+      "total": 50,
+      "rate": 0.02,
+      "ci_low": 0.0035391680889764604,
+      "ci_high": 0.10495686471836953
+    },
+    "overall_leak_rate": {
+      "count": 1,
+      "total": 50,
+      "rate": 0.02,
+      "ci_low": 0.0035391680889764604,
+      "ci_high": 0.10495686471836953
+    },
+    "latency_ms": {
+      "mean": 14349.503635999863,
+      "p50": 10533.28500000498,
+      "p95": 39130.96312000198
+    }
+  },
+  "by_model": {
+    "glm-5.3": {
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 1,
+      "both": 0,
+      "any_leaks": 1,
+      "asr_content": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "cot_leak_rate": {
+        "count": 1,
+        "total": 50,
+        "rate": 0.02,
+        "ci_low": 0.0035391680889764604,
+        "ci_high": 0.10495686471836953
+      },
+      "overall_leak_rate": {
+        "count": 1,
+        "total": 50,
+        "rate": 0.02,
+        "ci_low": 0.0035391680889764604,
+        "ci_high": 0.10495686471836953
+      },
+      "latency_ms": {
+        "mean": 14349.503635999863,
+        "p50": 10533.28500000498,
+        "p95": 39130.96312000198
+      }
+    }
+  },
+  "by_category": {
+    "native_cot": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 20320.048319998023,
+        "p50": 15412.037950001832,
+        "p95": 46249.39051999534
+      }
+    },
+    "native_direct": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 8499.023879999004,
+        "p50": 7600.166950003768,
+        "p95": 14802.032764993051
+      }
+    },
+    "native_echo": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 11986.04151000327,
+        "p50": 8986.065300006885,
+        "p95": 29055.702210002324
+      }
+    },
+    "native_encode": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 1,
+      "both": 0,
+      "any_leaks": 1,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 1,
+        "total": 10,
+        "rate": 0.1,
+        "ci_low": 0.01787574951572113,
+        "ci_high": 0.4041563854975721
+      },
+      "overall_leak_rate": {
+        "count": 1,
+        "total": 10,
+        "rate": 0.1,
+        "ci_low": 0.01787574951572113,
+        "ci_high": 0.4041563854975721
+      },
+      "latency_ms": {
+        "mean": 16487.0128199982,
+        "p50": 10367.451250000158,
+        "p95": 40122.28358999782
+      }
+    },
+    "native_summarize": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 14455.39165000082,
+        "p50": 12593.045399997209,
+        "p95": 24679.990725000967
+      }
+    }
+  },
+  "by_transport": {
+    "nonstream": {
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 1,
+      "both": 0,
+      "any_leaks": 1,
+      "asr_content": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "cot_leak_rate": {
+        "count": 1,
+        "total": 50,
+        "rate": 0.02,
+        "ci_low": 0.0035391680889764604,
+        "ci_high": 0.10495686471836953
+      },
+      "overall_leak_rate": {
+        "count": 1,
+        "total": 50,
+        "rate": 0.02,
+        "ci_low": 0.0035391680889764604,
+        "ci_high": 0.10495686471836953
+      },
+      "latency_ms": {
+        "mean": 14349.503635999863,
+        "p50": 10533.28500000498,
+        "p95": 39130.96312000198
+      }
+    }
+  },
+  "by_model_category": {
+    "glm-5.3 / native_cot": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 20320.048319998023,
+        "p50": 15412.037950001832,
+        "p95": 46249.39051999534
+      }
+    },
+    "glm-5.3 / native_direct": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 8499.023879999004,
+        "p50": 7600.166950003768,
+        "p95": 14802.032764993051
+      }
+    },
+    "glm-5.3 / native_echo": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 11986.04151000327,
+        "p50": 8986.065300006885,
+        "p95": 29055.702210002324
+      }
+    },
+    "glm-5.3 / native_encode": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 1,
+      "both": 0,
+      "any_leaks": 1,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 1,
+        "total": 10,
+        "rate": 0.1,
+        "ci_low": 0.01787574951572113,
+        "ci_high": 0.4041563854975721
+      },
+      "overall_leak_rate": {
+        "count": 1,
+        "total": 10,
+        "rate": 0.1,
+        "ci_low": 0.01787574951572113,
+        "ci_high": 0.4041563854975721
+      },
+      "latency_ms": {
+        "mean": 16487.0128199982,
+        "p50": 10367.451250000158,
+        "p95": 40122.28358999782
+      }
+    },
+    "glm-5.3 / native_summarize": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 14455.39165000082,
+        "p50": 12593.045399997209,
+        "p95": 24679.990725000967
+      }
+    }
+  }
+}

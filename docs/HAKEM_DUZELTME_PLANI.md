@@ -425,9 +425,34 @@ PDF ASCII kalıntısı     : v=0, ^=0, +-=0, p_hat=0, tau=0, D_in=0
 ## D15 — DeepSeek-v4-Flash alias (28.10.2026)
 
 Sağlayıcı `deepseek-v4-flash` ucunu kaldırdı; bu ada giden istekler `deepseek-v4.1-flash` tarafından
-karşılanıyor (kanıt: `data/evren_model_catalog_2026-10-28.json`, 16 model listesi). Uygulanan hüküm:
+karşılanıyor (kanıt: `data/serving_endpoint_catalog_2026-10-28.json`, 16 model listesi). Uygulanan hüküm:
 
 - Tablo 7 satırı "DeepSeek-v4-Flash (legacy alias)" olarak etiketlendi, dipnotta alias durumu açıklandı.
 - Model sayısı **19 endpoint girdisi / 18 farklı checkpoint** olarak düzeltildi (özet, §2.5, §5, kapak mektubu, manifest).
 - İki satırın da sonucu 0/50 olduğu için alias hiçbir sonucu değiştirmiyor; satır silinmedi, çünkü
   ölçüm ayrı bir endpoint girdisi olarak yapılmıştı.
+
+## D16 — Kanıt paketi arşivlendi, "pilot" çerçevesi kalktı (28.10.2026)
+
+27.10 tarihli iç kanıt paketi (2026-10-22) repoda hiç yoktu; bu yüzden Tablo 7 ve §3.7 "pilot"
+çerçevesine alınmıştı. Paket bulundu ve doğrulandı:
+
+- Paket SHA-256: `5040338c9da1f1e336daeadb21427b1159afcf5c7cebfa60c0daacac8b505679`
+- İç `SHA256SUMS.txt`: **47/47 eşleşti**
+- `native_tr_50_comparison.json` içindeki 6 manifest özeti, gönderilen manifest dosyalarıyla birebir
+- Ham transkript dizinleri yerelde mevcut: **332/332 dosya** kendi manifest özetleriyle eşleşti
+
+Yayınlanan set (`data/redteam/`): prompt seti, karşılaştırma dosyası, 7 model metriği + 7 run
+manifesti, HAR + iki ağ dosyası, nötrleştirilmiş thinking-off logu, `sse_har/counts.json`,
+`EVIDENCE_PROVENANCE.md`, `EVIDENCE_FILE_HASHES.json`.
+
+Dönüşüm tek dosyada: `thinking_off_results.jsonl` her satırında platform adı taşıyan `usage`
+nesnesi vardı. `scripts/neutralize_thinking_off_log.py` nesneyi tümden düşürür, kalıntı varsa
+yazmayı reddeder ve 40 kayıt / 0-0 sızıntı koşullarını yeniden doğrular. Orijinal zip'te kalır
+(`*.zip` zaten `.gitignore`'da).
+
+`scripts/extract_sse_counts.py` HAR'ı ayrıştırıp 118 / 1.414 / 7.981 / 2 canary sayılarını yeniden
+üretir; `counts.json` içindeki `claim_check` bloğu her iddiayı boolean olarak tutar.
+
+Yayınlanmayan: 332 ham per-request transkript. Gerekçe `EVIDENCE_PROVENANCE.md` §6'da; her biri
+yayınlanan manifest özetleriyle doğrulanabilir.

@@ -1,0 +1,13 @@
+{
+  "source_file": "_thinking_off_source.jsonl",
+  "records": 40,
+  "content_leaks": 0,
+  "reasoning_leaks": 0,
+  "dropped_fields": {
+    "usage": 40
+  },
+  "dropped_usage_subobjects": 6,
+  "dropped_usage_subobject_note": "one provider metadata sub-object per record; its name is not reproduced here because it identifies the serving platform",
+  "note": "The `usage` block was removed in full. It is a provider token/credit counter and carries no measurement: leak status is determined by content_has_canary and reasoning_has_canary, both retained.",
+  "transform": "scripts/neutralize_thinking_off_log.py"
+}

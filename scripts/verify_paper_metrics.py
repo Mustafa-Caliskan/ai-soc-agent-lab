@@ -39,6 +39,34 @@ FAIL = []
 WARN = []
 
 
+def read_source(source):
+    """Loads a source payload described by a manifest `source` entry.
+
+    Supports plain JSON with a dotted/bracketed path, and JSONL with an
+    aggregate (`records`, `count_true` on a field).
+    """
+    path = source["file"]
+    if source.get("format") == "jsonl":
+        rows = []
+        with io.open(path, encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if line:
+                    rows.append(json.loads(line))
+        agg = source.get("aggregate")
+        if agg == "records":
+            return len(rows)
+        if agg == "count_true":
+            return sum(1 for r in rows if r.get(source["field"]))
+        if agg == "count_false":
+            return sum(1 for r in rows if not r.get(source["field"]))
+        raise ValueError(f"unknown jsonl aggregate {agg}")
+
+    with io.open(path, encoding="utf-8") as handle:
+        doc = json.load(handle)
+    return resolve(doc, source["path"])
+
+
 def resolve(doc, path):
     """Resolve a dotted path that may contain bracketed indices and dots in keys."""
     if path in ("", None):
@@ -185,8 +213,7 @@ def main():
         # 2. source agreement
         if entry.get("source"):
             try:
-                src = resolve(json.load(io.open(entry["source"]["file"], encoding="utf-8")),
-                              entry["source"]["path"])
+                src = read_source(entry["source"])
             except Exception as exc:  # noqa: BLE001
                 FAIL.append(f"{mid}: source path error {exc}")
                 src = None

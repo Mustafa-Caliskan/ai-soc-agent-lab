@@ -1,0 +1,115 @@
+{
+  "runs": [
+    {
+      "model": "gemma-4-31b",
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 31,
+      "rate": 0.62,
+      "ci": [
+        0.4815019502239357,
+        0.7413740415742278
+      ],
+      "manifest_sha256": [
+        "d7ba95b1f14ee9d64c33fae00a52065d01aad883b421041f2d0b3851a3f415ba"
+      ],
+      "dirs": [
+        "evidence\\raw\\20261022_native50_gemma-4-31b"
+      ]
+    },
+    {
+      "model": "qwen3.8-flash-next",
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 4,
+      "rate": 0.08,
+      "ci": [
+        0.031549003255790686,
+        0.18838502545063704
+      ],
+      "manifest_sha256": [
+        "e52e3b554a40f549feda8f3fff70ccd8ee6447333f848e82c912971162131061"
+      ],
+      "dirs": [
+        "evidence\\raw\\20261022_native50_qwen3.8-flash-next"
+      ]
+    },
+    {
+      "model": "deepseek-v4-flash",
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "rate": 0.0,
+      "ci": [
+        0.0,
+        0.07135003417431873
+      ],
+      "manifest_sha256": [
+        "8e648da73b7cba811949fae6fbdfab10e287ed353aea84a705127d9c97ad8c30"
+      ],
+      "dirs": [
+        "evidence\\raw\\20261022_native50_deepseek-v4-flash"
+      ]
+    },
+    {
+      "model": "deepseek-v4.1-flash",
+      "n": 50,
+      "errors": 4,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "rate": 0.0,
+      "ci": [
+        0.0,
+        0.07135003417431873
+      ],
+      "manifest_sha256": [
+        "8ffb5cd0acc46f52f02be41aea9813bbb531d613b06eb068fad1fa83b78297cd",
+        "f3f4f1167d90f084133ae95fc2adcb73687edc466a92d48f239ecd40d6200808"
+      ],
+      "dirs": [
+        "evidence\\raw\\20261022_native50_deepseek-v4.1-flash",
+        "evidence\\raw\\20261022_native50_deepseek-v4.1-flash_retry"
+      ]
+    },
+    {
+      "model": "glm-5.3",
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 1,
+      "rate": 0.02,
+      "ci": [
+        0.0035391680889764604,
+        0.10495686471836953
+      ],
+      "manifest_sha256": [
+        "00d5758fa0022b0c13c3bb1f9ce4ac4c85be6a7a0170877245f3f56df15eae8e"
+      ],
+      "dirs": [
+        "evidence\\raw\\20261022_native50_glm-5.3"
+      ]
+    },
+    {
+      "model": "mimo-v2.6-pro",
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "rate": 0.0,
+      "ci": [
+        0.0,
+        0.07135003417431873
+      ],
+      "manifest_sha256": [
+        "392e9784d708c198b1d1d11071a60f40c5c0ef3304eb49196d213ef5aaa913e1"
+      ],
+      "dirs": [
+        "evidence\\raw\\20261022_native50_mimo-v2.6-pro"
+      ]
+    }
+  ],
+  "dataset": "evidence/reports/native_50.jsonl"
+}

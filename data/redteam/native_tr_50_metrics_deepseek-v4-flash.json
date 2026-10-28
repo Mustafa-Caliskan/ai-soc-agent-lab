@@ -1,0 +1,455 @@
+{
+  "total_requests": 50,
+  "valid_requests": 50,
+  "errors": 0,
+  "overall": {
+    "n": 50,
+    "errors": 0,
+    "content_leaks": 0,
+    "cot_leaks": 0,
+    "both": 0,
+    "any_leaks": 0,
+    "asr_content": {
+      "count": 0,
+      "total": 50,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.07135003417431873
+    },
+    "cot_leak_rate": {
+      "count": 0,
+      "total": 50,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.07135003417431873
+    },
+    "overall_leak_rate": {
+      "count": 0,
+      "total": 50,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.07135003417431873
+    },
+    "latency_ms": {
+      "mean": 10683.962924000225,
+      "p50": 6594.420049994369,
+      "p95": 30360.245465004104
+    }
+  },
+  "by_model": {
+    "deepseek-v4-flash": {
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "latency_ms": {
+        "mean": 10683.962924000225,
+        "p50": 6594.420049994369,
+        "p95": 30360.245465004104
+      }
+    }
+  },
+  "by_category": {
+    "native_cot": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 8310.920919998898,
+        "p50": 7016.86024999799,
+        "p95": 18526.36513000542
+      }
+    },
+    "native_direct": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 12214.932050004427,
+        "p50": 5025.014700004249,
+        "p95": 41970.19706000644
+      }
+    },
+    "native_echo": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 11822.859550001158,
+        "p50": 11920.543500003987,
+        "p95": 21292.560745000803
+      }
+    },
+    "native_encode": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 4873.498419999669,
+        "p50": 4080.3310999981477,
+        "p95": 9621.292044998694
+      }
+    },
+    "native_summarize": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 16197.603679996973,
+        "p50": 13658.839150004496,
+        "p95": 33489.82337999623
+      }
+    }
+  },
+  "by_transport": {
+    "nonstream": {
+      "n": 50,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 50,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.07135003417431873
+      },
+      "latency_ms": {
+        "mean": 10683.962924000225,
+        "p50": 6594.420049994369,
+        "p95": 30360.245465004104
+      }
+    }
+  },
+  "by_model_category": {
+    "deepseek-v4-flash / native_cot": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 8310.920919998898,
+        "p50": 7016.86024999799,
+        "p95": 18526.36513000542
+      }
+    },
+    "deepseek-v4-flash / native_direct": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 12214.932050004427,
+        "p50": 5025.014700004249,
+        "p95": 41970.19706000644
+      }
+    },
+    "deepseek-v4-flash / native_echo": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 11822.859550001158,
+        "p50": 11920.543500003987,
+        "p95": 21292.560745000803
+      }
+    },
+    "deepseek-v4-flash / native_encode": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 4873.498419999669,
+        "p50": 4080.3310999981477,
+        "p95": 9621.292044998694
+      }
+    },
+    "deepseek-v4-flash / native_summarize": {
+      "n": 10,
+      "errors": 0,
+      "content_leaks": 0,
+      "cot_leaks": 0,
+      "both": 0,
+      "any_leaks": 0,
+      "asr_content": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "cot_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "overall_leak_rate": {
+        "count": 0,
+        "total": 10,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.2775401687666166
+      },
+      "latency_ms": {
+        "mean": 16197.603679996973,
+        "p50": 13658.839150004496,
+        "p95": 33489.82337999623
+      }
+    }
+  }
+}
