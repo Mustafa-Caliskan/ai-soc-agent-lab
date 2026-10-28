@@ -104,7 +104,7 @@ It has now been archived under `data/redteam/`, with the internal package's own 
 Two clarifications the reviewer will want:
 
 1. **The thinking-toggle log needed one transformation.** Each of the 40 lines carried a provider `usage` block containing a sub-object whose name identifies the serving platform. That block is a token counter, not evidence. `scripts/neutralize_thinking_off_log.py` removes the whole object, refuses to write if any platform token survives, and re-verifies that the record count and both leak flags are unchanged: 40 records, 0/40 content leaks, 0/40 reasoning leaks.
-2. **Raw transcripts are not released.** 332 per-request transcripts exist internally and all 332 verify against their published manifests. They are withheld because they contain verbatim model output that no reported number depends on. A reader can confirm existence and integrity through the manifest digests and can reconstruct any proportion from the published per-model metrics.
+2. **Raw transcripts are retained, not published.** 332 per-request transcripts exist internally and all 332 verify against their published manifests. They are withheld because they contain verbatim model output that no reported number depends on. A reader can confirm existence and integrity through the manifest digests and can reconstruct any proportion from the published per-model metrics. Raw transcripts are available to reviewers upon request.
 
 Table 7 therefore no longer says "pilot": its caption states exactly what is released and what is retained under hashed manifests, and the SSE paragraph says the capture is public.
 

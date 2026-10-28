@@ -1,6 +1,6 @@
 # Cover Letter to the Editorial Board of Computers and Informatics (C&I)
 
-**Date:** 26 October 2026  
+**Date:** 28 October 2026  
 **To:** The Editorial Board and Editor-in-Chief  
 *Computers and Informatics* (C&I), DergiPark Academic Publishing  
 e-ISSN: 2757-8259 | https://dergipark.org.tr/en/pub/ci  

@@ -27,12 +27,27 @@ MANIFEST = "data/paper_metrics_manifest.json"
 MANUSCRIPT = "docs/CI_MANUSCRIPT_EN.md"
 TOL = 0.051
 
+# Retired figures and retired framing.
+#
+# Bare "pilot" is deliberately NOT forbidden: Section 3.9.1 is titled "The
+# Fallacy of Small-Sample Pilots", which is the correct scientific term for the
+# n=25 study compared in Table 10. What must never return is the *framing* that
+# was applied to the native Turkish suite and the SSE capture before their
+# artefacts were released.
 FORBIDDEN = [
+    # retired numbers
     "76.9", "89.11", "95.50", "98.12", "86.50", "92.30", "49.03",
-    "four-layer", "five defenses", "32–50 ms", "32-50 ms",
-    "attention cross-talk", "same statistic to two decimals",
-    "statistically measurable", "Jackhhao", "SPML",
     "74.10% to 53.30% even when paired with L0",
+    # retired layer terminology
+    "four-layer", "five defenses",
+    # retired claims
+    "32–50 ms", "32-50 ms", "attention cross-talk",
+    "same statistic to two decimals", "statistically measurable",
+    # unreferenced source names
+    "Jackhhao", "SPML",
+    # retired framing of the native suite / SSE capture
+    "red-team pilot", "pilot observation", "observational case study",
+    "artefacts are not released", "artifacts are not released",
 ]
 
 FAIL = []

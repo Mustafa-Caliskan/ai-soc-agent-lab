@@ -23,10 +23,10 @@ def build_cover_letter():
         s.left_margin = Cm(2.5)
         s.right_margin = Cm(2.5)
         
-    def add_p(text="", bold_prefix=None, space_after=6, space_before=0, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
+    def add_p(text="", bold_prefix=None, space_after=4, space_before=0, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
         p = doc.add_paragraph()
         p.alignment = align
-        p.paragraph_format.line_spacing = 1.15
+        p.paragraph_format.line_spacing = 1.12
         p.paragraph_format.space_after = Pt(space_after)
         p.paragraph_format.space_before = Pt(space_before)
         if bold_prefix:
@@ -44,7 +44,7 @@ def build_cover_letter():
     p_date = doc.add_paragraph()
     p_date.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     p_date.paragraph_format.space_after = Pt(14)
-    r_date = p_date.add_run("Date: 26 October 2026")
+    r_date = p_date.add_run("Date: 28 October 2026")
     r_date.font.name = 'Times New Roman'
     r_date.font.size = Pt(10.5)
 
@@ -102,18 +102,18 @@ def build_cover_letter():
           "3. The authors declare no competing financial interests or personal relationships that could have influenced the work.\n"
           "4. All code artifacts, trained ONNX models, benchmark datasets and evaluation harnesses have been open-sourced and archived on GitHub (https://github.com/Mustafa-Caliskan/ai-soc-agent-lab). Per-item outputs covering Tables 1-6 and 8-10 are released as JSON; for the native Turkish suite of Table 7 the released set comprises the prompt set, per-model and per-category metrics, SHA-256 run manifests, the thinking-toggle log and the SSE/HAR capture, with raw response transcripts retained under their hashed manifests.\n"
           "5. Blind review requirements have been fully respected: author names and affiliations have been strictly omitted from the main manuscript (docs/NeuralShield_CI_Manuscript.docx) and provided separately in the Title Page (docs/Title_Page.docx).",
-          space_after=12)
+          space_after=8)
 
     # Sign-off
     p_close = doc.add_paragraph()
-    p_close.paragraph_format.space_before = Pt(8)
-    p_close.paragraph_format.space_after = Pt(4)
+    p_close.paragraph_format.space_before = Pt(4)
+    p_close.paragraph_format.space_after = Pt(2)
     r_close = p_close.add_run("Please address all correspondence concerning this manuscript to me at 2211404051@ogr.mehmetakif.edu.tr.\n\nThank you very much for your time, consideration, and management of the peer-review process.\n\nSincerely yours,")
     r_close.font.name = 'Times New Roman'
     r_close.font.size = Pt(11)
 
     p_sig = doc.add_paragraph()
-    p_sig.paragraph_format.space_before = Pt(12)
+    p_sig.paragraph_format.space_before = Pt(4)
     p_sig.paragraph_format.space_after = Pt(2)
     r_sig = p_sig.add_run(
         "Mustafa ÇALIŞKAN (Corresponding Author)\n"
@@ -136,7 +136,7 @@ def build_cover_letter():
     # Also build markdown version
     md_content = """# Cover Letter to the Editorial Board of Computers and Informatics (C&I)
 
-**Date:** 26 October 2026  
+**Date:** 28 October 2026  
 **To:** The Editorial Board and Editor-in-Chief  
 *Computers and Informatics* (C&I), DergiPark Academic Publishing  
 e-ISSN: 2757-8259 | https://dergipark.org.tr/en/pub/ci  

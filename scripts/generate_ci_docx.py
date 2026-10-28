@@ -408,7 +408,7 @@ def build_masked_manuscript():
     # Submission Metadata Table
     tbl_dates = doc.add_table(rows=3, cols=2)
     tbl_dates.alignment = WD_TABLE_ALIGNMENT.LEFT
-    dates_info = [("Submitted:", "26.10.2026"), ("Accepted:", "[In Review]"), ("Published:", "[In Review]")]
+    dates_info = [("Submitted:", "28.10.2026"), ("Accepted:", "[In Review]"), ("Published:", "[In Review]")]
     for idx, (lbl, val) in enumerate(dates_info):
         r = tbl_dates.rows[idx]
         format_cell_text(r.cells[0], lbl, bold=True, size=9)

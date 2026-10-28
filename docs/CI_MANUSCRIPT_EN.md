@@ -7,7 +7,7 @@ NeuralShield: A Multilingual Multi-Layer Security Gateway Against Prompt Injecti
 |---|
 | [Institution, Department, Province, Country, E-mail Masked for Blind Review] |
 
-| Submitted: | 26.10.2026 |
+| Submitted: | 28.10.2026 |
 |---|---|
 | Accepted: | [In Review] |
 | Published: | [In Review] |

@@ -456,3 +456,15 @@ yazmayı reddeder ve 40 kayıt / 0-0 sızıntı koşullarını yeniden doğrular
 
 Yayınlanmayan: 332 ham per-request transkript. Gerekçe `EVIDENCE_PROVENANCE.md` §6'da; her biri
 yayınlanan manifest özetleriyle doğrulanabilir.
+
+## D17 — Gönderim tarihi ve kapsam kapanışı (28.10.2026)
+
+- Makale başlık sayfası ve kapak mektubundaki gönderim tarihi gerçek gönderim gününe çekildi:
+  `Submitted: 28.10.2026` / `Date: 28 October 2026`.
+- Ham per-request transkriptler **yayınlanmayacak**; `EVIDENCE_PROVENANCE.md` §6'daki
+  "332/332 verified, retained under hashed manifests" nihai konumdur. Cevap mektubuna
+  "raw transcripts are available to reviewers upon request" cümlesi eklendi.
+- `verify_paper_metrics.py` FORBIDDEN listesi rafine edildi: `red-team pilot`, `pilot observation`,
+  `observational case study`, `artefacts are not released` yasaklandı; çıplak `pilot` serbest
+  bırakıldı (§3.9.1 başlığı korunur). Negatif test: eski Tablo 7 başlığı geçici olarak metne
+  kondu, kapı `forbidden token still present: 'red-team pilot'` ile exit 1 verdi, metin geri alındı.
